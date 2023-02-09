@@ -1,13 +1,25 @@
-import { createStore } from 'zustand'
+import { create } from 'zustand'
 
-type Tool = 'line' | 'circle' | 'rectangle' | 'pen'
+export type Tool =
+  | 'select'
+  | 'line'
+  | 'circle'
+  | 'rectangle'
+  | 'pen'
+  | 'text'
+  | 'eraser'
+  | 'move'
+  | 'image'
+  | 'triangle'
+  | 'arrow'
+  | 'rhombus'
 
 interface UseTools {
   tool: Tool
   setTool: (t: Tool) => void
 }
 
-export const useTools = createStore<UseTools>((set) => ({
+export const useTools = create<UseTools>((set) => ({
   tool: 'line',
 
   setTool: (tool) => set({ tool }),

@@ -1,14 +1,52 @@
+import { Tool, useTools } from '@/hooks/useTools'
 import getStroke from 'perfect-freehand'
-import React, { PointerEvent, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import styles from './Board.module.css'
+import React, { useLayoutEffect, useRef, useState } from 'react'
 import rough from 'roughjs'
+import { RoughCanvas } from 'roughjs/bin/canvas'
+import styles from './Board.module.css'
 
 const roughGenerator = rough.generator()
 
-const createElement = (x1: number, y1: number, x2: number, y2: number) => {
-  const roughElement = roughGenerator.line(x1, y1, x2, y2)
+const createElement = (x1: number, y1: number, x2: number, y2: number, tool: Tool) => {
+  let roughElement
 
-  return { x1, y1, x2, y2, roughElement }
+  switch (tool) {
+    case 'circle':
+      const cx = (x1 + x2) / 2
+      const cy = (y1 + y2) / 2
+      const r = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)) / 2
+      const d = r * 2
+      roughElement = roughGenerator.circle(cx, cy, d)
+      break
+    case 'rectangle':
+      roughElement = roughGenerator.rectangle(x1, y1, x2 - x1, y2 - y1)
+      break
+    case 'line':
+      roughElement = roughGenerator.line(x1, y1, x2, y2)
+      break
+    case 'pen':
+      return {
+        tool,
+        points: [{ x: x2, y: y2 }],
+      }
+
+    default:
+      throw new Error('Invalid tool')
+  }
+
+  return { x1, y1, x2, y2, roughElement, tool }
+}
+
+const drawElement = (roughCanvas: RoughCanvas, context: CanvasRenderingContext2D, element: any) => {
+  if (element.tool === 'pen') {
+    const stroke = getSvgPathFromStroke(
+      getStroke(element.points, { size: 4, thinning: 0.5, smoothing: 0.5, streamline: 0.5 })
+    )
+    context.fillStyle = 'black'
+    context.fill(new Path2D(stroke))
+  } else {
+    roughCanvas.draw(element.roughElement)
+  }
 }
 
 const average = (a: any, b: any) => (a + b) / 2
@@ -46,40 +84,7 @@ const Board = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isDrawing, setIsDrawing] = useState(false)
   const [drawings, setDrawings] = useState<any[]>([])
-
-  /*   const [points, setPoints] = useState<number[][]>([])
-  const [canvasItems, setCanvasItems] = useState<any[]>([])
-
-  function handlePointerDown(e: any) {
-    e.target.setPointerCapture(e.pointerId)
-    setPoints([[e.pageX, e.pageY, e.pressure]])
-  }
-
-  function handlePointerMove(e: PointerEvent<HTMLCanvasElement>) {
-    if (e.buttons !== 1) return
-    setPoints([...points, [e.pageX, e.pageY, e.pressure]])
-  }
-
-  useLayoutEffect(() => {
-    const canvas = canvasRef.current
-    const ctx = canvas?.getContext('2d')
-    ctx?.clearRect(0, 0, canvas!.width, canvas!.height)
-
-    const stroke = getStroke(points, {
-      size: 4,
-      thinning: 0.5,
-      smoothing: 0.5,
-      streamline: 0.5,
-    })
-
-    const pathData = getSvgPathFromStroke(stroke)
-
-    const myPath = new Path2D(pathData)
-
-    ctx?.fill(myPath)
-
-    return () => {}
-  }, [points]) */
+  const tool = useTools((state) => state.tool)
 
   useLayoutEffect(() => {
     const canvas = canvasRef.current
@@ -88,8 +93,8 @@ const Board = () => {
 
     const roughCanvas = rough.canvas(canvas!)
 
-    drawings.forEach(({ roughElement }) => {
-      roughCanvas.draw(roughElement)
+    drawings.forEach((element) => {
+      drawElement(roughCanvas, ctx!, element)
     })
   }, [drawings])
 
@@ -107,17 +112,33 @@ const Board = () => {
 
     const { clientX, clientY } = e
 
-    const index = drawings.length - 1
+    if (tool === 'pen') {
+      const index = drawings.length - 1
+      const { x1, y1 } = drawings[index]
 
-    const { x1, y1 } = drawings[index]
-    const element = createElement(x1, y1, clientX, clientY)
+      const element = createElement(x1, y1, clientX, clientY, tool)
 
-    const elementsCopy = [...drawings]
+      const elementsCopy = [...drawings]
 
-    elementsCopy[index] = element
-    setDrawings(elementsCopy)
+      elementsCopy[index] = {
+        ...element,
+        points: [...elementsCopy[index].points, { x: clientX, y: clientY }],
+      }
+      setDrawings(elementsCopy)
+    } else {
+      const index = drawings.length - 1
+
+      const { x1, y1 } = drawings[index]
+      const element = createElement(x1, y1, clientX, clientY, tool)
+
+      const elementsCopy = [...drawings]
+
+      elementsCopy[index] = element
+      setDrawings(elementsCopy)
+    }
   }
 
+  console.log({ drawings })
   const handleMouseUp = () => {
     setIsDrawing(false)
   }
