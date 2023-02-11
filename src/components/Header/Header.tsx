@@ -16,6 +16,7 @@ import {
 } from 'react-icons/io5'
 import { RiEraserLine } from 'react-icons/ri'
 import styles from './Header.module.css'
+import { clsx } from 'clsx'
 
 const TOOLS: { value: Tool; label: string; icon: React.ReactNode }[] = [
   { value: 'select', label: 'Select', icon: <FiMousePointer /> },
@@ -52,7 +53,12 @@ const Header = () => {
           onValueChange={handleChangeTool}
           aria-label='Text alignment'>
           {TOOLS.map(({ value, label, icon }) => (
-            <RadioGroup.Item key={value} className={styles.ToggleGroupItem} value={value} aria-label={label}>
+            <RadioGroup.Item
+              key={value}
+              className={`${styles.ToggleGroupItem} tool-${[value]}`}
+              id={'govno'}
+              value={value}
+              aria-label={label}>
               {icon}
             </RadioGroup.Item>
           ))}
