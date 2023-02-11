@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 
 export type Tool =
   | 'select'
@@ -19,8 +20,15 @@ interface UseTools {
   setTool: (t: Tool) => void
 }
 
-export const useTools = create<UseTools>((set) => ({
-  tool: 'line',
-
-  setTool: (tool) => set({ tool }),
-}))
+export const useTools = create<UseTools>()(
+  persist(
+    (set, get) => ({
+      tool: 'pen',
+      setTool: (tool) => set({ tool }),
+    }),
+    {
+      name: 'current-tool',
+      partialize: (state) => ({ tool: state.tool }),
+    }
+  )
+)

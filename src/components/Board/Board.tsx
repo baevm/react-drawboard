@@ -1,89 +1,17 @@
 import { Tool, useTools } from '@/hooks/useTools'
-import getStroke from 'perfect-freehand'
-import React, { useLayoutEffect, useRef, useState } from 'react'
+import { generateId } from '@/utils/generateId'
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import rough from 'roughjs'
-import { RoughCanvas } from 'roughjs/bin/canvas'
 import styles from './Board.module.css'
+import { createElement, drawElement, getElementAtPoints } from './helpers/Element'
 
-const roughGenerator = rough.generator()
-
-const createElement = (x1: number, y1: number, x2: number, y2: number, tool: Tool) => {
-  let roughElement
-
-  switch (tool) {
-    case 'circle':
-      const cx = (x1 + x2) / 2
-      const cy = (y1 + y2) / 2
-      const r = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)) / 2
-      const d = r * 2
-      roughElement = roughGenerator.circle(cx, cy, d)
-      break
-    case 'rectangle':
-      roughElement = roughGenerator.rectangle(x1, y1, x2 - x1, y2 - y1)
-      break
-    case 'line':
-      roughElement = roughGenerator.line(x1, y1, x2, y2)
-      break
-    case 'pen':
-      return {
-        tool,
-        points: [{ x: x2, y: y2 }],
-      }
-
-    default:
-      throw new Error('Invalid tool')
-  }
-
-  return { x1, y1, x2, y2, roughElement, tool }
-}
-
-const drawElement = (roughCanvas: RoughCanvas, context: CanvasRenderingContext2D, element: any) => {
-  if (element.tool === 'pen') {
-    const stroke = getSvgPathFromStroke(
-      getStroke(element.points, { size: 4, thinning: 0.5, smoothing: 0.5, streamline: 0.5 })
-    )
-    context.fillStyle = 'black'
-    context.fill(new Path2D(stroke))
-  } else {
-    roughCanvas.draw(element.roughElement)
-  }
-}
-
-const average = (a: any, b: any) => (a + b) / 2
-
-function getSvgPathFromStroke(points: any, closed = true) {
-  const len = points.length
-
-  if (len < 4) {
-    return ``
-  }
-
-  let a = points[0]
-  let b = points[1]
-  const c = points[2]
-
-  let result = `M${a[0].toFixed(2)},${a[1].toFixed(2)} Q${b[0].toFixed(2)},${b[1].toFixed(2)} ${average(
-    b[0],
-    c[0]
-  ).toFixed(2)},${average(b[1], c[1]).toFixed(2)} T`
-
-  for (let i = 2, max = len - 1; i < max; i++) {
-    a = points[i]
-    b = points[i + 1]
-    result += `${average(a[0], b[0]).toFixed(2)},${average(a[1], b[1]).toFixed(2)} `
-  }
-
-  if (closed) {
-    result += 'Z'
-  }
-
-  return result
-}
+type Action = 'drawing' | 'erasing' | 'moving' | 'selecting' | 'none'
 
 const Board = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [isDrawing, setIsDrawing] = useState(false)
+  const [action, setAction] = useState<Action>('none')
   const [drawings, setDrawings] = useState<any[]>([])
+  const [selectedElement, setSelectedElement] = useState<any>(null)
   const tool = useTools((state) => state.tool)
 
   useLayoutEffect(() => {
@@ -99,48 +27,95 @@ const Board = () => {
   }, [drawings])
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDrawing(true)
     const { clientX, clientY } = e
 
-    const newElement = createElement(clientX, clientY, clientX, clientY, tool)
+    if (tool === 'eraser') {
+      const element = getElementAtPoints(clientX, clientY, drawings)
 
-    setDrawings((prev) => [...prev, newElement])
+      if (element) {
+        const index = drawings.indexOf(element)
+        const elementsCopy = [...drawings]
+
+        elementsCopy.splice(index, 1)
+
+        setDrawings(elementsCopy)
+      }
+    } else if (tool === 'select') {
+      const element = getElementAtPoints(clientX, clientY, drawings)
+
+      if (element) {
+        const offsetOfClickX = clientX - element.x1
+        const offsetOfClickY = clientY - element.y1
+
+        setSelectedElement({ ...element, offsetOfClickX, offsetOfClickY })
+        setAction('moving')
+      }
+    } else {
+      const { clientX, clientY } = e
+
+      const elementId = generateId()
+      const newElement = createElement(clientX, clientY, clientX, clientY, tool, elementId)
+
+      setDrawings((prev) => [...prev, newElement])
+
+      setAction('drawing')
+    }
   }
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDrawing) return
-
     const { clientX, clientY } = e
+    const index = drawings.length - 1
 
-    if (tool === 'pen') {
-      const index = drawings.length - 1
-      const { x1, y1 } = drawings[index]
+    if (tool === 'select') {
+      ;(e.target as HTMLElement).style.cursor = getElementAtPoints(clientX, clientY, drawings) ? 'move' : 'default'
+    }
 
-      const element = createElement(x1, y1, clientX, clientY, tool)
+    if (action === 'drawing') {
+      if (tool === 'pen') {
+        const elementsCopy = [...drawings]
 
-      const elementsCopy = [...drawings]
+        elementsCopy[index] = {
+          ...elementsCopy[index],
+          points: [...elementsCopy[index].points, { x: clientX, y: clientY }],
+        }
 
-      elementsCopy[index] = {
-        ...element,
-        points: [...elementsCopy[index].points, { x: clientX, y: clientY }],
+        setDrawings(elementsCopy)
+      } else {
+        const { x1, y1 } = drawings[index]
+        const elementsCopy = [...drawings]
+
+        const currentId = elementsCopy[index].id
+
+        elementsCopy[index] = createElement(x1, y1, clientX, clientY, tool, currentId)
+
+        setDrawings(elementsCopy)
       }
-      setDrawings(elementsCopy)
-    } else {
-      const index = drawings.length - 1
+    } else if (action === 'erasing') {
+      const element = getElementAtPoints(clientX, clientY, drawings)
+      if (!element) return
 
-      const { x1, y1 } = drawings[index]
-      const element = createElement(x1, y1, clientX, clientY, tool)
-
+      ;(e.target as HTMLElement).style.cursor = element
+        ? "url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAAXNSR0IArs4c6QAAARRJREFUOE/dlDFLxEAQhd+BVouFZ3vlQuwSyI+5a7PBRkk6k9KzTOwStJFsWv0xgaQzkNLWszim0kL2OOFc9oKRYHFTz37Lm/dmJhi5JiPzcBjAOYDz7WheADz3jalP8oIxds85P3Zd90RBqqpad133SUSXAJ5M4H3AhWVZd1EUzYQQP96VZYkkSV7btr02QY1Axtgqz/NTz/OM6qSUCMNwRURneoMJOLdt+7Gu643MfeU4zrppmgt9pibgjRBiWRRFb0R934eUcgngdrfxX4CjSwZj7C3Lsqnu8Lc05XQQBO9ENP2NKapnE5s4jme608rhNE2HxWb7qwr2A+f8SAv2BxFdDQ32rpLRVu9Pl+0wztcg6V/VPW4Vw1FsawAAAABJRU5ErkJggg==') 10 10, auto"
+        : 'default'
+    } else if (action === 'moving') {
+      const { id, x1, x2, y1, y2, tool, offsetOfClickX, offsetOfClickY } = selectedElement
       const elementsCopy = [...drawings]
 
-      elementsCopy[index] = element
+      const index = elementsCopy.findIndex((element) => element.id === id)
+
+      const width = x2 - x1
+      const height = y2 - y1
+
+      const newX = clientX - offsetOfClickX
+      const newY = clientY - offsetOfClickY
+
+      elementsCopy[index] = createElement(newX, newY, newX + width, newY + height, tool, id)
       setDrawings(elementsCopy)
     }
   }
 
-  console.log({ drawings })
   const handleMouseUp = () => {
-    setIsDrawing(false)
+    setAction('none')
   }
 
   return (
