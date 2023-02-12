@@ -7,16 +7,17 @@ import {
   IoArrowForward,
   IoBrushOutline,
   IoEllipseOutline,
+  IoEllipsisHorizontal,
   IoHandRightOutline,
   IoImageOutline,
   IoRemove,
   IoTabletLandscapeOutline,
   IoText,
-  IoTriangleOutline,
+  IoTriangleOutline
 } from 'react-icons/io5'
 import { RiEraserLine } from 'react-icons/ri'
+import { ClearCanvasButton } from './ClearCanvasButton'
 import styles from './Header.module.css'
-import { clsx } from 'clsx'
 
 const TOOLS: { value: Tool; label: string; icon: React.ReactNode }[] = [
   { value: 'select', label: 'Select', icon: <FiMousePointer /> },
@@ -46,8 +47,13 @@ const Header = () => {
   return (
     <div className={styles.header_container}>
       <div className={styles.header_settings}>
+        <div className={`${styles.toggle_group_item} ${styles.toggle_group_aside}`}>
+          <button>
+            <IoEllipsisHorizontal />
+          </button>
+        </div>
         <RadioGroup.Root
-          className={styles.ToggleGroup}
+          className={styles.toggle_group}
           value={tool}
           defaultValue='line'
           onValueChange={handleChangeTool}
@@ -55,7 +61,7 @@ const Header = () => {
           {TOOLS.map(({ value, label, icon }) => (
             <RadioGroup.Item
               key={value}
-              className={`${styles.ToggleGroupItem} tool-${[value]}`}
+              className={`${styles.toggle_group_item} tool-${[value]}`}
               id={'govno'}
               value={value}
               aria-label={label}>
@@ -63,6 +69,9 @@ const Header = () => {
             </RadioGroup.Item>
           ))}
         </RadioGroup.Root>
+        <div className={`${styles.toggle_group_item} ${styles.toggle_group_aside}`}>
+          <ClearCanvasButton />
+        </div>
       </div>
     </div>
   )
