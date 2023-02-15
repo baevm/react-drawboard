@@ -21,7 +21,7 @@ const Board = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [action, setAction] = useState<Action>('none')
   const [selectedElement, setSelectedElement] = useState<any>(null)
-  const tool = useTools((state) => state.tool)
+  const { tool, options } = useTools((state) => ({ tool: state.tool, options: state.options }))
   const { drawings, setDrawings, syncStorageDrawings } = useDrawnings()
 
   // uselayouteffect performs better than useEffect
@@ -47,7 +47,7 @@ const Board = () => {
       case 'text':
         break
       default:
-        drawingsCopy[index] = createElement(x1, y1, x2, y2, tool, id)
+        drawingsCopy[index] = createElement(x1, y1, x2, y2, tool, id, options)
         break
     }
 
@@ -83,7 +83,7 @@ const Board = () => {
     } else {
       const { clientX, clientY } = e
       const elementId = generateId()
-      const newElement = createElement(clientX, clientY, clientX, clientY, tool, elementId) as LinearDrawing
+      const newElement = createElement(clientX, clientY, clientX, clientY, tool, elementId, options) as LinearDrawing
 
       setSelectedElement(newElement)
       setDrawings([...drawings, newElement])

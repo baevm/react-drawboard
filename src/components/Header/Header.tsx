@@ -1,5 +1,6 @@
 import { useDrawnings } from '@/hooks/useDrawings'
-import { Tool, useTools } from '@/hooks/useTools'
+import { useTools } from '@/hooks/useTools'
+import { Tool } from '@/types'
 import * as RadioGroup from '@radix-ui/react-radio-group'
 import React from 'react'
 import { BsDiamond } from 'react-icons/bs'

@@ -5,7 +5,7 @@ import { RoughCanvas } from 'roughjs/bin/canvas'
 
 const roughGenerator = rough.generator()
 
-export const createElement = (x1: number, y1: number, x2: number, y2: number, tool: Tool, id: string) => {
+export const createElement = (x1: number, y1: number, x2: number, y2: number, tool: Tool, id: string, options: any) => {
   let roughElement
 
   switch (tool) {
@@ -14,6 +14,7 @@ export const createElement = (x1: number, y1: number, x2: number, y2: number, to
         tool,
         points: [{ x: x2, y: y2 }],
         id,
+        ...options,
       }
     case 'circle':
       const cx = (x1 + x2) / 2
@@ -62,7 +63,7 @@ export const createElement = (x1: number, y1: number, x2: number, y2: number, to
       throw new Error('Invalid tool')
   }
 
-  return { x1, y1, x2, y2, roughElement, tool, id }
+  return { x1, y1, x2, y2, roughElement, tool, id, ...options }
 }
 
 export const drawElement = (roughCanvas: RoughCanvas, context: CanvasRenderingContext2D, element: any) => {
@@ -70,7 +71,7 @@ export const drawElement = (roughCanvas: RoughCanvas, context: CanvasRenderingCo
     const stroke = getSvgPathFromStroke(
       getStroke(element.points, { size: 4, thinning: 0.5, smoothing: 0.5, streamline: 0.5 })
     )
-    context.fillStyle = 'black'
+    context.fillStyle = element.lineColor
     context.fill(new Path2D(stroke))
   } else {
     roughCanvas.draw(element.roughElement)
@@ -107,6 +108,3 @@ const getSvgPathFromStroke = (points: any, closed = true) => {
 }
 
 const average = (a: number, b: number) => (a + b) / 2
-
-
-

@@ -1,3 +1,28 @@
+@font-face {
+  font-family: 'SourceSansPro';
+  font-weight: 300;
+  src: url('/fonts/SourceSansPro-Light.ttf');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SourceSansPro';
+  font-weight: 400;
+  src: url('/fonts/SourceSansPro-Regular.ttf');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SourceSansPro';
+  font-weight: 600;
+  src: url('/fonts/SourceSansPro-SemiBold.ttf');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SourceSansPro';
+  font-weight: 700;
+  src: url('/fonts/SourceSansPro-Bold.ttf');
+  font-display: swap;
+}
+
 /*
   Josh's Custom CSS Reset
   https://www.joshwcomeau.com/css/custom-css-reset/
@@ -17,6 +42,7 @@ body {
 body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  font-family: SourceSansPro, sans-serif;
 }
 img,
 picture,
