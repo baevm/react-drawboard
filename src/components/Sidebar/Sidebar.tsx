@@ -34,7 +34,7 @@ const Sidebar = () => {
       <label htmlFor='settings-menu' className={styles.settings_menu_label}>
         <IoMenu />
       </label>
-      
+
       <div className={styles.sidebar_container}>
         <div className={styles.sidebar_wrapper}>
           <div className={styles.settings_item}>
@@ -42,13 +42,16 @@ const Sidebar = () => {
           </div>
 
           {isBgPickerVisible && (
-            <div className={styles.settings_item}>
-              <ColorPicker
-                label='Background color'
-                initialColor={options.backgroundFillColor}
-                onChange={handleBgColorChange}
-              />
-            </div>
+            <>
+              <div className={styles.settings_item}>Background fill style</div>
+              <div className={styles.settings_item}>
+                <ColorPicker
+                  label='Background color'
+                  initialColor={options.backgroundFillColor}
+                  onChange={handleBgColorChange}
+                />
+              </div>
+            </>
           )}
 
           <div className={styles.settings_item}>
