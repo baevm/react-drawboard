@@ -1,21 +1,12 @@
-import { Tool } from '@/types'
+import { DrawingOptions, Tool } from '@/types'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-export type HEX = `#${string}`
-
-type Options = {
-  lineColor: HEX
-  backgroundFillColor: HEX
-  lineWidth: string
-  lineOpacity: number
-}
-
 interface UseTools {
   tool: Tool
-  options: Options
+  options: DrawingOptions
   setTool: (t: Tool) => void
-  setOptions: (o: Options) => void
+  setOptions: (o: DrawingOptions) => void
 }
 
 export const useTools = create<UseTools>()(

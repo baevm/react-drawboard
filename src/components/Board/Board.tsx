@@ -7,15 +7,7 @@ import rough from 'roughjs'
 import styles from './Board.module.css'
 import { adjustDrawingCoordinates, getElementAtCoords, resizedCoordiantes } from './helpers/Coordinates'
 import { cursorForPosition } from './helpers/Cursor'
-import { createElement, drawElement } from './helpers/Element'
-
-const getElementById = (id: string, drawings: any) => {
-  return drawings.find((element: any) => element.id === id)
-}
-
-const getIndexOfElement = (id: string, drawings: any) => {
-  return drawings.findIndex((element: any) => element.id === id)
-}
+import { createElement, drawElement, getElementById, getIndexOfElement } from './helpers/Element'
 
 const Board = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -57,6 +49,7 @@ const Board = () => {
   const handleMouseDown = (e: React.MouseEvent) => {
     const { clientX, clientY } = e
 
+    //BUG: eraser deleting last element from array + not saving in localstorage
     if (tool === 'eraser') {
       const element = getElementAtCoords(clientX, clientY, drawings)
 

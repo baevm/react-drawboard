@@ -23,5 +23,37 @@
 }
 
 .settings_item_label {
-  
+}
+
+.settings_menu_checkbox {
+  display: none;
+}
+
+.settings_menu_label {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  margin-left: 0.5rem;
+  padding: 0.2rem;
+  background-color: white;
+  border-radius: 5px;
+  box-shadow: 0 2px 10px var(--blackA7);
+  cursor: pointer;
+}
+
+@media (min-width: 769px) {
+  .settings_menu_label {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar_container {
+    visibility: hidden;
+  }
+
+  .settings_menu_checkbox:checked ~ .sidebar_container {
+    visibility: visible;
+    margin-top: 7rem;
+  }
 }

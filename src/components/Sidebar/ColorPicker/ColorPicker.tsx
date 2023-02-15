@@ -4,7 +4,7 @@ import { HexColorInput, HexColorPicker } from 'react-colorful'
 import ItemLabel from '../ItemLabel'
 import styles from './ColorPicker.module.css'
 import { useDebouncyFn } from 'use-debouncy'
-import { HEX } from '@/hooks/useTools'
+import { HEX } from '@/types'
 
 type Props = {
   label: string
@@ -21,7 +21,7 @@ const ColorPicker = ({ label, onChange, initialColor }: Props) => {
 
   const debouncedOnChange = useDebouncyFn((value) => {
     onChange(value)
-  }, 500)
+  }, 250)
 
   const handleChangeColor = (color: string) => {
     setColor(color)

@@ -1,4 +1,6 @@
-import { HEX, useTools } from '@/hooks/useTools'
+import { useTools } from '@/hooks/useTools'
+import { HEX } from '@/types'
+import { IoMenu } from 'react-icons/io5'
 import ColorPicker from './ColorPicker/ColorPicker'
 import { OpacitySlider } from './OpacitySlider'
 import styles from './Sidebar.module.css'
@@ -22,31 +24,43 @@ const Sidebar = () => {
   }
 
   return (
-    <div className={styles.sidebar_container}>
-      <div className={styles.sidebar_wrapper}>
-        <div className={styles.settings_item}>
-          <ColorPicker label='Line color' initialColor={options.lineColor} onChange={handleLineColorChange} />
-        </div>
-
-        {isBgPickerVisible && (
+    <>
+      <input
+        type='checkbox'
+        id='settings-menu'
+        className={styles.settings_menu_checkbox}
+        onChange={(e) => console.log(e.target.checked)}
+      />
+      <label htmlFor='settings-menu' className={styles.settings_menu_label}>
+        <IoMenu />
+      </label>
+      
+      <div className={styles.sidebar_container}>
+        <div className={styles.sidebar_wrapper}>
           <div className={styles.settings_item}>
-            <ColorPicker
-              label='Background color'
-              initialColor={options.backgroundFillColor}
-              onChange={handleBgColorChange}
-            />
+            <ColorPicker label='Line color' initialColor={options.lineColor} onChange={handleLineColorChange} />
           </div>
-        )}
 
-        <div className={styles.settings_item}>
-          <WidthButtonGroup />
-        </div>
+          {isBgPickerVisible && (
+            <div className={styles.settings_item}>
+              <ColorPicker
+                label='Background color'
+                initialColor={options.backgroundFillColor}
+                onChange={handleBgColorChange}
+              />
+            </div>
+          )}
 
-        <div className={styles.settings_item}>
-          <OpacitySlider />
+          <div className={styles.settings_item}>
+            <WidthButtonGroup />
+          </div>
+
+          <div className={styles.settings_item}>
+            <OpacitySlider />
+          </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }
 

@@ -27,3 +27,12 @@ export type Tool =
   | 'rhombus'
 
 export type Action = 'drawing' | 'erasing' | 'moving' | 'selecting' | 'resizing' | 'none'
+
+export type HEX = `#${string}`
+
+export type DrawingOptions = {
+  lineColor: HEX
+  backgroundFillColor: HEX
+  lineWidth: string
+  lineOpacity: number
+}

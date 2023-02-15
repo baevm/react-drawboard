@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { DrawingOptions } from '@/types'
+import { useEffect } from 'react'
 import { Drawable } from 'roughjs/bin/core'
 import { create } from 'zustand'
 
 const LOCALSTORAGE_KEY = 'drawings'
 
-type BaseDrawing = {
+type BaseDrawing = DrawingOptions & {
   id: string
 }
 

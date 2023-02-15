@@ -21,13 +21,13 @@ export const createElement = (x1: number, y1: number, x2: number, y2: number, to
       const cy = (y1 + y2) / 2
       const r = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)) / 2
       const d = r * 2
-      roughElement = roughGenerator.circle(cx, cy, d)
+      roughElement = roughGenerator.circle(cx, cy, d, { stroke: options.lineColor })
       break
     case 'rectangle':
-      roughElement = roughGenerator.rectangle(x1, y1, x2 - x1, y2 - y1)
+      roughElement = roughGenerator.rectangle(x1, y1, x2 - x1, y2 - y1, { stroke: options.lineColor })
       break
     case 'line':
-      roughElement = roughGenerator.line(x1, y1, x2, y2)
+      roughElement = roughGenerator.line(x1, y1, x2, y2, { stroke: options.lineColor })
       break
     case 'triangle':
       const right = [
@@ -40,7 +40,7 @@ export const createElement = (x1: number, y1: number, x2: number, y2: number, to
         [x2, y2],
         [average(x1, x2), y1],
       ]
-      roughElement = roughGenerator.polygon([...(equilateral as any)])
+      roughElement = roughGenerator.polygon([...(equilateral as any)], { stroke: options.lineColor })
       break
     case 'rhombus':
       const rhombus = [
@@ -49,7 +49,7 @@ export const createElement = (x1: number, y1: number, x2: number, y2: number, to
         [x2, y1 + (y2 - y1) / 2],
         [x1 + (x2 - x1) / 2, y2],
       ]
-      roughElement = roughGenerator.polygon([...(rhombus as any)])
+      roughElement = roughGenerator.polygon([...(rhombus as any)], { stroke: options.lineColor })
       break
     case 'arrow':
       const arrow = [[x1, y1]]
@@ -76,6 +76,14 @@ export const drawElement = (roughCanvas: RoughCanvas, context: CanvasRenderingCo
   } else {
     roughCanvas.draw(element.roughElement)
   }
+}
+
+export const getElementById = (id: string, drawings: any) => {
+  return drawings.find((element: any) => element.id === id)
+}
+
+export const getIndexOfElement = (id: string, drawings: any) => {
+  return drawings.findIndex((element: any) => element.id === id)
 }
 
 const getSvgPathFromStroke = (points: any, closed = true) => {
