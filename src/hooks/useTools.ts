@@ -1,19 +1,6 @@
+import { Tool } from '@/types'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-
-export type Tool =
-  | 'select'
-  | 'line'
-  | 'circle'
-  | 'rectangle'
-  | 'pen'
-  | 'text'
-  | 'eraser'
-  | 'move'
-  | 'image'
-  | 'triangle'
-  | 'arrow'
-  | 'rhombus'
 
 interface UseTools {
   tool: Tool

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Drawable } from 'roughjs/bin/core'
 import { create } from 'zustand'
-import { Tool } from './useTools'
 
 const LOCALSTORAGE_KEY = 'drawings'
 
@@ -36,27 +35,51 @@ export type PenDrawing = BaseDrawing & {
 
 type Drawings = (PenDrawing | LinearDrawing)[]
 
-export const useDrawnings = () => {
-  const [drawings, setStateDrawings] = useState<Drawings>([])
+interface DrawingsStore {
+  drawings: Drawings
+  setStateDrawings: (drawings: Drawings) => void
+}
 
+const drawingsStore = create<DrawingsStore>((set) => ({
+  drawings: [],
+
+  setStateDrawings: (drawings: any) => set({ drawings }),
+}))
+
+export const useDrawnings = () => {
+  const { drawings, setStoreDrawings } = drawingsStore((state) => ({
+    drawings: state.drawings,
+    setStoreDrawings: state.setStateDrawings,
+  }))
+
+  // get drawings from localstorage on mount
   useEffect(() => {
     const items = localStorage.getItem(LOCALSTORAGE_KEY)
     if (items) {
       const parsedItems = JSON.parse(items) as Drawings
-      setStateDrawings(parsedItems)
+      setDrawings(parsedItems)
     } else {
-      setStateDrawings([])
+      setDrawings([])
     }
   }, [])
 
-  const syncStorageDrawings = () => {
-    window.localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(drawings))
+  const setDrawings = (newDrawings: Drawings) => {
+    setStoreDrawings(newDrawings)
   }
 
-  const setDrawings = (drawings: Drawings) => {
-    console.log({ drawings })
-    setStateDrawings(drawings)
+  // used to set localstorage after mouseUp
+  const syncStorageDrawings = (newDrawings: Drawings) => {
+    window.localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(newDrawings))
   }
 
-  return { drawings, setDrawings, syncStorageDrawings }
+  const clearDrawings = () => {
+    setDrawings([])
+    window.localStorage.removeItem(LOCALSTORAGE_KEY)
+  }
+
+  const undoDrawing = () => {}
+
+  const redoDrawing = () => {}
+
+  return { drawings, setDrawings, syncStorageDrawings, clearDrawings, undoDrawing, redoDrawing }
 }

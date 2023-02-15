@@ -1,10 +1,17 @@
 import React from 'react'
 import styles from './Footer.module.css'
 import { IoArrowUndoOutline, IoArrowRedoOutline } from 'react-icons/io5'
+import { useDrawnings } from '@/hooks/useDrawings'
 
 const Footer = () => {
-  const handleUndo = () => {}
-  const handleRedo = () => {}
+  const { undoDrawing, redoDrawing } = useDrawnings()
+
+  const handleUndo = () => {
+    undoDrawing()
+  }
+  const handleRedo = () => {
+    redoDrawing()
+  }
 
   const handleZoomIn = () => {}
   const handleZoomOut = () => {}

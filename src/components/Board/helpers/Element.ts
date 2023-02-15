@@ -1,4 +1,4 @@
-import { Tool } from '@/hooks/useTools'
+import { Tool } from '@/types'
 import getStroke from 'perfect-freehand'
 import rough from 'roughjs'
 import { RoughCanvas } from 'roughjs/bin/canvas'
@@ -55,7 +55,9 @@ export const createElement = (x1: number, y1: number, x2: number, y2: number, to
       roughElement = roughGenerator.polygon([...(arrow as any)])
       break
     case 'eraser':
-
+      break
+    case 'text':
+      break
     default:
       throw new Error('Invalid tool')
   }
@@ -72,30 +74,6 @@ export const drawElement = (roughCanvas: RoughCanvas, context: CanvasRenderingCo
     context.fill(new Path2D(stroke))
   } else {
     roughCanvas.draw(element.roughElement)
-  }
-}
-
-export const getElementAtPoints = (x: number, y: number, elements: any[]) => {
-  const element = elements.find((element) => isInElement(x, y, element))
-
-  return element
-}
-
-const isInElement = (x: number, y: number, element: ReturnType<typeof createElement>) => {
-  const { tool, x1, x2, y1, y2 } = element
-
-  if (tool === 'pen') {
-    const a = { x: x1!, y: y1! }
-    const b = { x: x2!, y: y2! }
-    const c = { x, y }
-    const offset = distance(a, b) - (distance(a, c) + distance(b, c))
-    return Math.abs(offset) < 1
-  } else {
-    const minX = Math.min(x1, x2)
-    const maxX = Math.max(x1, x2)
-    const minY = Math.min(y1, y2)
-    const maxY = Math.max(y1, y2)
-    return x >= minX && x <= maxX && y >= minY && y <= maxY
   }
 }
 
@@ -130,5 +108,5 @@ const getSvgPathFromStroke = (points: any, closed = true) => {
 
 const average = (a: number, b: number) => (a + b) / 2
 
-const distance = (a: { x: number; y: number }, b: { x: number; y: number }) =>
-  Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2))
+
+
