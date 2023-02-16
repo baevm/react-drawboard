@@ -17,7 +17,7 @@ export const useTools = create<UseTools>()(
         lineColor: '#000000',
         backgroundFillColor: '#ffffff',
         lineWidth: '1',
-        lineOpacity: 100,
+        lineOpacity: 1,
         backgroundFillStyle: 'none',
       },
       setTool: (tool) => set({ tool }),

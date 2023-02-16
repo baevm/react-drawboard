@@ -1,17 +1,28 @@
+import { useTools } from '@/hooks/useTools'
 import * as Slider from '@radix-ui/react-slider'
 import ItemLabel from '../ItemLabel'
 import styles from './OpacitySlider.module.css'
 
 export const OpacitySlider = () => {
+  const { options, setOptions } = useTools((state) => ({
+    options: state.options,
+    setOptions: state.setOptions,
+  }))
+
+  const handleChange = (value: number[]) => {
+    setOptions({ lineOpacity: value[0] })
+  }
+
   return (
     <>
       <ItemLabel>Line opacity</ItemLabel>
       <Slider.Root
         className={styles.SliderRoot}
-        defaultValue={[100]}
-        min={0}
-        max={100}
-        step={10}
+        onValueChange={handleChange}
+        defaultValue={[options.lineOpacity]}
+        min={0.2}
+        max={1}
+        step={0.2}
         aria-label='Line opacity'>
         <Slider.Track className={styles.SliderTrack}>
           <Slider.Range className={styles.SliderRange} />

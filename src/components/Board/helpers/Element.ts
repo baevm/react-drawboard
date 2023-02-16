@@ -30,7 +30,7 @@ export const createElement = (
       const r = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)) / 2
       const d = r * 2
       roughElement = roughGenerator.circle(cx, cy, d, {
-        stroke: options.lineColor,
+        stroke: options.lineOpacity === 1 ? options.lineColor : addAlpha(options.lineColor, options.lineOpacity),
         fill: options.backgroundFillStyle !== 'none' ? options.backgroundFillColor : undefined,
         fillStyle: options.backgroundFillStyle !== 'none' ? options.backgroundFillStyle : undefined,
         strokeWidth: +options.lineWidth,
@@ -38,7 +38,7 @@ export const createElement = (
       break
     case 'rectangle':
       roughElement = roughGenerator.rectangle(x1, y1, x2 - x1, y2 - y1, {
-        stroke: options.lineColor,
+        stroke: options.lineOpacity === 1 ? options.lineColor : addAlpha(options.lineColor, options.lineOpacity),
         fill: options.backgroundFillStyle !== 'none' ? options.backgroundFillColor : undefined,
         fillStyle: options.backgroundFillStyle !== 'none' ? options.backgroundFillStyle : undefined,
         strokeWidth: +options.lineWidth,
@@ -59,7 +59,7 @@ export const createElement = (
         [average(x1, x2), y1],
       ]
       roughElement = roughGenerator.polygon([...(equilateral as any)], {
-        stroke: options.lineColor,
+        stroke: options.lineOpacity === 1 ? options.lineColor : addAlpha(options.lineColor, options.lineOpacity),
         fill: options.backgroundFillStyle !== 'none' ? options.backgroundFillColor : undefined,
         fillStyle: options.backgroundFillStyle !== 'none' ? options.backgroundFillStyle : undefined,
         strokeWidth: +options.lineWidth,
@@ -73,7 +73,7 @@ export const createElement = (
         [x1 + (x2 - x1) / 2, y2],
       ]
       roughElement = roughGenerator.polygon([...(rhombus as any)], {
-        stroke: options.lineColor,
+        stroke: options.lineOpacity === 1 ? options.lineColor : addAlpha(options.lineColor, options.lineOpacity),
         fill: options.backgroundFillStyle !== 'none' ? options.backgroundFillColor : undefined,
         fillStyle: options.backgroundFillStyle !== 'none' ? options.backgroundFillStyle : undefined,
         strokeWidth: +options.lineWidth,
@@ -100,6 +100,7 @@ export const drawElement = (roughCanvas: RoughCanvas, context: CanvasRenderingCo
       getStroke(element.points, { size: 4 + +element.lineWidth, thinning: 0.5, smoothing: 0.5, streamline: 0.5 })
     )
     context.fillStyle = element.lineColor
+    context.globalAlpha = element.lineOpacity
     context.fill(new Path2D(stroke))
   } else {
     roughCanvas.draw(element.roughElement)
@@ -141,6 +142,12 @@ const getSvgPathFromStroke = (points: any, closed = true) => {
   }
 
   return result
+}
+
+function addAlpha(color: string, opacity: number): string {
+  // coerce values so ti is between 0 and 1.
+  const _opacity = Math.round(Math.min(Math.max(opacity || 1, 0), 1) * 255)
+  return color + _opacity.toString(16).toUpperCase()
 }
 
 const average = (a: number, b: number) => (a + b) / 2
