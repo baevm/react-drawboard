@@ -4,7 +4,8 @@ import { IoMenu } from 'react-icons/io5'
 import ColorPicker from './ColorPicker/ColorPicker'
 import { OpacitySlider } from './OpacitySlider'
 import styles from './Sidebar.module.css'
-import WidthButtonGroup from './WidthButtonGroup/WidthButtonGroup'
+import WidthButtonGroup from './ButtonGroup/WidthButtonGroup'
+import BgFillButtonGroup from './ButtonGroup/BgFillButtonGroup'
 
 const Sidebar = () => {
   const { tool, options, setOptions } = useTools((state) => ({
@@ -16,11 +17,11 @@ const Sidebar = () => {
   const isBgPickerVisible = tool === 'circle' || tool === 'rectangle' || tool === 'triangle' || tool === 'rhombus'
 
   const handleLineColorChange = (color: HEX) => {
-    setOptions({ ...options, lineColor: color })
+    setOptions({ lineColor: color })
   }
 
   const handleBgColorChange = (color: HEX) => {
-    setOptions({ ...options, backgroundFillColor: color })
+    setOptions({ backgroundFillColor: color })
   }
 
   return (
@@ -41,9 +42,15 @@ const Sidebar = () => {
             <ColorPicker label='Line color' initialColor={options.lineColor} onChange={handleLineColorChange} />
           </div>
 
+          <div className={styles.settings_item}>
+            <WidthButtonGroup />
+          </div>
+
           {isBgPickerVisible && (
             <>
-              <div className={styles.settings_item}>Background fill style</div>
+              <div className={styles.settings_item}>
+                <BgFillButtonGroup />
+              </div>
               <div className={styles.settings_item}>
                 <ColorPicker
                   label='Background color'
@@ -53,10 +60,6 @@ const Sidebar = () => {
               </div>
             </>
           )}
-
-          <div className={styles.settings_item}>
-            <WidthButtonGroup />
-          </div>
 
           <div className={styles.settings_item}>
             <OpacitySlider />

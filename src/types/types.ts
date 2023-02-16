@@ -30,9 +30,14 @@ export type Action = 'drawing' | 'erasing' | 'moving' | 'selecting' | 'resizing'
 
 export type HEX = `#${string}`
 
+export type BackgroundFillStyle = 'solid' | 'hachure' | 'none'
+
+export type LineWidth = '1' | '3' | '5'
+
 export type DrawingOptions = {
   lineColor: HEX
   backgroundFillColor: HEX
-  lineWidth: string
+  backgroundFillStyle: BackgroundFillStyle
+  lineWidth: LineWidth
   lineOpacity: number
 }

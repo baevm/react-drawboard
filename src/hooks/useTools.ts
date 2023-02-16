@@ -6,7 +6,7 @@ interface UseTools {
   tool: Tool
   options: DrawingOptions
   setTool: (t: Tool) => void
-  setOptions: (o: DrawingOptions) => void
+  setOptions: (o: Partial<DrawingOptions>) => void
 }
 
 export const useTools = create<UseTools>()(
@@ -18,9 +18,10 @@ export const useTools = create<UseTools>()(
         backgroundFillColor: '#ffffff',
         lineWidth: '1',
         lineOpacity: 100,
+        backgroundFillStyle: 'none',
       },
       setTool: (tool) => set({ tool }),
-      setOptions: (options) => set({ options }),
+      setOptions: (newOptions) => set({ options: { ...get().options, ...newOptions } }),
     }),
     {
       name: 'current-tool',
