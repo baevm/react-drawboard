@@ -32,7 +32,7 @@
 .settings_menu_label {
   position: absolute;
   left: 0;
-  top: 50%;
+  top: 0.5rem;
   margin-left: 0.5rem;
   padding: 0.2rem;
   background-color: white;
@@ -54,6 +54,7 @@
 
   .settings_menu_checkbox:checked ~ .sidebar_container {
     visibility: visible;
-    margin-top: 7rem;
+    top: 2.5rem;
+    transform: none;
   }
 }

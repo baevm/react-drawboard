@@ -15,6 +15,7 @@ const Sidebar = () => {
   }))
 
   const isBgPickerVisible = tool === 'circle' || tool === 'rectangle' || tool === 'triangle' || tool === 'rhombus'
+  const isSidebarVisible = tool !== 'move' && tool !== 'select' && tool !== 'eraser'
 
   const handleLineColorChange = (color: HEX) => {
     setOptions({ lineColor: color })
@@ -24,14 +25,14 @@ const Sidebar = () => {
     setOptions({ backgroundFillColor: color })
   }
 
+  if (!isSidebarVisible) {
+    return null
+  }
+
   return (
     <>
-      <input
-        type='checkbox'
-        id='settings-menu'
-        className={styles.settings_menu_checkbox}
-        onChange={(e) => console.log(e.target.checked)}
-      />
+      {/* Hidden burger button, only visible for mobile */}
+      <input type='checkbox' id='settings-menu' className={styles.settings_menu_checkbox} />
       <label htmlFor='settings-menu' className={styles.settings_menu_label}>
         <IoMenu />
       </label>

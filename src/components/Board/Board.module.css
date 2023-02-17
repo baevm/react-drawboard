@@ -6,4 +6,8 @@
 .board_canvas {
   width: 100%;
   height: 100%;
+  background-color: #f8f9fb;
+
+  /* to work on touchscreen */
+  touch-action: none;
 }

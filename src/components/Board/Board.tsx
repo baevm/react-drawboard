@@ -161,7 +161,6 @@ const Board = () => {
         onPointerUp={handleMouseUp}
         width={window.innerWidth}
         height={window.innerHeight}
-        style={{ backgroundColor: '#F8F9FB' }}
       />
     </div>
   )
