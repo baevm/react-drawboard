@@ -73,6 +73,8 @@ export const createElement = (
       roughElement = roughGenerator.polygon([...(rhombus as any)], { ...polygonOptions })
       break
     case 'arrow':
+      throw new Error('tool not implemented')
+      
       var headlen = 10
       var angle = Math.atan2(y2 - y1, x2 - x1)
 
@@ -86,10 +88,10 @@ export const createElement = (
     case 'line':
       roughElement = roughGenerator.line(x1, y1, x2, y2, { ...polygonOptions })
       break
-    case 'eraser':
-      break
     case 'text':
-      break
+      throw new Error('tool not implemented')
+    case 'move':
+      throw new Error('tool not implemented')
     default:
       throw new Error('Invalid tool')
   }

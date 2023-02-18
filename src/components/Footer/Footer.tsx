@@ -1,7 +1,7 @@
-import React from 'react'
-import styles from './Footer.module.css'
-import { IoArrowUndoOutline, IoArrowRedoOutline } from 'react-icons/io5'
 import { useDrawnings } from '@/hooks/useDrawings'
+import { IoArrowRedoOutline, IoArrowUndoOutline } from 'react-icons/io5'
+import { RxZoomIn, RxZoomOut } from 'react-icons/rx'
+import styles from './Footer.module.css'
 
 const Footer = () => {
   const { undoDraw, redoDraw } = useDrawnings()
@@ -27,11 +27,11 @@ const Footer = () => {
       </div>
       <div className={styles.ToggleGroup}>
         <button onClick={handleZoomOut} className={styles.ToggleGroupItem}>
-          <IoArrowUndoOutline />
+          <RxZoomOut />
         </button>
         <button className={styles.ToggleGroupItem}>100%</button>
         <button onClick={handleZoomIn} className={styles.ToggleGroupItem}>
-          <IoArrowRedoOutline />
+          <RxZoomIn />
         </button>
       </div>
     </div>

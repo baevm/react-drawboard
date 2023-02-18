@@ -10,6 +10,7 @@
   - [x] Pencil drawings
   - [x] Different elements (circle, rectangle, triangle, rhombus, arrow, text)
   - [x] Drawing settings (line color, line width, background fill style, etc.)
+  - [x] Adaptive 
   - [ ] Undo/redo  
   - [ ] Saving drawings as images
   - [ ] Resizing canvas

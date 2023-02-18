@@ -6,12 +6,9 @@ const LOCALSTORAGE_KEY = 'drawings'
 
 interface DrawingsStore {
   drawings: Drawings
-  pastDrawings: Drawings
-  futureDrawings: Drawings
+  historyDrawings: Drawings
 
   setStoreDrawings: (drawings: Drawings) => void
-  setPastDrawings: (drawings: Drawings) => void
-  setFutureDrawings: (drawings: Drawings) => void
   undoDraw: () => void
   redoDraw: () => void
 }
@@ -23,12 +20,9 @@ const syncStorageDrawings = (newDrawings: Drawings) => {
 
 const drawingsStore = create<DrawingsStore>((set, get) => ({
   drawings: [],
-  pastDrawings: [],
-  futureDrawings: [],
+  historyDrawings: [],
 
-  setStoreDrawings: (drawings: any) => set({ drawings, futureDrawings: [] }),
-  setPastDrawings: (pastDrawings: any) => set({ pastDrawings }),
-  setFutureDrawings: (futureDrawings: any) => set({ futureDrawings }),
+  setStoreDrawings: (drawings: any) => set({ drawings, historyDrawings: [] }),
 
   undoDraw: () =>
     set((state) => {
@@ -36,35 +30,31 @@ const drawingsStore = create<DrawingsStore>((set, get) => ({
 
       if (!last) return {}
 
-      const newPast = [...state.pastDrawings, last]
+      const newHistory = [...state.historyDrawings, last]
       const newDraw = state.drawings.slice(0, -1)
-      const newFuture = [...state.futureDrawings, last]
 
       syncStorageDrawings(newDraw)
 
       return {
-        pastDrawings: newPast,
+        historyDrawings: newHistory,
         drawings: newDraw,
-        futureDrawings: newFuture,
       }
     }),
 
   redoDraw: () =>
     set((state) => {
-      if (state.futureDrawings.length === 0) {
+      if (state.historyDrawings.length === 0) {
         return {}
       }
 
-      const newPast = state.pastDrawings.slice(0, -1)
-      const newDraw = [...state.drawings, state.futureDrawings[state.futureDrawings.length - 1]]
-      const newFuture = state.futureDrawings.slice(0, -1)
+      const newHistory = state.historyDrawings.slice(0, -1)
+      const newDraw = [...state.drawings, state.historyDrawings[state.historyDrawings.length - 1]]
 
       syncStorageDrawings(newDraw)
 
       return {
-        pastDrawings: newPast,
+        historyDrawings: newHistory,
         drawings: newDraw,
-        futureDrawings: newFuture,
       }
     }),
 }))
