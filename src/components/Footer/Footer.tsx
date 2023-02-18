@@ -4,13 +4,13 @@ import { IoArrowUndoOutline, IoArrowRedoOutline } from 'react-icons/io5'
 import { useDrawnings } from '@/hooks/useDrawings'
 
 const Footer = () => {
-  const { undoDrawing, redoDrawing } = useDrawnings()
+  const { undoDraw, redoDraw } = useDrawnings()
 
   const handleUndo = () => {
-    undoDrawing()
+    undoDraw()
   }
   const handleRedo = () => {
-    redoDrawing()
+    redoDraw()
   }
 
   const handleZoomIn = () => {}

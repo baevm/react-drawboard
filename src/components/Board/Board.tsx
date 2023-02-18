@@ -1,6 +1,6 @@
-import { LinearDrawing, useDrawnings } from '@/hooks/useDrawings'
+import { useDrawnings } from '@/hooks/useDrawings'
 import { useTools } from '@/hooks/useTools'
-import { Action, Tool } from '@/types'
+import { Action, Drawings, PolygonDrawing, Tool } from '@/types'
 import { generateId } from '@/utils/generateId'
 import React, { useLayoutEffect, useRef, useState } from 'react'
 import rough from 'roughjs'
@@ -76,7 +76,7 @@ const Board = () => {
     } else {
       const { clientX, clientY } = e
       const elementId = generateId()
-      const newElement = createElement(clientX, clientY, clientX, clientY, tool, elementId, options) as LinearDrawing
+      const newElement = createElement(clientX, clientY, clientX, clientY, tool, elementId, options) as PolygonDrawing
 
       setSelectedElement(newElement)
       setDrawings([...drawings, newElement])
@@ -108,7 +108,7 @@ const Board = () => {
 
     if (action === 'drawing') {
       const index = drawings.length - 1
-      const { x1, y1, id } = drawings[index] as LinearDrawing
+      const { x1, y1, id } = drawings[index] as any
 
       updateElement(x1, y1, clientX, clientY, tool, index, id)
     } else if (action === 'moving') {
@@ -137,13 +137,15 @@ const Board = () => {
   }
 
   const handleMouseUp = () => {
-    const id = selectedElement.id
-    const index = drawings.findIndex((element) => element.id === id)
+    if (selectedElement) {
+      const id = selectedElement.id
+      const index = drawings.findIndex((element) => element.id === id)
 
-    if ((action === 'drawing' || action === 'resizing') && tool !== 'pen') {
-      const element = getElementById(id, drawings)
-      const { x1, y1, x2, y2 } = adjustDrawingCoordinates(element)
-      updateElement(x1, y1, x2, y2, element.tool, index, id)
+      if ((action === 'drawing' || action === 'resizing') && tool !== 'pen' && tool !== 'arrow') {
+        const element = getElementById(id, drawings)
+        const { x1, y1, x2, y2 } = adjustDrawingCoordinates(element)
+        updateElement(x1, y1, x2, y2, element!.tool, index, id)
+      }
     }
 
     setAction('none')

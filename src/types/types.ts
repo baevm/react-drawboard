@@ -1,3 +1,5 @@
+import { Drawable } from 'roughjs/bin/core'
+
 export type PointPosition =
   | 'start'
   | 'end'
@@ -41,3 +43,23 @@ export type DrawingOptions = {
   lineWidth: LineWidth
   lineOpacity: number
 }
+
+type BaseDrawing = DrawingOptions & {
+  id: string
+}
+
+export type PolygonDrawing = BaseDrawing & {
+  tool: Extract<Tool, 'rectangle' | 'triangle' | 'circle' | 'rhombus' | 'line' | 'arrow'>
+  x1: number
+  x2: number
+  y1: number
+  y2: number
+  roughElement: Drawable
+}
+
+export type PenDrawing = BaseDrawing & {
+  tool: 'pen'
+  points: { x: number; y: number }[]
+}
+
+export type Drawings = (PenDrawing | PolygonDrawing)[]
