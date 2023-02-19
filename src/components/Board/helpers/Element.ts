@@ -1,4 +1,4 @@
-import { DrawingOptions, Drawings, Tool } from '@/types'
+import { DrawingOptions, Drawings, PenDrawing, PolygonDrawing, Tool } from '@/types'
 import getStroke from 'perfect-freehand'
 import rough from 'roughjs'
 import { RoughCanvas } from 'roughjs/bin/canvas'
@@ -6,7 +6,7 @@ import { Options } from 'roughjs/bin/core'
 
 const roughGenerator = rough.generator()
 
-export const createElement = (
+type CreateElement = (
   x1: number,
   y1: number,
   x2: number,
@@ -14,7 +14,9 @@ export const createElement = (
   tool: Tool,
   id: string,
   options: DrawingOptions
-) => {
+) => PenDrawing | PolygonDrawing
+
+export const createElement: CreateElement = (x1, y1, x2, y2, tool, id, options) => {
   let roughElement
   let polygonOptions: Options = {}
 
@@ -40,6 +42,7 @@ export const createElement = (
         id,
         ...options,
       }
+
     case 'circle':
       const cx = (x1 + x2) / 2
       const cy = (y1 + y2) / 2
@@ -47,9 +50,12 @@ export const createElement = (
       const d = r * 2
       roughElement = roughGenerator.circle(cx, cy, d, { ...polygonOptions })
       break
+
     case 'rectangle':
       roughElement = roughGenerator.rectangle(x1, y1, x2 - x1, y2 - y1, { ...polygonOptions })
       break
+
+    // TODO: RIGHT & EQUILATERAL
     case 'triangle':
       const right = [
         [x1, y2],
@@ -63,6 +69,7 @@ export const createElement = (
       ]
       roughElement = roughGenerator.polygon([...(equilateral as any)], { ...polygonOptions })
       break
+
     case 'rhombus':
       const rhombus = [
         [x1, y1 + (y2 - y1) / 2],
@@ -72,48 +79,57 @@ export const createElement = (
       ]
       roughElement = roughGenerator.polygon([...(rhombus as any)], { ...polygonOptions })
       break
+
     case 'arrow':
       throw new Error('tool not implemented')
-      
       var headlen = 10
       var angle = Math.atan2(y2 - y1, x2 - x1)
-
       let fromHeadToSide1 = [x2 - headlen * Math.cos(angle - Math.PI / 7), y2 - headlen * Math.sin(angle - Math.PI / 7)]
       let fromHeadToSide2 = [x2 - headlen * Math.cos(angle + Math.PI / 7), y2 - headlen * Math.sin(angle + Math.PI / 7)]
-
       const arrow = [[x1, y1], fromHeadToSide1, [], fromHeadToSide2]
-
       roughElement = roughGenerator.polygon([...(arrow as any)], { stroke: options.lineColor })
       break
+
     case 'line':
       roughElement = roughGenerator.line(x1, y1, x2, y2, { ...polygonOptions })
       break
+
     case 'text':
-      throw new Error('tool not implemented')
+      return { x1, y1, x2, y2, tool, id, text: '' }
+
     case 'move':
       throw new Error('tool not implemented')
+
     default:
       throw new Error('Invalid tool')
   }
 
-  return { x1, y1, x2, y2, roughElement, tool, id, ...polygonOptions }
+  return { x1, y1, x2, y2, roughElement, tool, id, ...(polygonOptions as any) }
 }
 
 export const drawElement = (roughCanvas: RoughCanvas, context: CanvasRenderingContext2D, element: any) => {
-  if (element.tool === 'pen') {
-    const stroke = getSvgPathFromStroke(
-      getStroke(element.points, { size: 4 + +element.lineWidth, thinning: 0.5, smoothing: 0.5, streamline: 0.5 })
-    )
-    context.fillStyle = element.lineColor
-    context.globalAlpha = element.lineOpacity
-    context.fill(new Path2D(stroke))
-  } else {
-    roughCanvas.draw(element.roughElement)
+  switch (element.tool) {
+    case 'pen':
+      const stroke = getSvgPathFromStroke(
+        getStroke(element.points, { size: 4 + +element.lineWidth, thinning: 0.5, smoothing: 0.5, streamline: 0.5 })
+      )
+      context.fillStyle = element.lineColor
+      context.globalAlpha = element.lineOpacity
+      context.fill(new Path2D(stroke))
+      break
+    case 'text':
+      context.font = '24px SourceSansPro'
+      context.textBaseline = 'top'
+      context.fillText(element.text, element.x1, element.y1)
+      break
+    default:
+      roughCanvas.draw(element.roughElement)
+      break
   }
 }
 
 export const getElementById = (id: string, drawings: Drawings) => {
-  return drawings.find((element) => element.id === id)
+  return drawings.find((element) => element.id === id)!
 }
 
 export const getIndexOfElement = (id: string, drawings: Drawings) => {

@@ -1,4 +1,4 @@
-import { PointPosition } from '@/types'
+import { Drawings, PointPosition, PolygonDrawing } from '@/types';
 
 export const resizedCoordiantes = (
   clientX: number,
@@ -11,10 +11,13 @@ export const resizedCoordiantes = (
     case 'top-left':
     case 'start':
       return { x1: clientX, y1: clientY, x2, y2 }
+
     case 'top-right':
       return { x1, y1: clientY, x2: clientX, y2 }
+
     case 'bottom-left':
       return { x1: clientX, y1, x2, y2: clientY }
+
     case 'end':
     case 'bottom-right':
       return { x1, y1, x2: clientX, y2: clientY }
@@ -24,7 +27,7 @@ export const resizedCoordiantes = (
   }
 }
 
-export const getElementAtCoords = (x: number, y: number, elements: any[]) => {
+export const getElementAtCoords = (x: number, y: number, elements: Drawings) => {
   const element = elements
     .map((element) => ({ ...element, position: posWithinDrawing(x, y, element) }))
     .find((el) => el.position !== null)
@@ -32,12 +35,10 @@ export const getElementAtCoords = (x: number, y: number, elements: any[]) => {
   return element
 }
 
-export const adjustDrawingCoordinates = (element: any) => {
+export const adjustDrawingCoordinates = (element: PolygonDrawing) => {
   const { x1, y1, x2, y2, tool } = element
 
-  if (tool === 'pen') {
-    return { x1, y1, x2, y2 }
-  } else if (tool === 'line') {
+  if (tool === 'line') {
     if (x1 < x2 || (x1 === x2 && y1 < y2)) {
       return { x1, y1, x2, y2 }
     } else {
@@ -61,6 +62,7 @@ const posWithinDrawing = (x: number, y: number, element: any) => {
       const start = nearPoint(x, y, x1, y1, 'start')
       const end = nearPoint(x, y, x2, y2, 'end')
       return start || end || on
+
     case 'rectangle':
       const topLeft = nearPoint(x, y, x1, y1, 'top-left')
       const topRight = nearPoint(x, y, x2, y1, 'top-right')
@@ -68,6 +70,7 @@ const posWithinDrawing = (x: number, y: number, element: any) => {
       const bottomRight = nearPoint(x, y, x2, y2, 'bottom-right')
       const inside = x >= x1 && x <= x2 && y >= y1 && y <= y2 ? 'inside' : null
       return topLeft || topRight || bottomLeft || bottomRight || inside
+
     case 'circle':
       const center = nearPoint(x, y, (x1 + x2) / 2, (y1 + y2) / 2, 'center')
       const radius = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)) / 2
@@ -82,12 +85,12 @@ const posWithinDrawing = (x: number, y: number, element: any) => {
       const insideRhombus = x >= x1 && x <= x2 && y >= y1 && y <= y2 ? 'inside' : null
       return top || bottom || left || right || insideRhombus
 
-    // DO: RIGHT & EQUILATERAL
     case 'triangle':
       const rightTriangle = nearPoint(x, y, x1, y2, 'right')
       const equilateralTriangle = nearPoint(x, y, x1, y2, 'left')
       const insideTriangle = x >= x1 && x <= x2 && y >= y1 && y <= y2 ? 'inside' : null
       return rightTriangle || equilateralTriangle || insideTriangle
+
     case 'pen':
       const betweenAnyPoint = element.points.some((point: any, index: any) => {
         const nextPoint = element.points[index + 1]
@@ -95,8 +98,10 @@ const posWithinDrawing = (x: number, y: number, element: any) => {
         return onLine(point.x, point.y, nextPoint.x, nextPoint.y, x, y, 5) != null
       })
       return betweenAnyPoint ? 'inside' : null
+
     case 'text':
       return x >= x1 && x <= x2 && y >= y1 && y <= y2 ? 'inside' : null
+
     default:
       throw new Error(`Type not recognised: ${tool}`)
   }
