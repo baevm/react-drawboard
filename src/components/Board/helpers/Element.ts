@@ -95,7 +95,7 @@ export const createElement: CreateElement = (x1, y1, x2, y2, tool, id, options) 
       break
 
     case 'text':
-      return { x1, y1, x2, y2, tool, id, text: '' }
+      return { tool, x1, y1, x2, y2, id, text: '', stroke: options.lineColor, fontFamily: '', fontSize: '' }
 
     case 'move':
       throw new Error('tool not implemented')
@@ -104,7 +104,7 @@ export const createElement: CreateElement = (x1, y1, x2, y2, tool, id, options) 
       throw new Error('Invalid tool')
   }
 
-  return { x1, y1, x2, y2, roughElement, tool, id, ...(polygonOptions as any) }
+  return { tool, x1, y1, x2, y2, roughElement, id, ...(polygonOptions as any) }
 }
 
 export const drawElement = (roughCanvas: RoughCanvas, context: CanvasRenderingContext2D, element: any) => {
@@ -120,6 +120,7 @@ export const drawElement = (roughCanvas: RoughCanvas, context: CanvasRenderingCo
     case 'text':
       context.font = '24px SourceSansPro'
       context.textBaseline = 'top'
+      context.fillStyle = element.stroke
       context.fillText(element.text, element.x1, element.y1)
       break
     default:

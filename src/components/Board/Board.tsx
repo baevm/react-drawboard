@@ -21,44 +21,34 @@ const Board = () => {
 
   const canvasScale = window.devicePixelRatio
 
+  function getCanvas() {
+    const canvas = canvasRef.current!
+    return { canvas, context: canvas.getContext('2d')! }
+  }
+
   // ??? uselayouteffect performs better than useEffect
   // for dom operations
   useLayoutEffect(() => {
-    const canvas = canvasRef.current
-    const ctx = canvas?.getContext('2d')
-    ctx?.clearRect(0, 0, canvas!.width, canvas!.height)
+    const { canvas, context } = getCanvas()
+    context.clearRect(0, 0, canvas.width, canvas.height)
     const roughCanvas = rough.canvas(canvas!)
 
     for (const element of drawings) {
-      //BUG: should return so when writing new text
-      // is not overlaping with old
       if (action === 'writing' && selectedElement?.id === element.id) {
-        return
+        continue
       }
 
-      drawElement(roughCanvas, ctx!, element)
+      drawElement(roughCanvas, context, element)
     }
-  }, [drawings, width, height, selectedElement])
+  }, [drawings, width, height, selectedElement, action])
 
-  //BUG: fires on blur on textarea mount
   useEffect(() => {
-    const textArea = textAreaRef.current
     if (action === 'writing') {
-      /* textArea.focus() */
-      textArea!.value! = selectedElement!.text!
+      textAreaRef.current!.value! = selectedElement!.text!
     }
-  }, [action, selectedElement])
+  }, [action, selectedElement, textAreaRef])
 
-  const updateElement = (
-    x1: number,
-    y1: number,
-    x2: number,
-    y2: number,
-    tool: Tool,
-    index: number,
-    id: string,
-    newOptions?: any
-  ) => {
+  const updateElement: UpdateElement = (x1, y1, x2, y2, tool, index, id, text) => {
     const drawingsCopy = [...drawings] as any
 
     switch (tool) {
@@ -66,14 +56,13 @@ const Board = () => {
         drawingsCopy[index].points = [...drawingsCopy[index].points, { x: x2, y: y2 }]
         break
       case 'text':
-        const canvas = canvasRef.current
-        const ctx = canvas?.getContext('2d')
-        const width = ctx!.measureText(newOptions.text).width
+        const { context } = getCanvas()
+        const width = context!.measureText(text).width
         const height = 24
 
         drawingsCopy[index] = {
           ...createElement(x1, y1, x1 + width, y1 + height, tool, id, options),
-          text: newOptions.text,
+          text,
         }
         break
       default:
@@ -97,15 +86,7 @@ const Board = () => {
 
     const isEraser = tool === 'eraser'
     const isSelect = tool === 'select'
-    const isDraw =
-      tool === 'pen' ||
-      tool === 'arrow' ||
-      tool === 'circle' ||
-      tool === 'line' ||
-      tool === 'triangle' ||
-      tool === 'rectangle' ||
-      tool === 'rhombus' ||
-      tool === 'text'
+    const isDraw = isDrawableTool(tool)
 
     if (isEraser) {
       const element = getElementAtCoords(clientX, clientY, drawings)
@@ -149,6 +130,7 @@ const Board = () => {
 
       setDrawings([...drawings, newElement])
       setSelectedElement(newElement)
+
       setAction(tool === 'text' ? 'writing' : 'drawing')
       return
     }
@@ -163,7 +145,8 @@ const Board = () => {
     clientY = clientY * canvasScale
 
     const isDrawing = action === 'drawing'
-    const isMoving = action === 'moving'
+    const isMovingPen = action === 'moving' && selectedElement?.tool === 'pen'
+    const isMovingPolygon = action === 'moving' && isPolygon(selectedElement?.tool)
     const isResizing = action === 'resizing'
 
     switch (tool) {
@@ -193,32 +176,33 @@ const Board = () => {
       return
     }
 
-    if (isMoving) {
-      if (selectedElement?.tool === 'pen') {
-        const newPoints = selectedElement.points.map((point: any, index: number) => ({
-          x: clientX - selectedElement.offsetsX![index],
-          y: clientY - selectedElement.offsetsY![index],
-        }))
-        const drawingsCopy = [...drawings] as any
-        const index = getIndexOfElement(selectedElement.id, drawings)
-        drawingsCopy[index] = {
-          ...drawingsCopy[index],
-          points: newPoints,
-        }
-        setDrawings(drawingsCopy)
-      } else {
-        const { id, x1, x2, y1, y2, tool, offsetOfClickX, offsetOfClickY } = selectedElement as any
-
-        const index = getIndexOfElement(id, drawings)
-        const width = x2 - x1
-        const height = y2 - y1
-        const newX = clientX - offsetOfClickX
-        const newY = clientY - offsetOfClickY
-
-        const newOptions = tool === 'text' ? { text: selectedElement!.text } : {}
-
-        updateElement(newX, newY, newX + width, newY + height, tool, index, id, newOptions)
+    if (isMovingPen) {
+      const newPoints = selectedElement.points.map((_: any, idx: number) => ({
+        x: clientX - selectedElement.offsetsX![idx],
+        y: clientY - selectedElement.offsetsY![idx],
+      }))
+      const drawingsCopy = [...drawings] as any
+      const index = getIndexOfElement(selectedElement.id, drawings)
+      drawingsCopy[index] = {
+        ...drawingsCopy[index],
+        points: newPoints,
       }
+      setDrawings(drawingsCopy)
+      return
+    }
+
+    if (isMovingPolygon) {
+      const { id, x1, x2, y1, y2, tool, offsetOfClickX, offsetOfClickY } = selectedElement as any
+
+      const index = getIndexOfElement(id, drawings)
+      const width = x2 - x1
+      const height = y2 - y1
+      const newX = clientX - offsetOfClickX
+      const newY = clientY - offsetOfClickY
+
+      const text = tool === 'text' ? selectedElement!.text : null
+
+      updateElement(newX, newY, newX + width, newY + height, tool, index, id, text)
       return
     }
 
@@ -258,7 +242,7 @@ const Board = () => {
       const index = drawings.findIndex((element) => element.id === id)
       const element = getElementById(id, drawings) as PolygonDrawing
 
-      if ((action === 'drawing' || action === 'resizing') && isAdjustable(element.tool)) {
+      if ((action === 'drawing' || action === 'resizing') && isPolygon(element.tool)) {
         const { x1, y1, x2, y2 } = adjustDrawingCoordinates(element)
         updateElement(x1, y1, x2, y2, element!.tool, index, id)
       }
@@ -275,15 +259,30 @@ const Board = () => {
 
   const handleBlur = (e: any) => {
     const { id, x1, y1, tool } = selectedElement as any
+    const text = e.target.value
     setAction('none')
     setSelectedElement(null)
 
-    const index = drawings.findIndex((element) => element.id === id)
-    updateElement(x1, y1, null as any, null as any, tool, index, id, { text: e.target.value })
+    const index = getIndexOfElement(id, drawings)
+    updateElement(x1, y1, null as any, null as any, tool, index, id, text)
   }
 
   return (
     <div className={styles.board_container}>
+      <canvas
+        ref={canvasRef}
+        className={styles.board_canvas}
+        onPointerDown={handleMouseDown}
+        onPointerMove={handleMouseMove}
+        onPointerUp={handleMouseUp}
+        width={width * canvasScale}
+        height={height * canvasScale}
+        style={{
+          width,
+          height,
+        }}
+      />
+
       {action === 'writing' ? (
         <textarea
           ref={textAreaRef}
@@ -303,19 +302,6 @@ const Board = () => {
           }}
         />
       ) : null}
-      <canvas
-        ref={canvasRef}
-        className={styles.board_canvas}
-        onPointerDown={handleMouseDown}
-        onPointerMove={handleMouseMove}
-        onPointerUp={handleMouseUp}
-        width={width * canvasScale}
-        height={height * canvasScale}
-        style={{
-          width,
-          height,
-        }}
-      />
     </div>
   )
 }
@@ -329,9 +315,32 @@ type DrawingWithOffset = Drawing & {
   offsetsY?: any[]
 }
 
-const isAdjustable = (tool: Tool) => {
+type UpdateElement = (
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+  tool: Tool,
+  index: number,
+  id: string,
+  text?: any
+) => void
+
+const isDrawableTool = (tool: Tool) => {
   return (
     tool === 'pen' ||
+    tool === 'arrow' ||
+    tool === 'circle' ||
+    tool === 'line' ||
+    tool === 'triangle' ||
+    tool === 'rectangle' ||
+    tool === 'rhombus' ||
+    tool === 'text'
+  )
+}
+
+const isPolygon = (tool: Tool | undefined) => {
+  return (
     tool === 'arrow' ||
     tool === 'circle' ||
     tool === 'line' ||

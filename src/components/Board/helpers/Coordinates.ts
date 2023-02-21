@@ -1,4 +1,4 @@
-import { Drawings, PointPosition, PolygonDrawing } from '@/types';
+import { Drawings, PointPosition, PolygonDrawing } from '@/types'
 
 export const resizedCoordiantes = (
   clientX: number,
