@@ -95,7 +95,18 @@ export const createElement: CreateElement = (x1, y1, x2, y2, tool, id, options) 
       break
 
     case 'text':
-      return { tool, x1, y1, x2, y2, id, text: '', stroke: options.lineColor, fontFamily: '', fontSize: '' }
+      return {
+        tool,
+        x1,
+        y1,
+        x2,
+        y2,
+        id,
+        text: '',
+        stroke: options.lineColor,
+        fontFamily: '',
+        fontSize: options.fontSize,
+      }
 
     case 'move':
       throw new Error('tool not implemented')
@@ -118,7 +129,8 @@ export const drawElement = (roughCanvas: RoughCanvas, context: CanvasRenderingCo
       context.fill(new Path2D(stroke))
       break
     case 'text':
-      context.font = '24px SourceSansPro'
+      const fontSize = `${element.fontSize}px`
+      context.font = `${fontSize} SourceSansPro`
       context.textBaseline = 'top'
       context.fillStyle = element.stroke
       context.fillText(element.text, element.x1, element.y1)

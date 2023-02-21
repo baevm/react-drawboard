@@ -12,7 +12,7 @@ type Props = {
   onChange: (color: HEX) => void
 }
 
-const ColorPicker = ({ label, onChange, initialColor }: Props) => {
+export const ColorPicker = ({ label, onChange, initialColor }: Props) => {
   const colorPickerRef = useRef<HTMLDivElement | null>(null)
   const [isColorPickerOpen, setIsColorPickerOpen] = useState(false)
   const [color, setColor] = useState(initialColor)
@@ -47,5 +47,3 @@ const ColorPicker = ({ label, onChange, initialColor }: Props) => {
     </>
   )
 }
-
-export default ColorPicker

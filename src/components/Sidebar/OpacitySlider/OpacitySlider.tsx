@@ -15,7 +15,7 @@ export const OpacitySlider = () => {
 
   return (
     <>
-      <ItemLabel>Line opacity</ItemLabel>
+      <ItemLabel>Stroke opacity</ItemLabel>
       <Slider.Root
         className={styles.SliderRoot}
         onValueChange={handleChange}
@@ -23,7 +23,7 @@ export const OpacitySlider = () => {
         min={0.2}
         max={1}
         step={0.2}
-        aria-label='Line opacity'>
+        aria-label='Stroke opacity'>
         <Slider.Track className={styles.SliderTrack}>
           <Slider.Range className={styles.SliderRange} />
         </Slider.Track>

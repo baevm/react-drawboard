@@ -1,11 +1,13 @@
 import { useTools } from '@/hooks/useTools'
 import { HEX } from '@/types'
 import { IoMenu } from 'react-icons/io5'
-import ColorPicker from './ColorPicker/ColorPicker'
+import { ColorPicker } from './ColorPicker'
 import { OpacitySlider } from './OpacitySlider'
 import styles from './Sidebar.module.css'
 import WidthButtonGroup from './ButtonGroup/WidthButtonGroup'
 import BgFillButtonGroup from './ButtonGroup/BgFillButtonGroup'
+import FontSizeButtonGroup from './ButtonGroup/FontSizeButtonGroup'
+import FontFamilyButtonGroup from './ButtonGroup/FontFamilyButtonGroup'
 
 const Sidebar = () => {
   const { tool, options, setOptions } = useTools((state) => ({
@@ -14,7 +16,9 @@ const Sidebar = () => {
     setOptions: state.setOptions,
   }))
 
-  const isBgPickerVisible = tool === 'circle' || tool === 'rectangle' || tool === 'triangle' || tool === 'rhombus'
+  const isPolygonSettings = tool === 'circle' || tool === 'rectangle' || tool === 'triangle' || tool === 'rhombus'
+  const isLineWidth = isPolygonSettings || tool === 'pen'
+  const isTextSettings = tool === 'text'
   const isSidebarVisible = tool !== 'move' && tool !== 'select' && tool !== 'eraser'
 
   const handleLineColorChange = (color: HEX) => {
@@ -40,14 +44,27 @@ const Sidebar = () => {
       <div className={styles.sidebar_container}>
         <div className={styles.sidebar_wrapper}>
           <div className={styles.settings_item}>
-            <ColorPicker label='Line color' initialColor={options.lineColor} onChange={handleLineColorChange} />
+            <ColorPicker label='Stroke' initialColor={options.lineColor} onChange={handleLineColorChange} />
           </div>
 
-          <div className={styles.settings_item}>
-            <WidthButtonGroup />
-          </div>
+          {isLineWidth && (
+            <div className={styles.settings_item}>
+              <WidthButtonGroup />
+            </div>
+          )}
 
-          {isBgPickerVisible && (
+          {isTextSettings && (
+            <>
+              <div className={styles.settings_item}>
+                <FontSizeButtonGroup />
+              </div>
+              <div className={styles.settings_item}>
+                <FontFamilyButtonGroup />
+              </div>
+            </>
+          )}
+
+          {isPolygonSettings && (
             <>
               <div className={styles.settings_item}>
                 <BgFillButtonGroup />

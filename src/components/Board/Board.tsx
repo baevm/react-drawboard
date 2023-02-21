@@ -54,17 +54,18 @@ const Board = () => {
     switch (tool) {
       case 'pen':
         drawingsCopy[index].points = [...drawingsCopy[index].points, { x: x2, y: y2 }]
+
         break
       case 'text':
         const { context } = getCanvas()
         const width = context!.measureText(text).width
-        const height = 24
-
+        const height = +options.fontSize
         drawingsCopy[index] = {
           ...createElement(x1, y1, x1 + width, y1 + height, tool, id, options),
           text,
         }
         break
+
       default:
         drawingsCopy[index] = createElement(x1, y1, x2, y2, tool, id, options)
         break
@@ -346,6 +347,7 @@ const isPolygon = (tool: Tool | undefined) => {
     tool === 'line' ||
     tool === 'triangle' ||
     tool === 'rectangle' ||
-    tool === 'rhombus'
+    tool === 'rhombus' ||
+    tool === 'text'
   )
 }
