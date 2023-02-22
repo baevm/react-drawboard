@@ -24,5 +24,5 @@ export const useResizeObserver = () => {
     return () => resizeObserver.disconnect()
   }, [])
 
-  return { width, height }
+  return { width, height, setWidth, setHeight }
 }

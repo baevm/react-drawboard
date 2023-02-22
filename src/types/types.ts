@@ -16,20 +16,21 @@ export type PointPosition =
 
 export type Tool =
   | 'select'
+  | 'pan'
+  | 'pen'
   | 'line'
   | 'circle'
   | 'rectangle'
-  | 'pen'
-  | 'text'
-  | 'eraser'
-  | 'move'
-  | 'image'
   | 'triangle'
-  | 'arrow'
   | 'rhombus'
+  | 'arrow'
+  | 'text'
+  | 'image'
+  | 'eraser'
+
 
 export type HEX = `#${string}`
-export type Action = 'drawing' | 'erasing' | 'moving' | 'selecting' | 'resizing' | 'writing' | 'none'
+export type Action = 'drawing' | 'erasing' | 'moving' | 'selecting' | 'resizing' | 'writing' | 'panning' | 'none'
 export type BackgroundFillStyle = 'solid' | 'hachure' | 'none'
 export type LineWidth = '1' | '3' | '5'
 export type FontFamily = 'default' | 'handDrawn'

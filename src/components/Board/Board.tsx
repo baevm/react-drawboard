@@ -15,19 +15,18 @@ const Board = () => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null)
   const [action, setAction] = useState<Action>('none')
   const [selectedElement, setSelectedElement] = useState<DrawingWithOffset | null>(null)
-  const { tool, options } = useTools((state) => ({ tool: state.tool, options: state.options }))
+  const { tool, options } = useTools((state) => ({
+    tool: state.tool,
+    options: state.options,
+  }))
   const { drawings, setDrawings, syncStorageDrawings } = useDrawnings()
   const { width, height } = useResizeObserver()
+  const [panStart, setPanStart] = useState({ x: 0, y: 0 })
+  const [panEnd, setPanEnd] = useState({ x: 0, y: 0 })
 
   const canvasScale = window.devicePixelRatio
 
-  function getCanvas() {
-    const canvas = canvasRef.current!
-    return { canvas, context: canvas.getContext('2d')! }
-  }
-
-  // ??? uselayouteffect performs better than useEffect
-  // for dom operations
+  // rerender canvas
   useLayoutEffect(() => {
     const { canvas, context } = getCanvas()
     context.clearRect(0, 0, canvas.width, canvas.height)
@@ -40,13 +39,25 @@ const Board = () => {
 
       drawElement(roughCanvas, context, element)
     }
-  }, [drawings, width, height, selectedElement, action])
+  }, [drawings, width, height, selectedElement, action, panEnd])
+
+  // pan canvas
+  useLayoutEffect(() => {
+    const { context } = getCanvas()
+    context.translate(panEnd.x - panStart.x, panEnd.y - panStart.y)
+    setPanStart({ ...panEnd })
+  }, [panEnd])
 
   useEffect(() => {
     if (action === 'writing') {
       textAreaRef.current!.value! = selectedElement!.text!
     }
   }, [action, selectedElement, textAreaRef])
+
+  function getCanvas() {
+    const canvas = canvasRef.current!
+    return { canvas, context: canvas.getContext('2d')! }
+  }
 
   const updateElement: UpdateElement = (x1, y1, x2, y2, tool, index, id, text) => {
     const drawingsCopy = [...drawings] as any
@@ -76,6 +87,16 @@ const Board = () => {
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (action === 'writing') {
+      return
+    }
+
+    if (e.button === 1) {
+      setAction('panning')
+      const { canvas } = getCanvas()
+      const panX = e.clientX - canvas.offsetLeft
+      const panY = e.clientY - canvas.offsetTop
+      console.log({ panX, panY })
+      setPanStart({ x: panX, y: panY })
       return
     }
 
@@ -149,6 +170,7 @@ const Board = () => {
     const isMovingPen = action === 'moving' && selectedElement?.tool === 'pen'
     const isMovingPolygon = action === 'moving' && isPolygon(selectedElement?.tool)
     const isResizing = action === 'resizing'
+    const isPanning = action === 'panning'
 
     switch (tool) {
       case 'select':
@@ -158,7 +180,7 @@ const Board = () => {
       case 'eraser':
         style.cursor = eraserIcon
         break
-      case 'move':
+      case 'pan':
         style.cursor = 'grab'
         break
       case 'text':
@@ -221,6 +243,15 @@ const Board = () => {
       updateElement(x1, y1, x2, y2, tool, index, id)
       return
     }
+
+    if (isPanning) {
+      const { canvas } = getCanvas()
+      const newW = e.clientX - canvas.offsetLeft
+      const newH = e.clientY - canvas.offsetTop
+
+      setPanEnd({ x: newW, y: newH })
+      return
+    }
   }
 
   // FIXME: TRIANGLE WRONG COORDS AFTER ADJUST
@@ -268,6 +299,11 @@ const Board = () => {
     updateElement(x1, y1, null as any, null as any, tool, index, id, text)
   }
 
+  const handleContextMenu = (e: any) => {
+    e.preventDefault()
+  }
+
+  // TODO: infinite canvas move
   return (
     <div className={styles.board_container}>
       <canvas
@@ -276,6 +312,7 @@ const Board = () => {
         onPointerDown={handleMouseDown}
         onPointerMove={handleMouseMove}
         onPointerUp={handleMouseUp}
+        onContextMenu={handleContextMenu}
         width={width * canvasScale}
         height={height * canvasScale}
         style={{
@@ -350,4 +387,12 @@ const isPolygon = (tool: Tool | undefined) => {
     tool === 'rhombus' ||
     tool === 'text'
   )
+}
+
+function getEventLocation(e: any) {
+  if (e.touches && e.touches.length == 1) {
+    return { x: e.touches[0].clientX, y: e.touches[0].clientY }
+  } else {
+    return { x: e.clientX, y: e.clientY }
+  }
 }

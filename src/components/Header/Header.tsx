@@ -1,4 +1,3 @@
-import { useDrawnings } from '@/hooks/useDrawings'
 import { useTools } from '@/hooks/useTools'
 import { Tool } from '@/types'
 import * as RadioGroup from '@radix-ui/react-radio-group'
@@ -21,21 +20,7 @@ import { RiEraserLine } from 'react-icons/ri'
 import { ClearCanvasButton } from './ClearCanvasButton'
 import styles from './Header.module.css'
 
-const TOOLS: { value: Tool; label: string; icon: React.ReactNode }[] = [
-  { value: 'select', label: 'Select', icon: <FiMousePointer /> },
-  { value: 'move', label: 'Move', icon: <IoHandRightOutline /> },
-  { value: 'pen', label: 'Pen', icon: <IoBrushOutline /> },
-  { value: 'line', label: 'Line', icon: <IoRemove /> },
-  { value: 'circle', label: 'Circle', icon: <IoEllipseOutline /> },
-  { value: 'rectangle', label: 'Rectangle', icon: <IoTabletLandscapeOutline /> },
-  { value: 'triangle', label: 'Triangle', icon: <IoTriangleOutline /> },
-  { value: 'rhombus', label: 'Rhombus', icon: <BsDiamond /> },
-  { value: 'arrow', label: 'Arrow', icon: <IoArrowForward /> },
-  { value: 'text', label: 'Text', icon: <IoText /> },
-  { value: 'image', label: 'Image', icon: <IoImageOutline /> },
-  { value: 'eraser', label: 'Eraser', icon: <RiEraserLine /> },
-]
-
+// TODO: tool label tooltip
 const Header = () => {
   const { tool, setTool } = useTools((state) => ({
     setTool: state.setTool,
@@ -80,3 +65,18 @@ const Header = () => {
 }
 
 export default Header
+
+const TOOLS: { value: Tool; label: string; icon: React.ReactNode }[] = [
+  { value: 'select', label: 'Select', icon: <FiMousePointer /> },
+  { value: 'pan', label: 'Move', icon: <IoHandRightOutline /> },
+  { value: 'pen', label: 'Pen', icon: <IoBrushOutline /> },
+  { value: 'line', label: 'Line', icon: <IoRemove /> },
+  { value: 'circle', label: 'Circle', icon: <IoEllipseOutline /> },
+  { value: 'rectangle', label: 'Rectangle', icon: <IoTabletLandscapeOutline /> },
+  { value: 'triangle', label: 'Triangle', icon: <IoTriangleOutline /> },
+  { value: 'rhombus', label: 'Rhombus', icon: <BsDiamond /> },
+  { value: 'arrow', label: 'Arrow', icon: <IoArrowForward /> },
+  { value: 'text', label: 'Text', icon: <IoText /> },
+  { value: 'image', label: 'Image', icon: <IoImageOutline /> },
+  { value: 'eraser', label: 'Eraser', icon: <RiEraserLine /> },
+]
