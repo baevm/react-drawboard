@@ -108,11 +108,11 @@ export const createElement: CreateElement = (x1, y1, x2, y2, tool, id, options) 
         fontSize: options.fontSize,
       }
 
-    case 'move':
-      throw new Error('tool not implemented')
+    case 'pan':
+      throw new Error(`tool not implemented: ${tool}`)
 
     default:
-      throw new Error('Invalid tool')
+      throw new Error(`Invalid tool: ${tool}`)
   }
 
   return { tool, x1, y1, x2, y2, roughElement, id, ...(polygonOptions as any) }
