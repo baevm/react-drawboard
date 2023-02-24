@@ -1,8 +1,11 @@
+import { DEVICE_PIXEL_RATIO } from '@/constants'
 import { useDrawnings } from '@/hooks/useDrawings'
 import { useResizeObserver } from '@/hooks/useResizeObserver'
 import { useTools } from '@/hooks/useTools'
-import { Action, Drawing, PenDrawing, PolygonDrawing, Tool } from '@/types'
+import { useZoom } from '@/hooks/useZoom'
+import { Action, Drawing, PenDrawing, Point, PolygonDrawing, Tool } from '@/types'
 import { generateId } from '@/utils/generateId'
+import { getCanvas } from '@/utils/getCanvas'
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import rough from 'roughjs'
 import styles from './Board.module.css'
@@ -17,16 +20,14 @@ const Board = () => {
     tool: state.tool,
     options: state.options,
   }))
-  const { drawings, setDrawings, syncStorageDrawings } = useDrawnings()
   const { width, height } = useResizeObserver()
+  const { drawings, setDrawings, syncStorageDrawings } = useDrawnings()
+  const { canvasScale, viewportTopLeft, handleZoom, setViewportTopLeft } = useZoom()
 
   const [action, setAction] = useState<Action>('none')
   const [selectedElement, setSelectedElement] = useState<DrawingWithOffset | null>(null)
 
-  const [canvasScale, setCanvasScale] = useState(window.devicePixelRatio)
   const [offset, setOffset] = useState({ x: 0, y: 0 })
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
-  const [viewportTopLeft, setViewportTopLeft] = useState({ x: 0, y: 0 })
   const isResetRef = useRef(false)
   const lastMousePosRef = useRef({ x: 0, y: 0 })
   const lastOffsetRef = useRef({ x: 0, y: 0 })
@@ -56,7 +57,8 @@ const Board = () => {
       const { context } = getCanvas()
       const offsetDiff = scalePoint(diffPoints(offset, lastOffsetRef.current), canvasScale)
       context.translate(offsetDiff.x, offsetDiff.y)
-      setViewportTopLeft((prevVal) => diffPoints(prevVal, offsetDiff))
+      const diffPointCoords = diffPoints(viewportTopLeft, offsetDiff)
+      setViewportTopLeft(diffPointCoords)
       isResetRef.current = false
     }
   }, [offset, canvasScale])
@@ -73,44 +75,13 @@ const Board = () => {
     }
   }, [action, selectedElement, textAreaRef])
 
-  // mouse move event listener
-  useEffect(() => {
-    const canvasElem = canvasRef.current
-    if (canvasElem === null) {
-      return
-    }
-
-    function handleUpdateMouse(event: MouseEvent) {
-      event.preventDefault()
-      if (canvasRef.current) {
-        const viewportMousePos = { x: event.clientX, y: event.clientY }
-        const topLeftCanvasPos = {
-          x: canvasRef.current.offsetLeft,
-          y: canvasRef.current.offsetTop,
-        }
-        setMousePos(diffPoints(viewportMousePos, topLeftCanvasPos))
-      }
-    }
-
-    canvasElem.addEventListener('mousemove', handleUpdateMouse)
-    canvasElem.addEventListener('wheel', handleUpdateMouse)
-    return () => {
-      canvasElem.removeEventListener('mousemove', handleUpdateMouse)
-      canvasElem.removeEventListener('wheel', handleUpdateMouse)
-    }
-  }, [])
-
-  // get canvas and context from ref
-  function getCanvas() {
-    const canvas = canvasRef.current!
-    return { canvas, context: canvas.getContext('2d')! }
-  }
 
   // scale to high dpi
   function getCoords(x: number, y: number) {
     return { clientX: x * DEVICE_PIXEL_RATIO + offset.x, clientY: y * DEVICE_PIXEL_RATIO + offset.y }
   }
 
+  
   // update element when drawing
   const updateElement: UpdateElement = (x1, y1, x2, y2, tool, index, id, text) => {
     const drawingsCopy = [...drawings] as any
@@ -356,37 +327,18 @@ const Board = () => {
     e.preventDefault()
   }
 
-  const handleWheel = (e: React.WheelEvent) => {
-    const { context } = getCanvas()
-
-    const zoom = 1 - e.deltaY / ZOOM_SENSITIVITY
-
-    const viewportTopLeftDelta = {
-      x: (mousePos.x / canvasScale) * (1 - 1 / zoom),
-      y: (mousePos.y / canvasScale) * (1 - 1 / zoom),
-    }
-    const newViewportTopLeft = addPoints(viewportTopLeft, viewportTopLeftDelta)
-
-    context.translate(viewportTopLeft.x, viewportTopLeft.y)
-    context.scale(zoom, zoom)
-    context.translate(-newViewportTopLeft.x, -newViewportTopLeft.y)
-
-    setViewportTopLeft(newViewportTopLeft)
-    setCanvasScale(canvasScale * zoom)
-    isResetRef.current = false
-  }
-
   // TODO: infinite canvas move
   return (
     <div className={styles.board_container}>
       <canvas
+        id='canvas'
         ref={canvasRef}
         className={styles.board_canvas}
         onPointerDown={handleMouseDown}
         onPointerMove={handleMouseMove}
         onPointerUp={handleMouseUp}
         onContextMenu={handleContextMenu}
-        onWheel={handleWheel}
+        onWheel={(e) => handleZoom(e.deltaY, 'wheel')}
         width={width * DEVICE_PIXEL_RATIO}
         height={height * DEVICE_PIXEL_RATIO}
         style={{
@@ -437,14 +389,6 @@ type UpdateElement = (
   id: string,
   text?: any
 ) => void
-
-type Point = {
-  x: number
-  y: number
-}
-
-const ZOOM_SENSITIVITY = 500
-const DEVICE_PIXEL_RATIO = window.devicePixelRatio
 
 const isDrawableTool = (tool: Tool) => {
   return (
