@@ -1,27 +1,27 @@
 import { useDrawnings } from '@/hooks/useDrawings'
+import { useZoom } from '@/hooks/useZoom'
 import { IoArrowRedoOutline, IoArrowUndoOutline } from 'react-icons/io5'
 import { RxZoomIn, RxZoomOut } from 'react-icons/rx'
 import styles from './Footer.module.css'
 
 const Footer = () => {
   const { undoDraw, redoDraw } = useDrawnings()
+  const { canvasScale, handleZoom, resetZoom } = useZoom()
 
-  const handleUndo = () => {
-    undoDraw()
+  const handleZoomIn = () => {
+    handleZoom(-100, 'click')
   }
-  const handleRedo = () => {
-    redoDraw()
+  const handleZoomOut = () => {
+    handleZoom(100, 'click')
   }
 
-  const handleZoomIn = () => {}
-  const handleZoomOut = () => {}
   return (
     <div className={styles.footer_container}>
       <div className={styles.ToggleGroup} role='group'>
-        <button onClick={handleUndo} className={styles.ToggleGroupItem}>
+        <button onClick={undoDraw} className={styles.ToggleGroupItem}>
           <IoArrowUndoOutline />
         </button>
-        <button onClick={handleRedo} className={styles.ToggleGroupItem}>
+        <button onClick={redoDraw} className={styles.ToggleGroupItem}>
           <IoArrowRedoOutline />
         </button>
       </div>
@@ -29,7 +29,9 @@ const Footer = () => {
         <button onClick={handleZoomOut} className={styles.ToggleGroupItem}>
           <RxZoomOut />
         </button>
-        <button className={styles.ToggleGroupItem}>100%</button>
+        <button className={styles.ToggleGroupItem} onClick={resetZoom}>
+          {Math.floor(100 * canvasScale)}%
+        </button>
         <button onClick={handleZoomIn} className={styles.ToggleGroupItem}>
           <RxZoomIn />
         </button>

@@ -19,7 +19,7 @@ const Sidebar = () => {
   const isPolygonSettings = tool === 'circle' || tool === 'rectangle' || tool === 'triangle' || tool === 'rhombus'
   const isLineWidth = isPolygonSettings || tool === 'pen'
   const isTextSettings = tool === 'text'
-  const isSidebarVisible = tool !== 'move' && tool !== 'select' && tool !== 'eraser'
+  const isSidebarVisible = tool !== 'pan' && tool !== 'select' && tool !== 'eraser'
 
   const handleLineColorChange = (color: HEX) => {
     setOptions({ lineColor: color })

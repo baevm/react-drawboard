@@ -46,6 +46,11 @@ export type DrawingOptions = {
   fontSize: FontSize
 }
 
+export type Point = {
+  x: number
+  y: number
+}
+
 type BaseDrawing = DrawingOptions & {
   id: string
 }
@@ -74,10 +79,8 @@ export type PenDrawing = BaseDrawing & {
 }
 
 export type Drawing = StrictUnion<TextDrawing | PolygonDrawing | PenDrawing>
-
 export type Drawings = Drawing[]
 
 type UnionKeys<T> = T extends T ? keyof T : never
 type StrictUnionHelper<T, TAll> = T extends any ? T & Partial<Record<Exclude<UnionKeys<TAll>, keyof T>, never>> : never
-
 type StrictUnion<T> = StrictUnionHelper<T, T>

@@ -1,8 +1,11 @@
+import { DEVICE_PIXEL_RATIO } from '@/constants'
 import { useDrawnings } from '@/hooks/useDrawings'
 import { useResizeObserver } from '@/hooks/useResizeObserver'
 import { useTools } from '@/hooks/useTools'
-import { Action, Drawing, PenDrawing, PolygonDrawing, Tool } from '@/types'
+import { useZoom } from '@/hooks/useZoom'
+import { Action, Drawing, PenDrawing, Point, PolygonDrawing, Tool } from '@/types'
 import { generateId } from '@/utils/generateId'
+import { getCanvas } from '@/utils/getCanvas'
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import rough from 'roughjs'
 import styles from './Board.module.css'
@@ -13,23 +16,30 @@ import { createElement, drawElement, getElementById, getIndexOfElement } from '.
 const Board = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const textAreaRef = useRef<HTMLTextAreaElement>(null)
-  const [action, setAction] = useState<Action>('none')
-  const [selectedElement, setSelectedElement] = useState<DrawingWithOffset | null>(null)
   const { tool, options } = useTools((state) => ({
     tool: state.tool,
     options: state.options,
   }))
-  const { drawings, setDrawings, syncStorageDrawings } = useDrawnings()
   const { width, height } = useResizeObserver()
-  const [panStart, setPanStart] = useState({ x: 0, y: 0 })
-  const [panEnd, setPanEnd] = useState({ x: 0, y: 0 })
+  const { drawings, setDrawings, syncStorageDrawings } = useDrawnings()
+  const { canvasScale, viewportTopLeft, handleZoom, setViewportTopLeft } = useZoom()
 
-  const canvasScale = window.devicePixelRatio
+  const [action, setAction] = useState<Action>('none')
+  const [selectedElement, setSelectedElement] = useState<DrawingWithOffset | null>(null)
 
-  // rerender canvas
+  const [offset, setOffset] = useState({ x: 0, y: 0 })
+  const isResetRef = useRef(false)
+  const lastMousePosRef = useRef({ x: 0, y: 0 })
+  const lastOffsetRef = useRef({ x: 0, y: 0 })
+
+  // draw
   useLayoutEffect(() => {
     const { canvas, context } = getCanvas()
-    context.clearRect(0, 0, canvas.width, canvas.height)
+
+    const storedTransform = context.getTransform()
+    context.canvas.width = context.canvas.width
+    context.setTransform(storedTransform)
+
     const roughCanvas = rough.canvas(canvas!)
 
     for (const element of drawings) {
@@ -39,26 +49,40 @@ const Board = () => {
 
       drawElement(roughCanvas, context, element)
     }
-  }, [drawings, width, height, selectedElement, action, panEnd])
+  }, [drawings, width, height, selectedElement, action, canvasScale, offset, viewportTopLeft])
 
-  // pan canvas
+  // pan canvas when scale changes
   useLayoutEffect(() => {
-    const { context } = getCanvas()
-    context.translate(panEnd.x - panStart.x, panEnd.y - panStart.y)
-    setPanStart({ ...panEnd })
-  }, [panEnd])
+    if (lastOffsetRef.current) {
+      const { context } = getCanvas()
+      const offsetDiff = scalePoint(diffPoints(offset, lastOffsetRef.current), canvasScale)
+      context.translate(offsetDiff.x, offsetDiff.y)
+      const diffPointCoords = diffPoints(viewportTopLeft, offsetDiff)
+      setViewportTopLeft(diffPointCoords)
+      isResetRef.current = false
+    }
+  }, [offset, canvasScale])
 
+  // update last offset
+  useEffect(() => {
+    lastOffsetRef.current = offset
+  }, [offset])
+
+  // set value in textarea on open
   useEffect(() => {
     if (action === 'writing') {
       textAreaRef.current!.value! = selectedElement!.text!
     }
   }, [action, selectedElement, textAreaRef])
 
-  function getCanvas() {
-    const canvas = canvasRef.current!
-    return { canvas, context: canvas.getContext('2d')! }
+
+  // scale to high dpi
+  function getCoords(x: number, y: number) {
+    return { clientX: x * DEVICE_PIXEL_RATIO + offset.x, clientY: y * DEVICE_PIXEL_RATIO + offset.y }
   }
 
+  
+  // update element when drawing
   const updateElement: UpdateElement = (x1, y1, x2, y2, tool, index, id, text) => {
     const drawingsCopy = [...drawings] as any
 
@@ -90,25 +114,18 @@ const Board = () => {
       return
     }
 
-    if (e.button === 1) {
-      setAction('panning')
-      const { canvas } = getCanvas()
-      const panX = e.clientX - canvas.offsetLeft
-      const panY = e.clientY - canvas.offsetTop
-      console.log({ panX, panY })
-      setPanStart({ x: panX, y: panY })
-      return
-    }
-
-    let { clientX, clientY } = e
-
-    // scale to high dpi
-    clientX = clientX * canvasScale
-    clientY = clientY * canvasScale
-
     const isEraser = tool === 'eraser'
     const isSelect = tool === 'select'
+    const isPan = tool === 'pan'
     const isDraw = isDrawableTool(tool)
+
+    const { clientX, clientY } = getCoords(e.clientX, e.clientY)
+
+    if (e.button === 1 || isPan) {
+      lastMousePosRef.current = { x: e.pageX, y: e.pageY }
+      setAction('panning')
+      return
+    }
 
     if (isEraser) {
       const element = getElementAtCoords(clientX, clientY, drawings)
@@ -148,7 +165,15 @@ const Board = () => {
 
     if (isDraw) {
       const elementId = generateId()
-      const newElement = createElement(clientX, clientY, clientX, clientY, tool, elementId, options) as any
+      const newElement = createElement(
+        clientX + offset.x,
+        clientY + offset.y,
+        clientX + offset.x,
+        clientY + offset.y,
+        tool,
+        elementId,
+        options
+      ) as any
 
       setDrawings([...drawings, newElement])
       setSelectedElement(newElement)
@@ -159,12 +184,8 @@ const Board = () => {
   }
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    let { clientX, clientY } = e
+    const { clientX, clientY } = getCoords(e.clientX, e.clientY)
     const { style } = e.target as HTMLElement
-
-    // scale to high dpi
-    clientX = clientX * canvasScale
-    clientY = clientY * canvasScale
 
     const isDrawing = action === 'drawing'
     const isMovingPen = action === 'moving' && selectedElement?.tool === 'pen'
@@ -195,7 +216,7 @@ const Board = () => {
       const index = drawings.length - 1
       const { x1, y1, id } = drawings[index] as any
 
-      updateElement(x1, y1, clientX, clientY, tool, index, id)
+      updateElement(x1, y1, clientX + offset.x, clientY + offset.y, tool, index, id)
       return
     }
 
@@ -245,20 +266,23 @@ const Board = () => {
     }
 
     if (isPanning) {
-      const { canvas } = getCanvas()
-      const newW = e.clientX - canvas.offsetLeft
-      const newH = e.clientY - canvas.offsetTop
+      const { context } = getCanvas()
 
-      setPanEnd({ x: newW, y: newH })
+      if (context) {
+        const lastMousePos = lastMousePosRef.current
+        const currentMousePos = { x: e.pageX, y: e.pageY } // use document so can pan off element
+        lastMousePosRef.current = currentMousePos
+
+        const mouseDiff = diffPoints(currentMousePos, lastMousePos)
+        setOffset((prevOffset) => addPoints(prevOffset, mouseDiff))
+      }
       return
     }
   }
 
   // FIXME: TRIANGLE WRONG COORDS AFTER ADJUST
   const handleMouseUp = (e: React.MouseEvent) => {
-    let { clientX, clientY } = e
-    clientX = clientX * canvasScale
-    clientY = clientY * canvasScale
+    const { clientX, clientY } = getCoords(e.clientX, e.clientY)
 
     if (selectedElement) {
       if (
@@ -307,14 +331,16 @@ const Board = () => {
   return (
     <div className={styles.board_container}>
       <canvas
+        id='canvas'
         ref={canvasRef}
         className={styles.board_canvas}
         onPointerDown={handleMouseDown}
         onPointerMove={handleMouseMove}
         onPointerUp={handleMouseUp}
         onContextMenu={handleContextMenu}
-        width={width * canvasScale}
-        height={height * canvasScale}
+        onWheel={(e) => handleZoom(e.deltaY, 'wheel')}
+        width={width * DEVICE_PIXEL_RATIO}
+        height={height * DEVICE_PIXEL_RATIO}
         style={{
           width,
           height,
@@ -387,6 +413,18 @@ const isPolygon = (tool: Tool | undefined) => {
     tool === 'rhombus' ||
     tool === 'text'
   )
+}
+
+function scalePoint(p1: Point, scale: number) {
+  return { x: p1.x / scale, y: p1.y / scale }
+}
+
+function addPoints(p1: Point, p2: Point) {
+  return { x: p1.x + p2.x, y: p1.y + p2.y }
+}
+
+function diffPoints(p1: Point, p2: Point) {
+  return { x: p1.x - p2.x, y: p1.y - p2.y }
 }
 
 function getEventLocation(e: any) {
