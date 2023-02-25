@@ -9,7 +9,14 @@ import { getCanvas } from '@/utils/getCanvas'
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import rough from 'roughjs'
 import styles from './Board.module.css'
-import { adjustDrawingCoordinates, getElementAtCoords, resizedCoordiantes } from './helpers/Coordinates'
+import {
+  addPoints,
+  adjustDrawingCoordinates,
+  diffPoints,
+  getElementAtCoords,
+  resizedCoordiantes,
+  scalePoints,
+} from './helpers/Coordinates'
 import { cursorForPosition, eraserIcon } from './helpers/Cursor'
 import { createElement, drawElement, getElementById, getIndexOfElement } from './helpers/Element'
 
@@ -55,7 +62,7 @@ const Board = () => {
   useLayoutEffect(() => {
     if (lastOffsetRef.current) {
       const { context } = getCanvas()
-      const offsetDiff = scalePoint(diffPoints(offset, lastOffsetRef.current), canvasScale)
+      const offsetDiff = scalePoints(diffPoints(offset, lastOffsetRef.current), canvasScale)
       context.translate(offsetDiff.x, offsetDiff.y)
       const diffPointCoords = diffPoints(viewportTopLeft, offsetDiff)
       setViewportTopLeft(diffPointCoords)
@@ -75,9 +82,9 @@ const Board = () => {
     }
   }, [action, selectedElement, textAreaRef])
 
-  // scale to high dpi
+  // scale to high dpi & zoom
   function getCoords(x: number, y: number) {
-    return { clientX: x * DEVICE_PIXEL_RATIO + offset.x, clientY: y * DEVICE_PIXEL_RATIO + offset.y }
+    return { clientX: (x * DEVICE_PIXEL_RATIO) / canvasScale, clientY: (y * DEVICE_PIXEL_RATIO) / canvasScale }
   }
 
   // update element when drawing
@@ -87,8 +94,8 @@ const Board = () => {
     switch (tool) {
       case 'pen':
         drawingsCopy[index].points = [...drawingsCopy[index].points, { x: x2, y: y2 }]
-
         break
+
       case 'text':
         const { context } = getCanvas()
         const width = context!.measureText(text).width
@@ -114,12 +121,12 @@ const Board = () => {
 
     const isEraser = tool === 'eraser'
     const isSelect = tool === 'select'
-    const isPan = tool === 'pan'
+    const isPan = tool === 'pan' || e.button === 1
     const isDraw = isDrawableTool(tool)
 
     const { clientX, clientY } = getCoords(e.clientX, e.clientY)
 
-    if (e.button === 1 || isPan) {
+    if (isPan) {
       lastMousePosRef.current = { x: e.pageX, y: e.pageY }
       setAction('panning')
       return
@@ -164,10 +171,10 @@ const Board = () => {
     if (isDraw) {
       const elementId = generateId()
       const newElement = createElement(
-        clientX + offset.x,
-        clientY + offset.y,
-        clientX + offset.x,
-        clientY + offset.y,
+        clientX + viewportTopLeft.x,
+        clientY + viewportTopLeft.y,
+        clientX + viewportTopLeft.x,
+        clientY + viewportTopLeft.y,
         tool,
         elementId,
         options
@@ -214,7 +221,7 @@ const Board = () => {
       const index = drawings.length - 1
       const { x1, y1, id } = drawings[index] as any
 
-      updateElement(x1, y1, clientX + offset.x, clientY + offset.y, tool, index, id)
+      updateElement(x1, y1, clientX + viewportTopLeft.x, clientY + viewportTopLeft.y, tool, index, id)
       return
     }
 
@@ -264,16 +271,13 @@ const Board = () => {
     }
 
     if (isPanning) {
-      const { context } = getCanvas()
+      const lastMousePos = lastMousePosRef.current
+      const currentMousePos = { x: e.pageX, y: e.pageY } // use document so can pan off element
+      lastMousePosRef.current = currentMousePos
 
-      if (context) {
-        const lastMousePos = lastMousePosRef.current
-        const currentMousePos = { x: e.pageX, y: e.pageY } // use document so can pan off element
-        lastMousePosRef.current = currentMousePos
+      const mouseDiff = diffPoints(currentMousePos, lastMousePos)
+      setOffset((prevOffset) => addPoints(prevOffset, mouseDiff))
 
-        const mouseDiff = diffPoints(currentMousePos, lastMousePos)
-        setOffset((prevOffset) => addPoints(prevOffset, mouseDiff))
-      }
       return
     }
   }
@@ -411,24 +415,4 @@ const isPolygon = (tool: Tool | undefined) => {
     tool === 'rhombus' ||
     tool === 'text'
   )
-}
-
-function scalePoint(p1: Point, scale: number) {
-  return { x: p1.x / scale, y: p1.y / scale }
-}
-
-function addPoints(p1: Point, p2: Point) {
-  return { x: p1.x + p2.x, y: p1.y + p2.y }
-}
-
-function diffPoints(p1: Point, p2: Point) {
-  return { x: p1.x - p2.x, y: p1.y - p2.y }
-}
-
-function getEventLocation(e: any) {
-  if (e.touches && e.touches.length == 1) {
-    return { x: e.touches[0].clientX, y: e.touches[0].clientY }
-  } else {
-    return { x: e.clientX, y: e.clientY }
-  }
 }
