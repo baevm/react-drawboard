@@ -26,11 +26,15 @@ const FontFamilyButtonGroup = () => {
         type='single'
         defaultValue={options.fontFamily}
         onValueChange={handleChange}
-        aria-label='Font size'>
-        <ToggleGroup.Item className={styles.ToggleGroupItem} value='default' aria-label='default'>
+        aria-label='Font family'>
+        <ToggleGroup.Item className={styles.ToggleGroupItem} value='SourceSansPro' aria-label='Default' title='Default'>
           <BiFont />
         </ToggleGroup.Item>
-        <ToggleGroup.Item className={styles.ToggleGroupItem} value='handDrawn' aria-label='handDrawn'>
+        <ToggleGroup.Item
+          className={styles.ToggleGroupItem}
+          value='Caveat'
+          aria-label='Hand written'
+          title='Hand written'>
           <IoBrushOutline />
         </ToggleGroup.Item>
       </ToggleGroup.Root>

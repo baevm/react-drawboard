@@ -15,7 +15,7 @@ export const ClearCanvasButton = () => {
   return (
     <AlertDialog.Root open={open} onOpenChange={setOpen}>
       <AlertDialog.Trigger asChild>
-        <button>
+        <button title='Reset board'>
           <IoTrashOutline />
         </button>
       </AlertDialog.Trigger>

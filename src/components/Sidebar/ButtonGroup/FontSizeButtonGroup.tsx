@@ -25,13 +25,13 @@ const FontSizeButtonGroup = () => {
         defaultValue={options.fontSize}
         onValueChange={handleChange}
         aria-label='Font size'>
-        <ToggleGroup.Item className={styles.ToggleGroupItem} value='14' aria-label='small'>
+        <ToggleGroup.Item className={styles.ToggleGroupItem} value='14' aria-label='small' title='Small'>
           S
         </ToggleGroup.Item>
-        <ToggleGroup.Item className={styles.ToggleGroupItem} value='24' aria-label='medium'>
+        <ToggleGroup.Item className={styles.ToggleGroupItem} value='24' aria-label='medium' title='Medium'>
           M
         </ToggleGroup.Item>
-        <ToggleGroup.Item className={styles.ToggleGroupItem} value='32' aria-label='large'>
+        <ToggleGroup.Item className={styles.ToggleGroupItem} value='32' aria-label='large' title='Large'>
           L
         </ToggleGroup.Item>
       </ToggleGroup.Root>

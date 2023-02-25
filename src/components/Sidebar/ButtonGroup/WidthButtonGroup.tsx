@@ -25,13 +25,13 @@ const WidthButtonGroup = () => {
         type='single'
         defaultValue={options.lineWidth}
         aria-label='Line width'>
-        <ToggleGroup.Item className={styles.ToggleGroupItem} value='1' aria-label='Light line'>
+        <ToggleGroup.Item className={styles.ToggleGroupItem} value='1' aria-label='Light' title='Light'>
           <IoRemove />
         </ToggleGroup.Item>
-        <ToggleGroup.Item className={styles.ToggleGroupItem} value='3' aria-label='Regular line'>
+        <ToggleGroup.Item className={styles.ToggleGroupItem} value='3' aria-label='Regular' title='Regular'>
           <IoReorderTwo />
         </ToggleGroup.Item>
-        <ToggleGroup.Item className={styles.ToggleGroupItem} value='5' aria-label='Thick line'>
+        <ToggleGroup.Item className={styles.ToggleGroupItem} value='5' aria-label='Thick' title='Thick'>
           <IoReorderThree />
         </ToggleGroup.Item>
       </ToggleGroup.Root>

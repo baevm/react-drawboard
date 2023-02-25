@@ -75,13 +75,11 @@ const Board = () => {
     }
   }, [action, selectedElement, textAreaRef])
 
-
   // scale to high dpi
   function getCoords(x: number, y: number) {
     return { clientX: x * DEVICE_PIXEL_RATIO + offset.x, clientY: y * DEVICE_PIXEL_RATIO + offset.y }
   }
 
-  
   // update element when drawing
   const updateElement: UpdateElement = (x1, y1, x2, y2, tool, index, id, text) => {
     const drawingsCopy = [...drawings] as any
@@ -355,7 +353,7 @@ const Board = () => {
             position: 'fixed',
             top: selectedElement?.y1! - 7,
             left: selectedElement?.x1,
-            font: '24px SourceSansPro',
+            font: `${options.fontSize}px ${options.fontFamily}`,
             outline: 0,
             border: '1px dashed lightgray',
             backgroundColor: 'transparent',

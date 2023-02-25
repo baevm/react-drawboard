@@ -19,7 +19,7 @@ export const useTools = create<UseTools>()(
         lineWidth: '1',
         lineOpacity: 1,
         backgroundFillStyle: 'none',
-        fontFamily: 'default',
+        fontFamily: 'SourceSansPro',
         fontSize: '24',
       },
       setTool: (tool) => set({ tool }),

@@ -35,7 +35,7 @@ const Header = () => {
     <div className={styles.header_container}>
       <div className={styles.header_settings}>
         <div className={`${styles.toggle_group_item} ${styles.toggle_group_aside}`}>
-          <button>
+          <button title='Settings'>
             <IoEllipsisHorizontal />
           </button>
         </div>
@@ -51,6 +51,7 @@ const Header = () => {
               className={`${styles.toggle_group_item} tool-${[value]}`}
               id={'govno'}
               value={value}
+              title={label}
               aria-label={label}>
               {icon}
             </RadioGroup.Item>

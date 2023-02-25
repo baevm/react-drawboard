@@ -28,12 +28,11 @@ export type Tool =
   | 'image'
   | 'eraser'
 
-
 export type HEX = `#${string}`
 export type Action = 'drawing' | 'erasing' | 'moving' | 'selecting' | 'resizing' | 'writing' | 'panning' | 'none'
 export type BackgroundFillStyle = 'solid' | 'hachure' | 'none'
 export type LineWidth = '1' | '3' | '5'
-export type FontFamily = 'default' | 'handDrawn'
+export type FontFamily = 'SourceSansPro' | 'handDrawn'
 export type FontSize = '14' | '24' | '32'
 
 export type DrawingOptions = {

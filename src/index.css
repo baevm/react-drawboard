@@ -23,6 +23,27 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: 'Caveat';
+  font-weight: 400;
+  src: url('/fonts/Caveat-Regular.ttf');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Caveat';
+  font-weight: 600;
+  src: url('/fonts/Caveat-SemiBold.ttf');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Caveat';
+  font-weight: 700;
+  src: url('/fonts/Caveat-Bold.ttf');
+  font-display: swap;
+}
+
 /*
   Josh's Custom CSS Reset
   https://www.joshwcomeau.com/css/custom-css-reset/

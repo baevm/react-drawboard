@@ -26,13 +26,13 @@ const BgFillButtonGroup = () => {
         defaultValue={options.backgroundFillStyle}
         onValueChange={handleChange}
         aria-label='Background fill style'>
-        <ToggleGroup.Item className={styles.ToggleGroupItem} value='none' aria-label='none'>
+        <ToggleGroup.Item className={styles.ToggleGroupItem} value='none' aria-label='none' title='No fill'>
           <TbSquare />
         </ToggleGroup.Item>
-        <ToggleGroup.Item className={styles.ToggleGroupItem} value='solid' aria-label='solid'>
+        <ToggleGroup.Item className={styles.ToggleGroupItem} value='solid' aria-label='solid' title='Fill'>
           <IoSquare />
         </ToggleGroup.Item>
-        <ToggleGroup.Item className={styles.ToggleGroupItem} value='hachure' aria-label='hachure'>
+        <ToggleGroup.Item className={styles.ToggleGroupItem} value='hachure' aria-label='hachure' title='Hachure'>
           <TbSquaresFilled />
         </ToggleGroup.Item>
       </ToggleGroup.Root>

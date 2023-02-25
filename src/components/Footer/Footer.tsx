@@ -18,21 +18,21 @@ const Footer = () => {
   return (
     <div className={styles.footer_container}>
       <div className={styles.ToggleGroup} role='group'>
-        <button onClick={undoDraw} className={styles.ToggleGroupItem}>
+        <button onClick={undoDraw} className={styles.ToggleGroupItem} title='Undo'>
           <IoArrowUndoOutline />
         </button>
-        <button onClick={redoDraw} className={styles.ToggleGroupItem}>
+        <button onClick={redoDraw} className={styles.ToggleGroupItem} title='Redo'>
           <IoArrowRedoOutline />
         </button>
       </div>
       <div className={styles.ToggleGroup}>
-        <button onClick={handleZoomOut} className={styles.ToggleGroupItem}>
+        <button onClick={handleZoomOut} className={styles.ToggleGroupItem} title='Zoom out'>
           <RxZoomOut />
         </button>
-        <button className={styles.ToggleGroupItem} onClick={resetZoom}>
+        <button className={styles.ToggleGroupItem} onClick={resetZoom} title='Reset zoom'>
           {Math.floor(100 * canvasScale)}%
         </button>
-        <button onClick={handleZoomIn} className={styles.ToggleGroupItem}>
+        <button onClick={handleZoomIn} className={styles.ToggleGroupItem} title='Zoom in'>
           <RxZoomIn />
         </button>
       </div>
