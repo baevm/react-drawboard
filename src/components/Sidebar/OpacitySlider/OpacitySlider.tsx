@@ -10,7 +10,7 @@ export const OpacitySlider = () => {
   }))
 
   const handleChange = (value: number[]) => {
-    setOptions({ lineOpacity: value[0] })
+    setOptions({ strokeOpacity: value[0] })
   }
 
   return (
@@ -19,7 +19,7 @@ export const OpacitySlider = () => {
       <Slider.Root
         className={styles.SliderRoot}
         onValueChange={handleChange}
-        defaultValue={[options.lineOpacity]}
+        defaultValue={[options.strokeOpacity]}
         min={0.2}
         max={1}
         step={0.2}

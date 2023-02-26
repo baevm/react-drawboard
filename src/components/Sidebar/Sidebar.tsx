@@ -17,16 +17,16 @@ const Sidebar = () => {
   }))
 
   const isPolygonSettings = tool === 'circle' || tool === 'rectangle' || tool === 'triangle' || tool === 'rhombus'
-  const isLineWidth = isPolygonSettings || tool === 'pen'
+  const isStrokeWidth = isPolygonSettings || tool === 'pen'
   const isTextSettings = tool === 'text'
   const isSidebarVisible = tool !== 'pan' && tool !== 'select' && tool !== 'eraser'
 
   const handleLineColorChange = (color: HEX) => {
-    setOptions({ lineColor: color })
+    setOptions({ stroke: color })
   }
 
   const handleBgColorChange = (color: HEX) => {
-    setOptions({ backgroundFillColor: color })
+    setOptions({ backgroundColor: color })
   }
 
   if (!isSidebarVisible) {
@@ -44,10 +44,10 @@ const Sidebar = () => {
       <div className={styles.sidebar_container}>
         <div className={styles.sidebar_wrapper}>
           <div className={styles.settings_item}>
-            <ColorPicker label='Stroke' initialColor={options.lineColor} onChange={handleLineColorChange} />
+            <ColorPicker label='Stroke' initialColor={options.stroke} onChange={handleLineColorChange} />
           </div>
 
-          {isLineWidth && (
+          {isStrokeWidth && (
             <div className={styles.settings_item}>
               <WidthButtonGroup />
             </div>
@@ -72,7 +72,7 @@ const Sidebar = () => {
               <div className={styles.settings_item}>
                 <ColorPicker
                   label='Background color'
-                  initialColor={options.backgroundFillColor}
+                  initialColor={options.backgroundColor}
                   onChange={handleBgColorChange}
                 />
               </div>

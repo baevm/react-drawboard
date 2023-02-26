@@ -1,5 +1,5 @@
 import { useTools } from '@/hooks/useTools'
-import { LineWidth } from '@/types'
+import { StrokeWidth } from '@/types'
 import * as ToggleGroup from '@radix-ui/react-toggle-group'
 import { IoRemove, IoReorderThree, IoReorderTwo } from 'react-icons/io5'
 import ItemLabel from '../ItemLabel'
@@ -11,8 +11,8 @@ const WidthButtonGroup = () => {
     setOptions: state.setOptions,
   }))
 
-  const handleChange = (value: LineWidth) => {
-    setOptions({ lineWidth: value })
+  const handleChange = (value: StrokeWidth) => {
+    setOptions({ strokeWidth: value })
   }
 
   return (
@@ -23,7 +23,7 @@ const WidthButtonGroup = () => {
         className={styles.ToggleGroup}
         onValueChange={handleChange}
         type='single'
-        defaultValue={options.lineWidth}
+        defaultValue={options.strokeWidth}
         aria-label='Line width'>
         <ToggleGroup.Item className={styles.ToggleGroupItem} value='1' aria-label='Light' title='Light'>
           <IoRemove />

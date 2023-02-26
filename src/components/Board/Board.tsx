@@ -82,9 +82,12 @@ const Board = () => {
     }
   }, [action, selectedElement, textAreaRef])
 
-  // scale to high dpi & zoom
-  function getCoords(x: number, y: number) {
-    return { clientX: (x * DEVICE_PIXEL_RATIO) / canvasScale, clientY: (y * DEVICE_PIXEL_RATIO) / canvasScale }
+  // scale to high dpi & zoom & pan
+  const getCoords = (x: number, y: number) => {
+    return {
+      clientX: (x * DEVICE_PIXEL_RATIO) / canvasScale + viewportTopLeft.x,
+      clientY: (y * DEVICE_PIXEL_RATIO) / canvasScale + viewportTopLeft.y,
+    }
   }
 
   // update element when drawing
@@ -127,6 +130,9 @@ const Board = () => {
     const { clientX, clientY } = getCoords(e.clientX, e.clientY)
 
     if (isPan) {
+      // pageX, pageY used because
+      // clientX, and clientY already scaled and
+      // its going to offset when panning
       lastMousePosRef.current = { x: e.pageX, y: e.pageY }
       setAction('panning')
       return
@@ -170,15 +176,7 @@ const Board = () => {
 
     if (isDraw) {
       const elementId = generateId()
-      const newElement = createElement(
-        clientX + viewportTopLeft.x,
-        clientY + viewportTopLeft.y,
-        clientX + viewportTopLeft.x,
-        clientY + viewportTopLeft.y,
-        tool,
-        elementId,
-        options
-      ) as any
+      const newElement = createElement(clientX, clientY, clientX, clientY, tool, elementId, options) as any
 
       setDrawings([...drawings, newElement])
       setSelectedElement(newElement)
@@ -221,7 +219,7 @@ const Board = () => {
       const index = drawings.length - 1
       const { x1, y1, id } = drawings[index] as any
 
-      updateElement(x1, y1, clientX + viewportTopLeft.x, clientY + viewportTopLeft.y, tool, index, id)
+      updateElement(x1, y1, clientX, clientY, tool, index, id)
       return
     }
 
@@ -249,6 +247,7 @@ const Board = () => {
       const newX = clientX - offsetOfClickX
       const newY = clientY - offsetOfClickY
 
+      // moving text
       const text = tool === 'text' ? selectedElement!.text : null
 
       updateElement(newX, newY, newX + width, newY + height, tool, index, id, text)
@@ -272,7 +271,7 @@ const Board = () => {
 
     if (isPanning) {
       const lastMousePos = lastMousePosRef.current
-      const currentMousePos = { x: e.pageX, y: e.pageY } // use document so can pan off element
+      const currentMousePos = { x: e.pageX, y: e.pageY }
       lastMousePosRef.current = currentMousePos
 
       const mouseDiff = diffPoints(currentMousePos, lastMousePos)
@@ -282,32 +281,29 @@ const Board = () => {
     }
   }
 
-  // FIXME: TRIANGLE WRONG COORDS AFTER ADJUST
   const handleMouseUp = (e: React.MouseEvent) => {
     const { clientX, clientY } = getCoords(e.clientX, e.clientY)
 
-    if (selectedElement) {
-      if (
-        selectedElement.tool === 'text' &&
-        clientX - selectedElement.offsetOfClickX === selectedElement.x1 &&
-        clientY - selectedElement.offsetOfClickY === selectedElement.y1
-      ) {
-        setAction('writing')
-        return
-      }
-
-      const id = selectedElement.id
-      const index = drawings.findIndex((element) => element.id === id)
-      const element = getElementById(id, drawings) as PolygonDrawing
-
-      if ((action === 'drawing' || action === 'resizing') && isPolygon(element.tool)) {
-        const { x1, y1, x2, y2 } = adjustDrawingCoordinates(element)
-        updateElement(x1, y1, x2, y2, element!.tool, index, id)
-      }
+    if (!selectedElement) {
+      return
     }
 
-    if (action === 'writing') {
+    if (
+      selectedElement.tool === 'text' &&
+      clientX - selectedElement.offsetOfClickX === selectedElement.x1 &&
+      clientY - selectedElement.offsetOfClickY === selectedElement.y1
+    ) {
+      setAction('writing')
       return
+    }
+
+    const id = selectedElement.id
+    const index = drawings.findIndex((element) => element.id === id)
+    const element = getElementById(id, drawings) as PolygonDrawing
+
+    if ((action === 'drawing' || action === 'resizing') && isPolygon(element.tool)) {
+      const { x1, y1, x2, y2 } = adjustDrawingCoordinates(element)
+      updateElement(x1, y1, x2, y2, element.tool, index, id)
     }
 
     setAction('none')

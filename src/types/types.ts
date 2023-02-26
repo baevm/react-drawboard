@@ -1,4 +1,4 @@
-import { Drawable } from 'roughjs/bin/core'
+import { Drawable, Options, OpSet } from 'roughjs/bin/core'
 
 export type PointPosition =
   | 'start'
@@ -31,16 +31,16 @@ export type Tool =
 export type HEX = `#${string}`
 export type Action = 'drawing' | 'erasing' | 'moving' | 'selecting' | 'resizing' | 'writing' | 'panning' | 'none'
 export type BackgroundFillStyle = 'solid' | 'hachure' | 'none'
-export type LineWidth = '1' | '3' | '5'
+export type StrokeWidth = '1' | '3' | '5'
 export type FontFamily = 'SourceSansPro' | 'handDrawn'
 export type FontSize = '14' | '24' | '32'
 
 export type DrawingOptions = {
-  lineColor: HEX
-  backgroundFillColor: HEX
+  stroke: HEX
+  backgroundColor: HEX
   backgroundFillStyle: BackgroundFillStyle
-  lineWidth: LineWidth
-  lineOpacity: number
+  strokeWidth: StrokeWidth
+  strokeOpacity: number
   fontFamily: FontFamily
   fontSize: FontSize
 }
@@ -50,17 +50,17 @@ export type Point = {
   y: number
 }
 
-type BaseDrawing = DrawingOptions & {
+type BaseDrawing = {
   id: string
 }
 
-type TextDrawing = BaseDrawing & {
+export type TextDrawing = BaseDrawing & {
+  tool: 'text'
   text: string
   x1: number
   x2: number
   y1: number
   y2: number
-  tool: 'text'
 }
 
 export type PolygonDrawing = BaseDrawing & {
@@ -69,7 +69,9 @@ export type PolygonDrawing = BaseDrawing & {
   x2: number
   y1: number
   y2: number
-  roughElement: Drawable
+  options: Options
+  shape: string
+  readonly sets: OpSet[]
 }
 
 export type PenDrawing = BaseDrawing & {

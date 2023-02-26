@@ -1,38 +1,46 @@
-import { DrawingOptions, Drawings, PenDrawing, PolygonDrawing, Tool } from '@/types'
+import { DrawingOptions, Drawings, HEX, PenDrawing, PolygonDrawing, TextDrawing, Tool } from '@/types'
 import getStroke from 'perfect-freehand'
 import rough from 'roughjs'
 import { RoughCanvas } from 'roughjs/bin/canvas'
-import { Options } from 'roughjs/bin/core'
 
 const roughGenerator = rough.generator()
 
-type CreateElement = (
-  x1: number,
-  y1: number,
-  x2: number,
-  y2: number,
-  tool: Tool,
-  id: string,
-  options: DrawingOptions
-) => PenDrawing | PolygonDrawing
+const getToolOptions = (tool: Tool, options: DrawingOptions) => {
+  switch (tool) {
+    case 'line':
+      return {
+        stroke: options.strokeOpacity === 1 ? options.stroke : addAlpha(options.stroke, options.strokeOpacity),
+        strokeWidth: +options.strokeWidth,
+      }
+
+    case 'text':
+      return {
+        stroke: options.strokeOpacity === 1 ? options.stroke : addAlpha(options.stroke, options.strokeOpacity),
+        fontSize: options.fontSize,
+        fontFamily: options.fontFamily,
+      }
+
+    case 'pen':
+      return {
+        stroke: options.strokeOpacity === 1 ? options.stroke : addAlpha(options.stroke, options.strokeOpacity),
+        strokeWidth: +options.strokeWidth,
+        strokeOpacity: options.strokeOpacity,
+      }
+
+    default:
+      return {
+        stroke: options.strokeOpacity === 1 ? options.stroke : addAlpha(options.stroke, options.strokeOpacity),
+        strokeWidth: +options.strokeWidth,
+        fill: options.backgroundFillStyle !== 'none' ? options.backgroundColor : undefined,
+        fillStyle: options.backgroundFillStyle !== 'none' ? options.backgroundFillStyle : undefined,
+      }
+  }
+}
 
 export const createElement: CreateElement = (x1, y1, x2, y2, tool, id, options) => {
   let roughElement
-  let polygonOptions: Options = {}
 
-  if (tool === 'line') {
-    polygonOptions = {
-      stroke: options.lineOpacity === 1 ? options.lineColor : addAlpha(options.lineColor, options.lineOpacity),
-      strokeWidth: +options.lineWidth,
-    }
-  } else if (tool !== 'pen') {
-    polygonOptions = {
-      stroke: options.lineOpacity === 1 ? options.lineColor : addAlpha(options.lineColor, options.lineOpacity),
-      fill: options.backgroundFillStyle !== 'none' ? options.backgroundFillColor : undefined,
-      fillStyle: options.backgroundFillStyle !== 'none' ? options.backgroundFillStyle : undefined,
-      strokeWidth: +options.lineWidth,
-    }
-  }
+  const drawingOptions = getToolOptions(tool, options)
 
   switch (tool) {
     case 'pen':
@@ -40,7 +48,19 @@ export const createElement: CreateElement = (x1, y1, x2, y2, tool, id, options) 
         tool,
         points: [{ x: x2, y: y2 }],
         id,
-        ...options,
+        ...drawingOptions,
+      }
+
+    case 'text':
+      return {
+        tool,
+        x1,
+        y1,
+        x2,
+        y2,
+        id,
+        text: '',
+        ...drawingOptions,
       }
 
     case 'circle':
@@ -48,11 +68,11 @@ export const createElement: CreateElement = (x1, y1, x2, y2, tool, id, options) 
       const cy = (y1 + y2) / 2
       const r = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)) / 2
       const d = r * 2
-      roughElement = roughGenerator.circle(cx, cy, d, { ...polygonOptions })
+      roughElement = roughGenerator.circle(cx, cy, d, { ...drawingOptions })
       break
 
     case 'rectangle':
-      roughElement = roughGenerator.rectangle(x1, y1, x2 - x1, y2 - y1, { ...polygonOptions })
+      roughElement = roughGenerator.rectangle(x1, y1, x2 - x1, y2 - y1, { ...drawingOptions })
       break
 
     // TODO: RIGHT & EQUILATERAL
@@ -67,7 +87,7 @@ export const createElement: CreateElement = (x1, y1, x2, y2, tool, id, options) 
         [x2, y2],
         [average(x1, x2), y1],
       ]
-      roughElement = roughGenerator.polygon([...(equilateral as any)], { ...polygonOptions })
+      roughElement = roughGenerator.polygon([...(equilateral as any)], { ...drawingOptions })
       break
 
     case 'rhombus':
@@ -77,7 +97,7 @@ export const createElement: CreateElement = (x1, y1, x2, y2, tool, id, options) 
         [x2, y1 + (y2 - y1) / 2],
         [x1 + (x2 - x1) / 2, y2],
       ]
-      roughElement = roughGenerator.polygon([...(rhombus as any)], { ...polygonOptions })
+      roughElement = roughGenerator.polygon([...(rhombus as any)], { ...drawingOptions })
       break
 
     case 'arrow':
@@ -87,52 +107,40 @@ export const createElement: CreateElement = (x1, y1, x2, y2, tool, id, options) 
       let fromHeadToSide1 = [x2 - headlen * Math.cos(angle - Math.PI / 7), y2 - headlen * Math.sin(angle - Math.PI / 7)]
       let fromHeadToSide2 = [x2 - headlen * Math.cos(angle + Math.PI / 7), y2 - headlen * Math.sin(angle + Math.PI / 7)]
       const arrow = [[x1, y1], fromHeadToSide1, [], fromHeadToSide2]
-      roughElement = roughGenerator.polygon([...(arrow as any)], { stroke: options.lineColor })
+      roughElement = roughGenerator.polygon([...(arrow as any)], { stroke: options.stroke })
       break
 
     case 'line':
-      roughElement = roughGenerator.line(x1, y1, x2, y2, { ...polygonOptions })
+      roughElement = roughGenerator.line(x1, y1, x2, y2, { ...drawingOptions })
       break
-
-    case 'text':
-      return {
-        tool,
-        x1,
-        y1,
-        x2,
-        y2,
-        id,
-        text: '',
-        stroke: options.lineColor,
-        fontFamily: options.fontFamily,
-        fontSize: options.fontSize,
-      }
 
     default:
       throw new Error(`Invalid tool: ${tool}`)
   }
 
-  return { tool, x1, y1, x2, y2, roughElement, id, ...(polygonOptions as any) }
+  return { tool, x1, y1, x2, y2, id, options: roughElement.options, sets: roughElement.sets, shape: roughElement.shape }
 }
 
 export const drawElement = (roughCanvas: RoughCanvas, context: CanvasRenderingContext2D, element: any) => {
   switch (element.tool) {
     case 'pen':
       const stroke = getSvgPathFromStroke(
-        getStroke(element.points, { size: 4 + +element.lineWidth, thinning: 0.5, smoothing: 0.5, streamline: 0.5 })
+        getStroke(element.points, { size: 4 + +element.strokeWidth, thinning: 0.5, smoothing: 0.5, streamline: 0.5 })
       )
-      context.fillStyle = element.lineColor
-      context.globalAlpha = element.lineOpacity
+      context.fillStyle = element.stroke
+      context.globalAlpha = element.strokeOpacity
       context.fill(new Path2D(stroke))
       break
     case 'text':
       context.font = `${element.fontSize}px ${element.fontFamily}`
       context.textBaseline = 'top'
       context.fillStyle = element.stroke
+      context.globalAlpha = element.strokeOpacity
       context.fillText(element.text, element.x1, element.y1)
       break
     default:
-      roughCanvas.draw(element.roughElement)
+      console.log(element)
+      roughCanvas.draw(element)
       break
   }
 }
@@ -174,10 +182,19 @@ const getSvgPathFromStroke = (points: any, closed = true) => {
   return result
 }
 
-function addAlpha(color: string, opacity: number) {
-  // coerce values so ti is between 0 and 1.
+const addAlpha = (color: HEX, opacity: number): HEX => {
   const _opacity = Math.round(Math.min(Math.max(opacity || 1, 0), 1) * 255)
-  return color + _opacity.toString(16).toUpperCase()
+  return (color + _opacity.toString(16).toUpperCase()) as HEX
 }
 
 const average = (a: number, b: number) => (a + b) / 2
+
+type CreateElement = (
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+  tool: Tool,
+  id: string,
+  options: DrawingOptions
+) => PenDrawing | PolygonDrawing | TextDrawing
