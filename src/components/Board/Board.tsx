@@ -75,7 +75,7 @@ const Board = () => {
     lastOffsetRef.current = offset
   }, [offset])
 
-  // set value in textarea on open
+  // set value in textarea
   useEffect(() => {
     if (action === 'writing') {
       textAreaRef.current!.value! = selectedElement!.text!
@@ -284,26 +284,24 @@ const Board = () => {
   const handleMouseUp = (e: React.MouseEvent) => {
     const { clientX, clientY } = getCoords(e.clientX, e.clientY)
 
-    if (!selectedElement) {
-      return
-    }
+    if (selectedElement) {
+      if (
+        selectedElement.tool === 'text' &&
+        clientX - selectedElement.offsetOfClickX === selectedElement.x1 &&
+        clientY - selectedElement.offsetOfClickY === selectedElement.y1
+      ) {
+        setAction('writing')
+        return
+      }
 
-    if (
-      selectedElement.tool === 'text' &&
-      clientX - selectedElement.offsetOfClickX === selectedElement.x1 &&
-      clientY - selectedElement.offsetOfClickY === selectedElement.y1
-    ) {
-      setAction('writing')
-      return
-    }
+      const id = selectedElement.id
+      const index = drawings.findIndex((element) => element.id === id)
+      const element = getElementById(id, drawings) as PolygonDrawing
 
-    const id = selectedElement.id
-    const index = drawings.findIndex((element) => element.id === id)
-    const element = getElementById(id, drawings) as PolygonDrawing
-
-    if ((action === 'drawing' || action === 'resizing') && isPolygon(element.tool)) {
-      const { x1, y1, x2, y2 } = adjustDrawingCoordinates(element)
-      updateElement(x1, y1, x2, y2, element.tool, index, id)
+      if ((action === 'drawing' || action === 'resizing') && isPolygon(element.tool)) {
+        const { x1, y1, x2, y2 } = adjustDrawingCoordinates(element)
+        updateElement(x1, y1, x2, y2, element.tool, index, id)
+      }
     }
 
     setAction('none')
@@ -323,6 +321,21 @@ const Board = () => {
 
   const handleContextMenu = (e: any) => {
     e.preventDefault()
+  }
+
+  const resizeTextarea = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const { context } = getCanvas()
+
+    // set context font to current font
+    // because on first mount it contains incorrect font
+    // even though it shows right
+    context.font = `${options.fontSize}px ${options.fontFamily}`
+
+    // now measure width of text with correct font
+    const width = context!.measureText(e.target.value).width
+
+    // set width of textarea with offset of 5 px
+    textAreaRef.current!.style.width = width + 5 + 'px'
   }
 
   // TODO: infinite canvas move
@@ -349,18 +362,22 @@ const Board = () => {
         <textarea
           ref={textAreaRef}
           onBlur={handleBlur}
+          onChange={resizeTextarea}
           style={{
             position: 'fixed',
             top: selectedElement?.y1! - 7,
             left: selectedElement?.x1,
             font: `${options.fontSize}px ${options.fontFamily}`,
+            color: options.stroke,
             outline: 0,
-            border: '1px dashed lightgray',
+            border: '1px dashed black',
             backgroundColor: 'transparent',
             overflow: 'hidden',
             whiteSpace: 'pre',
             margin: 0,
             padding: 0,
+            width: '100px',
+            resize: 'none',
           }}
         />
       ) : null}

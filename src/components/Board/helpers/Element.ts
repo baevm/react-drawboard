@@ -5,38 +5,6 @@ import { RoughCanvas } from 'roughjs/bin/canvas'
 
 const roughGenerator = rough.generator()
 
-const getToolOptions = (tool: Tool, options: DrawingOptions) => {
-  switch (tool) {
-    case 'line':
-      return {
-        stroke: options.strokeOpacity === 1 ? options.stroke : addAlpha(options.stroke, options.strokeOpacity),
-        strokeWidth: +options.strokeWidth,
-      }
-
-    case 'text':
-      return {
-        stroke: options.strokeOpacity === 1 ? options.stroke : addAlpha(options.stroke, options.strokeOpacity),
-        fontSize: options.fontSize,
-        fontFamily: options.fontFamily,
-      }
-
-    case 'pen':
-      return {
-        stroke: options.strokeOpacity === 1 ? options.stroke : addAlpha(options.stroke, options.strokeOpacity),
-        strokeWidth: +options.strokeWidth,
-        strokeOpacity: options.strokeOpacity,
-      }
-
-    default:
-      return {
-        stroke: options.strokeOpacity === 1 ? options.stroke : addAlpha(options.stroke, options.strokeOpacity),
-        strokeWidth: +options.strokeWidth,
-        fill: options.backgroundFillStyle !== 'none' ? options.backgroundColor : undefined,
-        fillStyle: options.backgroundFillStyle !== 'none' ? options.backgroundFillStyle : undefined,
-      }
-  }
-}
-
 export const createElement: CreateElement = (x1, y1, x2, y2, tool, id, options) => {
   let roughElement
 
@@ -101,9 +69,8 @@ export const createElement: CreateElement = (x1, y1, x2, y2, tool, id, options) 
       break
 
     case 'arrow':
-      throw new Error('tool not implemented')
-      var headlen = 10
-      var angle = Math.atan2(y2 - y1, x2 - x1)
+      let headlen = 10
+      let angle = Math.atan2(y2 - y1, x2 - x1)
       let fromHeadToSide1 = [x2 - headlen * Math.cos(angle - Math.PI / 7), y2 - headlen * Math.sin(angle - Math.PI / 7)]
       let fromHeadToSide2 = [x2 - headlen * Math.cos(angle + Math.PI / 7), y2 - headlen * Math.sin(angle + Math.PI / 7)]
       const arrow = [[x1, y1], fromHeadToSide1, [], fromHeadToSide2]
@@ -151,6 +118,38 @@ export const getElementById = (id: string, drawings: Drawings) => {
 
 export const getIndexOfElement = (id: string, drawings: Drawings) => {
   return drawings.findIndex((element) => element.id === id)
+}
+
+const getToolOptions = (tool: Tool, options: DrawingOptions) => {
+  switch (tool) {
+    case 'line':
+      return {
+        stroke: options.strokeOpacity === 1 ? options.stroke : addAlpha(options.stroke, options.strokeOpacity),
+        strokeWidth: +options.strokeWidth,
+      }
+
+    case 'text':
+      return {
+        stroke: options.strokeOpacity === 1 ? options.stroke : addAlpha(options.stroke, options.strokeOpacity),
+        fontSize: options.fontSize,
+        fontFamily: options.fontFamily,
+      }
+
+    case 'pen':
+      return {
+        stroke: options.strokeOpacity === 1 ? options.stroke : addAlpha(options.stroke, options.strokeOpacity),
+        strokeWidth: +options.strokeWidth,
+        strokeOpacity: options.strokeOpacity,
+      }
+
+    default:
+      return {
+        stroke: options.strokeOpacity === 1 ? options.stroke : addAlpha(options.stroke, options.strokeOpacity),
+        strokeWidth: +options.strokeWidth,
+        fill: options.backgroundFillStyle !== 'none' ? options.backgroundColor : undefined,
+        fillStyle: options.backgroundFillStyle !== 'none' ? options.backgroundFillStyle : undefined,
+      }
+  }
 }
 
 const getSvgPathFromStroke = (points: any, closed = true) => {
