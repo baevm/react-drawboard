@@ -69,12 +69,29 @@ export const createElement: CreateElement = (x1, y1, x2, y2, tool, id, options) 
       break
 
     case 'arrow':
-      let headlen = 10
-      let angle = Math.atan2(y2 - y1, x2 - x1)
-      let fromHeadToSide1 = [x2 - headlen * Math.cos(angle - Math.PI / 7), y2 - headlen * Math.sin(angle - Math.PI / 7)]
-      let fromHeadToSide2 = [x2 - headlen * Math.cos(angle + Math.PI / 7), y2 - headlen * Math.sin(angle + Math.PI / 7)]
-      const arrow = [[x1, y1], fromHeadToSide1, [], fromHeadToSide2]
-      roughElement = roughGenerator.polygon([...(arrow as any)], { stroke: options.stroke })
+      let PI = Math.PI
+      let degreesInRadians225 = (225 * PI) / 180
+      let degreesInRadians135 = (135 * PI) / 180
+
+      // calc the angle of the line
+      let dx = x2 - x1
+      let dy = y2 - y1
+      let angle = Math.atan2(dy, dx)
+
+      // calc arrowhead points
+      let x225 = x2 + 20 * Math.cos(angle + degreesInRadians225)
+      let y225 = y2 + 20 * Math.sin(angle + degreesInRadians225)
+      let x135 = x2 + 20 * Math.cos(angle + degreesInRadians135)
+      let y135 = y2 + 20 * Math.sin(angle + degreesInRadians135)
+
+      const arrow = [
+        [x1, y1],
+        [x2, y2],
+        [x225, y225],
+        [x135, y135],
+        [x2, y2],
+      ]
+      roughElement = roughGenerator.polygon([...(arrow as any)], { ...drawingOptions })
       break
 
     case 'line':
@@ -106,7 +123,6 @@ export const drawElement = (roughCanvas: RoughCanvas, context: CanvasRenderingCo
       context.fillText(element.text, element.x1, element.y1)
       break
     default:
-      console.log(element)
       roughCanvas.draw(element)
       break
   }
@@ -123,6 +139,7 @@ export const getIndexOfElement = (id: string, drawings: Drawings) => {
 const getToolOptions = (tool: Tool, options: DrawingOptions) => {
   switch (tool) {
     case 'line':
+    case 'arrow':
       return {
         stroke: options.strokeOpacity === 1 ? options.stroke : addAlpha(options.stroke, options.strokeOpacity),
         strokeWidth: +options.strokeWidth,

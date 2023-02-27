@@ -84,7 +84,7 @@ export const useDrawnings = () => {
 
   const clearDrawings = () => {
     setDrawings([])
-    window.localStorage.removeItem(LOCALSTORAGE_KEY)
+    syncStorageDrawings([])
   }
 
   return { drawings, setDrawings, syncStorageDrawings, clearDrawings, undoDraw, redoDraw }

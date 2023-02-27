@@ -7,18 +7,17 @@ import { FiMousePointer } from 'react-icons/fi'
 import {
   IoArrowForward,
   IoBrushOutline,
-  IoEllipseOutline,
-  IoEllipsisHorizontal,
-  IoHandRightOutline,
+  IoEllipseOutline, IoHandRightOutline,
   IoImageOutline,
   IoRemove,
   IoTabletLandscapeOutline,
   IoText,
-  IoTriangleOutline,
+  IoTriangleOutline
 } from 'react-icons/io5'
 import { RiEraserLine } from 'react-icons/ri'
 import { ClearCanvasButton } from './ClearCanvasButton'
 import styles from './Header.module.css'
+import { SettingsButton } from './SettingsButton'
 
 // TODO: tool label tooltip
 const Header = () => {
@@ -35,9 +34,7 @@ const Header = () => {
     <div className={styles.header_container}>
       <div className={styles.header_settings}>
         <div className={`${styles.toggle_group_item} ${styles.toggle_group_aside}`}>
-          <button title='Settings'>
-            <IoEllipsisHorizontal />
-          </button>
+          <SettingsButton />
         </div>
         <RadioGroup.Root
           className={styles.toggle_group}

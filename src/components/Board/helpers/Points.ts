@@ -1,12 +1,12 @@
 import { Drawings, Point, PointPosition, PolygonDrawing } from '@/types'
 
-export const resizedCoordiantes = (
+export const resizePoints = (
   clientX: number,
   clientY: number,
   position: PointPosition,
-  coordinates: { x1: number; y1: number; x2: number; y2: number }
+  points: { x1: number; y1: number; x2: number; y2: number }
 ) => {
-  const { x1, y1, x2, y2 } = coordinates
+  const { x1, y1, x2, y2 } = points
   switch (position) {
     case 'top-left':
     case 'start':
@@ -27,7 +27,7 @@ export const resizedCoordiantes = (
   }
 }
 
-export const getElementAtCoords = (x: number, y: number, elements: Drawings) => {
+export const getElementAtPoints = (x: number, y: number, elements: Drawings) => {
   const element = elements
     .map((element) => ({ ...element, position: posWithinDrawing(x, y, element) }))
     .find((el) => el.position !== null)
@@ -35,7 +35,7 @@ export const getElementAtCoords = (x: number, y: number, elements: Drawings) => 
   return element
 }
 
-export const adjustDrawingCoordinates = (element: PolygonDrawing) => {
+export const adjustDrawingPoints = (element: PolygonDrawing) => {
   const { x1, y1, x2, y2, tool } = element
 
   if (tool === 'line') {
@@ -74,6 +74,7 @@ const posWithinDrawing = (x: number, y: number, element: any) => {
 
   switch (tool) {
     case 'line':
+    case 'arrow':
       const on = onLine(x1, y1, x2, y2, x, y)
       const start = nearPoint(x, y, x1, y1, 'start')
       const end = nearPoint(x, y, x2, y2, 'end')

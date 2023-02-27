@@ -3,7 +3,7 @@ import { useDrawnings } from '@/hooks/useDrawings'
 import { useResizeObserver } from '@/hooks/useResizeObserver'
 import { useTools } from '@/hooks/useTools'
 import { useZoom } from '@/hooks/useZoom'
-import { Action, Drawing, PenDrawing, Point, PolygonDrawing, Tool } from '@/types'
+import { Action, Drawing, PolygonDrawing, Tool } from '@/types'
 import { generateId } from '@/utils/generateId'
 import { getCanvas } from '@/utils/getCanvas'
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
@@ -11,12 +11,12 @@ import rough from 'roughjs'
 import styles from './Board.module.css'
 import {
   addPoints,
-  adjustDrawingCoordinates,
+  adjustDrawingPoints,
   diffPoints,
-  getElementAtCoords,
-  resizedCoordiantes,
-  scalePoints,
-} from './helpers/Coordinates'
+  getElementAtPoints,
+  resizePoints,
+  scalePoints
+} from './helpers/Points'
 import { cursorForPosition, eraserIcon } from './helpers/Cursor'
 import { createElement, drawElement, getElementById, getIndexOfElement } from './helpers/Element'
 
@@ -83,7 +83,7 @@ const Board = () => {
   }, [action, selectedElement, textAreaRef])
 
   // scale to high dpi & zoom & pan
-  const getCoords = (x: number, y: number) => {
+  const getXY = (x: number, y: number) => {
     return {
       clientX: (x * DEVICE_PIXEL_RATIO) / canvasScale + viewportTopLeft.x,
       clientY: (y * DEVICE_PIXEL_RATIO) / canvasScale + viewportTopLeft.y,
@@ -127,19 +127,19 @@ const Board = () => {
     const isPan = tool === 'pan' || e.button === 1
     const isDraw = isDrawableTool(tool)
 
-    const { clientX, clientY } = getCoords(e.clientX, e.clientY)
+    const { clientX, clientY } = getXY(e.clientX, e.clientY)
 
     if (isPan) {
       // pageX, pageY used because
-      // clientX, and clientY already scaled and
-      // its going to offset when panning
+      // clientX, and clientY already scaled, and
+      // it's going to offset when panning
       lastMousePosRef.current = { x: e.pageX, y: e.pageY }
       setAction('panning')
       return
     }
 
     if (isEraser) {
-      const element = getElementAtCoords(clientX, clientY, drawings)
+      const element = getElementAtPoints(clientX, clientY, drawings)
 
       if (!element) return
 
@@ -151,7 +151,7 @@ const Board = () => {
     }
 
     if (isSelect) {
-      const element = getElementAtCoords(clientX, clientY, drawings)
+      const element = getElementAtPoints(clientX, clientY, drawings)
 
       if (!element) return
 
@@ -187,7 +187,7 @@ const Board = () => {
   }
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    const { clientX, clientY } = getCoords(e.clientX, e.clientY)
+    const { clientX, clientY } = getXY(e.clientX, e.clientY)
     const { style } = e.target as HTMLElement
 
     const isDrawing = action === 'drawing'
@@ -198,7 +198,7 @@ const Board = () => {
 
     switch (tool) {
       case 'select':
-        const element = getElementAtCoords(clientX, clientY, drawings)
+        const element = getElementAtPoints(clientX, clientY, drawings)
         style.cursor = element ? cursorForPosition(element.position) : 'default'
         break
       case 'eraser':
@@ -256,14 +256,14 @@ const Board = () => {
 
     if (isResizing) {
       const { id, tool, position, x1: oldX1, y1: oldY1, x2: oldX2, y2: oldY2 } = selectedElement as any
-      const coordinates = {
+      const points = {
         x1: oldX1,
         y1: oldY1,
         x2: oldX2,
         y2: oldY2,
       }
       const index = getIndexOfElement(id, drawings)
-      const { x1, y1, x2, y2 } = resizedCoordiantes(clientX, clientY, position, coordinates)
+      const { x1, y1, x2, y2 } = resizePoints(clientX, clientY, position, points)
 
       updateElement(x1, y1, x2, y2, tool, index, id)
       return
@@ -282,7 +282,7 @@ const Board = () => {
   }
 
   const handleMouseUp = (e: React.MouseEvent) => {
-    const { clientX, clientY } = getCoords(e.clientX, e.clientY)
+    const { clientX, clientY } = getXY(e.clientX, e.clientY)
 
     if (selectedElement) {
       if (
@@ -299,7 +299,7 @@ const Board = () => {
       const element = getElementById(id, drawings) as PolygonDrawing
 
       if ((action === 'drawing' || action === 'resizing') && isPolygon(element.tool)) {
-        const { x1, y1, x2, y2 } = adjustDrawingCoordinates(element)
+        const { x1, y1, x2, y2 } = adjustDrawingPoints(element)
         updateElement(x1, y1, x2, y2, element.tool, index, id)
       }
     }
