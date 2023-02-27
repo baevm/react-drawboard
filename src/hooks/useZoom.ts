@@ -11,10 +11,10 @@ interface useZoom {
   setViewportTopLeft: (v: Point) => void
 }
 
-const ZOOM_SENSITIVITY = 1000
+const ZOOM_SENSITIVITY = 1000 / DEVICE_PIXEL_RATIO
 
 const useZoomStore = create<useZoom>()((set) => ({
-  canvasScale: window.devicePixelRatio,
+  canvasScale: 1,
   viewportTopLeft: { x: 0, y: 0 },
   setCanvasScale: (canvasScale) => set({ canvasScale }),
   setViewportTopLeft: (viewportTopLeft) => set({ viewportTopLeft }),
@@ -58,7 +58,7 @@ export const useZoom = () => {
 
     context.resetTransform()
     setViewportTopLeft(newViewPost)
-    setCanvasScale(DEVICE_PIXEL_RATIO)
+    setCanvasScale(1)
   }
 
   return { canvasScale, viewportTopLeft, handleZoom, setViewportTopLeft, resetZoom }
