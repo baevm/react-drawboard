@@ -12,6 +12,8 @@ interface useZoom {
 }
 
 const ZOOM_SENSITIVITY = 1000 / DEVICE_PIXEL_RATIO
+const MIN_CANVAS_SCALE = 0.11
+const MAX_CANVAS_SCALE = 10
 
 const useZoomStore = create<useZoom>()((set) => ({
   canvasScale: 1,
@@ -21,7 +23,7 @@ const useZoomStore = create<useZoom>()((set) => ({
 }))
 
 export const useZoom = () => {
-  const { canvasScale, setCanvasScale, setViewportTopLeft, viewportTopLeft } = useZoomStore((state) => ({
+  const { canvasScale, viewportTopLeft, setCanvasScale, setViewportTopLeft } = useZoomStore((state) => ({
     canvasScale: state.canvasScale,
     viewportTopLeft: state.viewportTopLeft,
     setCanvasScale: state.setCanvasScale,
@@ -30,6 +32,15 @@ export const useZoom = () => {
   const { mousePos } = useMousePosition()
 
   const handleZoom = (deltaY: number, type: 'wheel' | 'click') => {
+    // check if canvas scale is less than minimum and action is zoom-out
+    // check if canvas scale is bigger than maximum and action is zoom-in
+    if (
+      (canvasScale <= MIN_CANVAS_SCALE && Math.sign(deltaY) === 1) ||
+      (canvasScale >= MAX_CANVAS_SCALE && Math.sign(deltaY) === -1)
+    ) {
+      return
+    }
+
     const { context } = getCanvas()
 
     const zoom = 1 - deltaY / ZOOM_SENSITIVITY

@@ -4,7 +4,7 @@
 }
 
 .board_canvas {
-  background-color: #f8f9fb;
+  background-color: var(--canvas-background-color);
   display: block;
 
   /* to work on touchscreen */

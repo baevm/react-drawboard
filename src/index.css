@@ -44,6 +44,14 @@
   font-display: swap;
 }
 
+:root {
+  --canvas-background-color: #f8f9fb;
+}
+
+body[data-theme='dark'] {
+  --canvas-background-color: rgb(33, 33, 33);
+}
+
 /*
   Josh's Custom CSS Reset
   https://www.joshwcomeau.com/css/custom-css-reset/

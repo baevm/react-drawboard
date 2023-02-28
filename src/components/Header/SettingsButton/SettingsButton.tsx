@@ -1,14 +1,11 @@
-import { useState } from 'react'
-import { IoEllipsisHorizontal, IoMoonOutline, IoSunnyOutline } from 'react-icons/io5'
+import { useTheme } from '@/hooks/useTheme'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
+import { IoEllipsisHorizontal, IoMoonOutline, IoSunnyOutline } from 'react-icons/io5'
 import styles from './SettingsButton.module.css'
 
 export const SettingsButton = () => {
-  const [theme, setTheme] = useState('dark')
-  const [open, setOpen] = useState(false)
-
-  const handleClearCanvas = () => {}
-
+  const { theme, changeTheme } = useTheme()
+ 
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
@@ -39,19 +36,19 @@ export const SettingsButton = () => {
           <DropdownMenu.Separator className={styles.DropdownMenuSeparator} />
 
           <DropdownMenu.Label className={styles.DropdownMenuLabel}>Theme</DropdownMenu.Label>
-          <DropdownMenu.RadioGroup value={theme} onValueChange={setTheme}>
-            <DropdownMenu.RadioItem className={styles.DropdownMenuRadioItem} value='pedro'>
+          <DropdownMenu.RadioGroup value={theme} onValueChange={changeTheme}>
+            <DropdownMenu.RadioItem className={styles.DropdownMenuRadioItem} value='dark'>
               <DropdownMenu.ItemIndicator className={styles.DropdownMenuItemIndicator}>
                 <IoMoonOutline size={14} className={styles.item_icon} />
               </DropdownMenu.ItemIndicator>
-              Light
+              Dark
             </DropdownMenu.RadioItem>
 
-            <DropdownMenu.RadioItem className={styles.DropdownMenuRadioItem} value='colm'>
+            <DropdownMenu.RadioItem className={styles.DropdownMenuRadioItem} value='light'>
               <DropdownMenu.ItemIndicator className={styles.DropdownMenuItemIndicator}>
                 <IoSunnyOutline size={14} className={styles.item_icon} />
               </DropdownMenu.ItemIndicator>
-              Dark
+              Light
             </DropdownMenu.RadioItem>
           </DropdownMenu.RadioGroup>
           <DropdownMenu.Arrow className={styles.DropdownMenuArrow} />
