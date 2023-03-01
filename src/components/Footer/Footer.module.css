@@ -4,7 +4,7 @@
 }
 
 .ToggleGroup {
-  background-color: white;
+  background-color: var(--ui-background-color);
   display: inline-flex;
   align-items: center;
   border-radius: 5px;
@@ -23,7 +23,7 @@
 }
 
 .ToggleGroupItem {
-  background-color: white;
+  background-color: var(--ui-background-color);
   color: var(--mauve11);
   height: 25px;
   width: 40px;
@@ -39,10 +39,10 @@
 }
 
 .ToggleGroupItem:hover {
-  background-color: var(--violet3);
+  background-color: var(--hover-button-color);
 }
 .ToggleGroupItem:active {
-  background-color: var(--violet5);
+  background-color: var(--active-button-color);
   color: var(--violet11);
 }
 .ToggleGroupItem:focus {

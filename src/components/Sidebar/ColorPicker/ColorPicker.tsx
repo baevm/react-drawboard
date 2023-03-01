@@ -37,7 +37,7 @@ export const ColorPicker = ({ label, onChange, initialColor }: Props) => {
           onClick={() => setIsColorPickerOpen(true)}
           className={styles.item_swatch}
         />
-        <HexColorInput color={color} onChange={setColor} className={styles.color_input} />
+        <HexColorInput color={color} onChange={setColor} className={styles.color_input} style={{ color }} />
       </div>
       {isColorPickerOpen && (
         <div ref={colorPickerRef} className={styles.color_popover}>

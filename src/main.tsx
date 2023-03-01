@@ -10,7 +10,7 @@ const helmetContext = {}
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <HelmetProvider context={helmetContext}>
-      <IconContext.Provider value={{ color: '#707579', size: '20' }}>
+      <IconContext.Provider value={{ color: 'var(--icon-color)', size: '20' }}>
         <App />
       </IconContext.Provider>
     </HelmetProvider>

@@ -1,3 +1,7 @@
+@import '@radix-ui/colors/violet.css';
+@import '@radix-ui/colors/mauve.css';
+@import '@radix-ui/colors/blackA.css';
+
 @font-face {
   font-family: 'SourceSansPro';
   font-weight: 300;
@@ -46,10 +50,48 @@
 
 :root {
   --canvas-background-color: #f8f9fb;
+  --ui-background-color: white;
+  --secondary-background-color: #eee;
+
+  --border-color: #ddd;
+
+  /* BUTTONS */
+  --icon-color: #707579;
+  --hover-button-color: var(--violet4);
+  --active-button-color: var(--violet6);
+  --alert-button-color: var(--red4);
+  --alert-button-hover-color: var(--red5);
+  --secondary-button-color: var(--mauve4);
+  --secondary-buttoh-hover-color: var(--mauve5);
+
+  /* TEXT */
+  --text-primary-color: var(--mauve10);
+  --text-secondary-color: var(--mauve8);
+  --text-disabled-color: var(--mauve8);
+  --text-hover-color: var(--blackA12);
 }
 
 body[data-theme='dark'] {
-  --canvas-background-color: rgb(33, 33, 33);
+  --canvas-background-color: rgb(24, 25, 26);
+  --ui-background-color: rgb(42, 44, 46);
+  --secondary-background-color: rgb(53, 55, 58);
+
+  --border-color: rgb(89, 89, 89);
+
+  /* BUTTONS */
+  --icon-color: rgb(170, 170, 170);
+  --hover-button-color: var(--violet9);
+  --active-button-color: var(--violet11);
+  --alert-button-color: var(--red6);
+  --alert-button-hover-color: var(--red7);
+  --secondary-button-color: var(--mauve10);
+  --secondary-buttoh-hover-color: var(--mauve11);
+
+  /* TEXT */
+  --text-primary-color: #bf94ff;
+  --text-secondary-color: var(--mauve11);
+  --text-disabled-color: var(--mauve10);
+  --text-hover-color: var(--mauve1);
 }
 
 /*

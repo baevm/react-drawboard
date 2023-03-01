@@ -20,7 +20,7 @@ button {
 }
 
 .toggle_group {
-  background-color: white;
+  background-color: var(--ui-background-color);
   width: fit-content;
   margin: 0 auto;
   padding: 0.4rem;
@@ -30,7 +30,7 @@ button {
 }
 
 .toggle_group_item {
-  background-color: white;
+  background-color: var(--ui-background-color);
   height: 40px;
   width: 40px;
   display: flex;
@@ -52,11 +52,11 @@ button {
 }
 
 .toggle_group_item:hover {
-  background-color: var(--violet3);
+  background-color: var(--hover-button-color);
 }
 .toggle_group_item[data-state='checked'],
 .toggle_group_item:active {
-  background-color: var(--violet5);
+  background-color: var(--active-button-color);
 }
 
 .toggle_group_item:focus {

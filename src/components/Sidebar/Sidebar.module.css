@@ -10,7 +10,7 @@
 }
 
 .sidebar_wrapper {
-  background-color: white;
+  background-color: var(--ui-background-color);
   box-shadow: 0 2px 10px var(--blackA7);
   display: flex;
   flex-direction: column;
@@ -20,9 +20,11 @@
 
 .settings_item {
   position: relative;
+  margin-bottom: 0.5rem;
 }
 
 .settings_item_label {
+  color: var(--text-primary-color);
 }
 
 .settings_menu_checkbox {
