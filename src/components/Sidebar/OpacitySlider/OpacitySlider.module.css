@@ -32,7 +32,6 @@
   width: 15px;
   height: 15px;
   background-color: var(--active-button-color);
-  box-shadow: 0 2px 10px var(--blackA7);
   border-radius: 10px;
 }
 .SliderThumb:hover {

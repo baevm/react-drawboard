@@ -28,8 +28,18 @@ export type Tool =
   | 'image'
   | 'eraser'
 
+export type Action =
+  | 'drawing'
+  | 'erasing'
+  | 'moving'
+  | 'selecting'
+  | 'resizing'
+  | 'writing'
+  | 'panning'
+  | 'uploading'
+  | 'none'
+
 export type HEX = `#${string}`
-export type Action = 'drawing' | 'erasing' | 'moving' | 'selecting' | 'resizing' | 'writing' | 'panning' | 'none'
 export type BackgroundFillStyle = 'solid' | 'hachure' | 'none'
 export type StrokeWidth = '1' | '3' | '5'
 export type FontFamily = 'SourceSansPro' | 'handDrawn'

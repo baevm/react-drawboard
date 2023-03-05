@@ -11,7 +11,7 @@
 
 .sidebar_wrapper {
   background-color: var(--ui-background-color);
-  box-shadow: 0 2px 10px var(--blackA7);
+  box-shadow: var(--button-shadow);
   display: flex;
   flex-direction: column;
   padding: 0.4rem;
@@ -37,9 +37,9 @@
   top: 0.5rem;
   margin-left: 0.5rem;
   padding: 0.2rem;
-  background-color: white;
+  background-color: var(--ui-background-color);
   border-radius: 5px;
-  box-shadow: 0 2px 10px var(--blackA7);
+  box-shadow: var(--button-shadow);
   cursor: pointer;
 }
 

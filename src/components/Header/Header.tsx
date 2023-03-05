@@ -1,26 +1,50 @@
+import { useFile } from '@/hooks/useFile'
 import { useTools } from '@/hooks/useTools'
 import { Tool } from '@/types'
+import { generateId } from '@/utils/generateId'
+import { db } from '@/utils/indexdb'
+import IndexedDbRepository from '@/utils/indexDbRepository'
 import * as RadioGroup from '@radix-ui/react-radio-group'
-import React from 'react'
+import React, { useState } from 'react'
 import { BsDiamond } from 'react-icons/bs'
 import { FiMousePointer } from 'react-icons/fi'
 import {
   IoArrowForward,
   IoBrushOutline,
-  IoEllipseOutline, IoHandRightOutline,
+  IoEllipseOutline,
+  IoHandRightOutline,
   IoImageOutline,
   IoRemove,
   IoTabletLandscapeOutline,
   IoText,
-  IoTriangleOutline
+  IoTriangleOutline,
 } from 'react-icons/io5'
 import { RiEraserLine } from 'react-icons/ri'
 import { ClearCanvasButton } from './ClearCanvasButton'
 import styles from './Header.module.css'
 import { SettingsButton } from './SettingsButton'
 
+export function readFileAsUrl(file: any) {
+  return new Promise(function (resolve, reject) {
+    let fr = new FileReader()
+
+    fr.readAsDataURL(file)
+
+    fr.onload = function () {
+      resolve(fr.result)
+    }
+
+    fr.onerror = function () {
+      reject(fr)
+    }
+  })
+}
+
 // TODO: tool label tooltip
 const Header = () => {
+  const { setFile } = useFile((state) => ({
+    setFile: state.setFile,
+  }))
   const { tool, setTool } = useTools((state) => ({
     setTool: state.setTool,
     tool: state.tool,
@@ -28,6 +52,27 @@ const Header = () => {
 
   const handleChangeTool = (value: Tool) => {
     setTool(value)
+
+    if (value === 'image') {
+      document.getElementById('fileLoad')?.click()
+    }
+  }
+
+  const handleFileUpload = async (e: React.ChangeEvent) => {
+    /* const dbRepo = new IndexedDbRepository('id') */
+
+    const id = generateId()
+    const file = document.getElementById('fileLoad')!.files[0]
+    const base64Image = await readFileAsUrl(file)
+
+    /*  await dbRepo.save({ id, file }) */
+
+    const dbId = await db.files.add({
+      id,
+      file,
+    })
+
+    setFile(base64Image)
   }
 
   return (
@@ -45,12 +90,12 @@ const Header = () => {
           {TOOLS.map(({ value, label, icon }) => (
             <RadioGroup.Item
               key={value}
-              className={`${styles.toggle_group_item} tool-${[value]}`}
-              id={'govno'}
+              className={`${styles.toggle_group_item} tool_${[value]}`}
               value={value}
               title={label}
               aria-label={label}>
               {icon}
+              {value === 'image' && <input id='fileLoad' hidden type='file' onChange={handleFileUpload} />}
             </RadioGroup.Item>
           ))}
         </RadioGroup.Root>

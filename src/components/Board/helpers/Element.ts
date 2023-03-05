@@ -122,6 +122,8 @@ export const drawElement = (roughCanvas: RoughCanvas, context: CanvasRenderingCo
       context.globalAlpha = element.strokeOpacity
       context.fillText(element.text, element.x1, element.y1)
       break
+    case 'image':
+      
     default:
       roughCanvas.draw(element)
       break

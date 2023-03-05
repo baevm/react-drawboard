@@ -62,7 +62,8 @@
   --alert-button-color: var(--red4);
   --alert-button-hover-color: var(--red5);
   --secondary-button-color: var(--mauve4);
-  --secondary-buttoh-hover-color: var(--mauve5);
+  --secondary-button-hover-color: var(--mauve5);
+  --button-shadow: 0 2px 10px var(--blackA7);
 
   /* TEXT */
   --text-primary-color: var(--mauve10);
@@ -85,7 +86,8 @@ body[data-theme='dark'] {
   --alert-button-color: var(--red6);
   --alert-button-hover-color: var(--red7);
   --secondary-button-color: var(--mauve10);
-  --secondary-buttoh-hover-color: var(--mauve11);
+  --secondary-button-hover-color: var(--mauve11);
+  --button-shadow: 0 2px 10px var(--blackA7);
 
   /* TEXT */
   --text-primary-color: #bf94ff;

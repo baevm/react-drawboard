@@ -1,7 +1,6 @@
 @import '@radix-ui/colors/blackA.css';
 @import '@radix-ui/colors/mauve.css';
 @import '@radix-ui/colors/red.css';
-@import '@radix-ui/colors/violet.css';
 
 /* reset */
 button {
@@ -74,7 +73,7 @@ button {
   color: black;
 }
 .Button.mauve:hover {
-  background-color: var(--secondary-buttoh-hover-color);
+  background-color: var(--secondary-button-hover-color);
 }
 .Button.mauve:focus {
   box-shadow: 0 0 0 2px var(--mauve7);

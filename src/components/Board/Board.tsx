@@ -3,7 +3,7 @@ import { useDrawnings } from '@/hooks/useDrawings'
 import { useResizeObserver } from '@/hooks/useResizeObserver'
 import { useTools } from '@/hooks/useTools'
 import { useZoom } from '@/hooks/useZoom'
-import { Action, Drawing, PolygonDrawing, Tool } from '@/types'
+import { Action, Drawing, PenDrawing, Point, PolygonDrawing, Tool } from '@/types'
 import { generateId } from '@/utils/generateId'
 import { getCanvas } from '@/utils/getCanvas'
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
@@ -15,10 +15,26 @@ import {
   diffPoints,
   getElementAtPoints,
   resizePoints,
-  scalePoints
+  scalePoints,
 } from './helpers/Points'
 import { cursorForPosition, eraserIcon } from './helpers/Cursor'
 import { createElement, drawElement, getElementById, getIndexOfElement } from './helpers/Element'
+import { useFile } from '@/hooks/useFile'
+
+const TOOL_ACTIONS: { [tool in Tool]: Action } = {
+  text: 'writing',
+  eraser: 'erasing',
+  select: 'selecting',
+  pan: 'panning',
+  arrow: 'drawing',
+  circle: 'drawing',
+  line: 'drawing',
+  pen: 'drawing',
+  rectangle: 'drawing',
+  rhombus: 'drawing',
+  triangle: 'drawing',
+  image: 'uploading',
+} as const
 
 const Board = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -31,6 +47,7 @@ const Board = () => {
   const { drawings, setDrawings, syncStorageDrawings } = useDrawnings()
   const { canvasScale, viewportTopLeft, handleZoom, setViewportTopLeft } = useZoom()
 
+  const { file } = useFile((state) => ({ file: state.file }))
   const [action, setAction] = useState<Action>('none')
   const [selectedElement, setSelectedElement] = useState<DrawingWithOffset | null>(null)
 
@@ -101,7 +118,7 @@ const Board = () => {
 
       case 'text':
         const { context } = getCanvas()
-        const width = context!.measureText(text).width
+        const width = context.measureText(text).width
         const height = +options.fontSize
         drawingsCopy[index] = {
           ...createElement(x1, y1, x1 + width, y1 + height, tool, id, options),
@@ -126,6 +143,7 @@ const Board = () => {
     const isSelect = tool === 'select'
     const isPan = tool === 'pan' || e.button === 1
     const isDraw = isDrawableTool(tool)
+    const isImage = tool === 'image'
 
     const { clientX, clientY } = getXY(e.clientX, e.clientY)
 
@@ -155,16 +173,8 @@ const Board = () => {
 
       if (!element) return
 
-      if (element.tool === 'pen') {
-        const offsetsX = element.points.map((point) => clientX - point.x)
-        const offsetsY = element.points.map((point) => clientY - point.y)
-
-        setSelectedElement({ ...element, offsetsX, offsetsY })
-      } else {
-        const offsetOfClickX = clientX - element.x1
-        const offsetOfClickY = clientY - element.y1
-        setSelectedElement({ ...element, offsetOfClickX, offsetOfClickY })
-      }
+      const { offsetX, offsetY } = calcOffsets(element, { x: clientX, y: clientY })
+      setSelectedElement({ ...element, offsetX, offsetY })
 
       if (element.position === 'inside') {
         setAction('moving')
@@ -180,9 +190,14 @@ const Board = () => {
 
       setDrawings([...drawings, newElement])
       setSelectedElement(newElement)
-
       setAction(tool === 'text' ? 'writing' : 'drawing')
       return
+    }
+
+    if (isImage) {
+      if (!file) return
+
+      const elementId = generateId()
     }
   }
 
@@ -225,8 +240,8 @@ const Board = () => {
 
     if (isMovingPen) {
       const newPoints = selectedElement.points.map((_: any, idx: number) => ({
-        x: clientX - selectedElement.offsetsX![idx],
-        y: clientY - selectedElement.offsetsY![idx],
+        x: clientX - selectedElement.offsetX![idx],
+        y: clientY - selectedElement.offsetY![idx],
       }))
       const drawingsCopy = [...drawings] as any
       const index = getIndexOfElement(selectedElement.id, drawings)
@@ -239,13 +254,13 @@ const Board = () => {
     }
 
     if (isMovingPolygon) {
-      const { id, x1, x2, y1, y2, tool, offsetOfClickX, offsetOfClickY } = selectedElement as any
+      const { id, x1, x2, y1, y2, tool, offsetX, offsetY } = selectedElement as any
 
       const index = getIndexOfElement(id, drawings)
       const width = x2 - x1
       const height = y2 - y1
-      const newX = clientX - offsetOfClickX
-      const newY = clientY - offsetOfClickY
+      const newX = clientX - offsetX
+      const newY = clientY - offsetY
 
       // moving text
       const text = tool === 'text' ? selectedElement!.text : null
@@ -287,8 +302,8 @@ const Board = () => {
     if (selectedElement) {
       if (
         selectedElement.tool === 'text' &&
-        clientX - selectedElement.offsetOfClickX === selectedElement.x1 &&
-        clientY - selectedElement.offsetOfClickY === selectedElement.y1
+        clientX - selectedElement.offsetX === selectedElement.x1 &&
+        clientY - selectedElement.offsetY === selectedElement.y1
       ) {
         setAction('writing')
         return
@@ -347,7 +362,7 @@ const Board = () => {
         className={styles.board_canvas}
         onPointerDown={handleMouseDown}
         onPointerMove={handleMouseMove}
-        onPointerUp={handleMouseUp}
+        onMouseUp={handleMouseUp}
         onContextMenu={handleContextMenu}
         onWheel={(e) => handleZoom(e.deltaY, 'wheel')}
         width={width * DEVICE_PIXEL_RATIO}
@@ -388,10 +403,8 @@ const Board = () => {
 export default Board
 
 type DrawingWithOffset = Drawing & {
-  offsetOfClickX?: any
-  offsetOfClickY?: any
-  offsetsX?: any[]
-  offsetsY?: any[]
+  offsetX?: any | any[]
+  offsetY?: any | any[]
 }
 
 type UpdateElement = (
@@ -404,6 +417,20 @@ type UpdateElement = (
   id: string,
   text?: any
 ) => void
+
+const calcOffsets = (element: Drawing, { x, y }: Point) => {
+  if (element.tool === 'pen') {
+    return {
+      offsetX: element.points.map((point) => x - point.x),
+      offsetY: element.points.map((point) => y - point.y),
+    }
+  } else {
+    return {
+      offsetX: x - element.x1,
+      offsetY: y - element.y1,
+    }
+  }
+}
 
 const isDrawableTool = (tool: Tool) => {
   return (

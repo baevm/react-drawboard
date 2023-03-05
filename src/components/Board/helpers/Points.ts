@@ -109,7 +109,7 @@ const posWithinDrawing = (x: number, y: number, element: any) => {
       return rightTriangle || equilateralTriangle || insideTriangle
 
     case 'pen':
-      const betweenAnyPoint = element.points.some((point: any, index: any) => {
+      const betweenAnyPoint = element.points.some((point: Point, index: number) => {
         const nextPoint = element.points[index + 1]
         if (!nextPoint) return false
         return onLine(point.x, point.y, nextPoint.x, nextPoint.y, x, y, 5) != null
