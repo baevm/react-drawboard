@@ -19,7 +19,7 @@ const Sidebar = () => {
   const isPolygonSettings = tool === 'circle' || tool === 'rectangle' || tool === 'triangle' || tool === 'rhombus'
   const isStrokeWidth = isPolygonSettings || tool === 'pen' || tool === 'line' || tool === 'arrow'
   const isTextSettings = tool === 'text'
-  const isSidebarVisible = tool !== 'pan' && tool !== 'select' && tool !== 'eraser'
+  const isSidebarVisible = tool !== 'pan' && tool !== 'select' && tool !== 'eraser' && tool !== 'image'
 
   const handleLineColorChange = (color: HEX) => {
     setOptions({ stroke: color })

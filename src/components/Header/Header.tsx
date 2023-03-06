@@ -1,50 +1,15 @@
-import { useFile } from '@/hooks/useFile'
+import { TOOLS } from '@/constants/tools'
 import { useTools } from '@/hooks/useTools'
 import { Tool } from '@/types'
-import { generateId } from '@/utils/generateId'
-import { db } from '@/utils/indexdb'
-import IndexedDbRepository from '@/utils/indexDbRepository'
 import * as RadioGroup from '@radix-ui/react-radio-group'
-import React, { useState } from 'react'
-import { BsDiamond } from 'react-icons/bs'
-import { FiMousePointer } from 'react-icons/fi'
-import {
-  IoArrowForward,
-  IoBrushOutline,
-  IoEllipseOutline,
-  IoHandRightOutline,
-  IoImageOutline,
-  IoRemove,
-  IoTabletLandscapeOutline,
-  IoText,
-  IoTriangleOutline,
-} from 'react-icons/io5'
-import { RiEraserLine } from 'react-icons/ri'
 import { ClearCanvasButton } from './ClearCanvasButton'
 import styles from './Header.module.css'
 import { SettingsButton } from './SettingsButton'
 
-export function readFileAsUrl(file: any) {
-  return new Promise(function (resolve, reject) {
-    let fr = new FileReader()
 
-    fr.readAsDataURL(file)
-
-    fr.onload = function () {
-      resolve(fr.result)
-    }
-
-    fr.onerror = function () {
-      reject(fr)
-    }
-  })
-}
 
 // TODO: tool label tooltip
 const Header = () => {
-  const { setFile } = useFile((state) => ({
-    setFile: state.setFile,
-  }))
   const { tool, setTool } = useTools((state) => ({
     setTool: state.setTool,
     tool: state.tool,
@@ -53,26 +18,7 @@ const Header = () => {
   const handleChangeTool = (value: Tool) => {
     setTool(value)
 
-    if (value === 'image') {
-      document.getElementById('fileLoad')?.click()
-    }
-  }
 
-  const handleFileUpload = async (e: React.ChangeEvent) => {
-    /* const dbRepo = new IndexedDbRepository('id') */
-
-    const id = generateId()
-    const file = document.getElementById('fileLoad')!.files[0]
-    const base64Image = await readFileAsUrl(file)
-
-    /*  await dbRepo.save({ id, file }) */
-
-    const dbId = await db.files.add({
-      id,
-      file,
-    })
-
-    setFile(base64Image)
   }
 
   return (
@@ -95,7 +41,7 @@ const Header = () => {
               title={label}
               aria-label={label}>
               {icon}
-              {value === 'image' && <input id='fileLoad' hidden type='file' onChange={handleFileUpload} />}
+              {value === 'image' && <input id='fileLoad' hidden type='file' /* onChange={handleFileUpload} */ />}
             </RadioGroup.Item>
           ))}
         </RadioGroup.Root>
@@ -108,18 +54,3 @@ const Header = () => {
 }
 
 export default Header
-
-const TOOLS: { value: Tool; label: string; icon: React.ReactNode }[] = [
-  { value: 'select', label: 'Select', icon: <FiMousePointer /> },
-  { value: 'pan', label: 'Move', icon: <IoHandRightOutline /> },
-  { value: 'pen', label: 'Pen', icon: <IoBrushOutline /> },
-  { value: 'line', label: 'Line', icon: <IoRemove /> },
-  { value: 'circle', label: 'Circle', icon: <IoEllipseOutline /> },
-  { value: 'rectangle', label: 'Rectangle', icon: <IoTabletLandscapeOutline /> },
-  { value: 'triangle', label: 'Triangle', icon: <IoTriangleOutline /> },
-  { value: 'rhombus', label: 'Rhombus', icon: <BsDiamond /> },
-  { value: 'arrow', label: 'Arrow', icon: <IoArrowForward /> },
-  { value: 'text', label: 'Text', icon: <IoText /> },
-  { value: 'image', label: 'Image', icon: <IoImageOutline /> },
-  { value: 'eraser', label: 'Eraser', icon: <RiEraserLine /> },
-]

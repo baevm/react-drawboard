@@ -1,7 +1,9 @@
-import { DrawingOptions, Drawings, HEX, PenDrawing, PolygonDrawing, TextDrawing, Tool } from '@/types'
+import { DrawingOptions, Drawings, HEX, ImageDrawing, PenDrawing, PolygonDrawing, TextDrawing, Tool } from '@/types'
+import { db } from '@/utils/indexdb'
 import getStroke from 'perfect-freehand'
 import rough from 'roughjs'
 import { RoughCanvas } from 'roughjs/bin/canvas'
+import { eraserIcon } from './Cursor'
 
 const roughGenerator = rough.generator()
 
@@ -28,6 +30,18 @@ export const createElement: CreateElement = (x1, y1, x2, y2, tool, id, options) 
         y2,
         id,
         text: '',
+        ...drawingOptions,
+      }
+
+    case 'image':
+      return {
+        tool,
+        x1,
+        y1,
+        x2,
+        y2,
+        id,
+        dataURL: '',
         ...drawingOptions,
       }
 
@@ -105,7 +119,9 @@ export const createElement: CreateElement = (x1, y1, x2, y2, tool, id, options) 
   return { tool, x1, y1, x2, y2, id, options: roughElement.options, sets: roughElement.sets, shape: roughElement.shape }
 }
 
-export const drawElement = (roughCanvas: RoughCanvas, context: CanvasRenderingContext2D, element: any) => {
+const cachedFiles: any = []
+
+export const drawElement = async (roughCanvas: RoughCanvas, context: CanvasRenderingContext2D, element: any) => {
   switch (element.tool) {
     case 'pen':
       const stroke = getSvgPathFromStroke(
@@ -123,7 +139,26 @@ export const drawElement = (roughCanvas: RoughCanvas, context: CanvasRenderingCo
       context.fillText(element.text, element.x1, element.y1)
       break
     case 'image':
-      
+      let cachedImage = cachedFiles.find((item: any) => item.id === element.id)
+
+      if (cachedImage) {
+        let image = new Image()
+        image.src = cachedImage.dataURL
+        context.drawImage(image, element.x1, element.y1)
+      } else {
+        let image = new Image()
+
+        let base64File = await db.files.where('id').equals(element.id).toArray()
+        cachedFiles.push(base64File[0])
+
+        image.src = base64File[0].dataURL
+
+        image.onload = function () {
+          context.drawImage(image, element.x1, element.y1)
+        }
+      }
+      break
+
     default:
       roughCanvas.draw(element)
       break
@@ -215,4 +250,4 @@ type CreateElement = (
   tool: Tool,
   id: string,
   options: DrawingOptions
-) => PenDrawing | PolygonDrawing | TextDrawing
+) => PenDrawing | PolygonDrawing | TextDrawing | ImageDrawing

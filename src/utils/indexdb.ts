@@ -1,17 +1,16 @@
+import { INDEXDB_NAME } from '@/constants'
 import Dexie, { Table } from 'dexie'
 
 export interface File {
   id?: string
-  file: any
+  dataURL: any
 }
 
 export class MySubClassedDexie extends Dexie {
-  // 'friends' is added by dexie when declaring the stores()
-  // We just tell the typing system this is the case
   files!: Table<File>
 
   constructor() {
-    super('fileStore')
+    super(INDEXDB_NAME)
     this.version(1).stores({
       files: '++id', // Primary key and indexed props
     })

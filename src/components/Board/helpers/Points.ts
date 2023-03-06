@@ -119,6 +119,9 @@ const posWithinDrawing = (x: number, y: number, element: any) => {
     case 'text':
       return x >= x1 && x <= x2 && y >= y1 && y <= y2 ? 'inside' : null
 
+    case 'image':
+      return null
+
     default:
       throw new Error(`Type not recognised: ${tool}`)
   }

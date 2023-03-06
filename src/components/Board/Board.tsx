@@ -1,14 +1,18 @@
 import { DEVICE_PIXEL_RATIO } from '@/constants'
-import { useDrawnings } from '@/hooks/useDrawings'
+import { useDrawings } from '@/hooks/useDrawings'
 import { useResizeObserver } from '@/hooks/useResizeObserver'
 import { useTools } from '@/hooks/useTools'
 import { useZoom } from '@/hooks/useZoom'
-import { Action, Drawing, PenDrawing, Point, PolygonDrawing, Tool } from '@/types'
+import { Action, Drawing, Point, PolygonDrawing, Tool } from '@/types'
 import { generateId } from '@/utils/generateId'
 import { getCanvas } from '@/utils/getCanvas'
+import { db } from '@/utils/indexdb'
+import { fileOpen } from 'browser-fs-access'
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import rough from 'roughjs'
 import styles from './Board.module.css'
+import { cursorForPosition, eraserIcon } from './helpers/Cursor'
+import { createElement, drawElement, getElementById, getIndexOfElement } from './helpers/Element'
 import {
   addPoints,
   adjustDrawingPoints,
@@ -17,37 +21,19 @@ import {
   resizePoints,
   scalePoints,
 } from './helpers/Points'
-import { cursorForPosition, eraserIcon } from './helpers/Cursor'
-import { createElement, drawElement, getElementById, getIndexOfElement } from './helpers/Element'
-import { useFile } from '@/hooks/useFile'
-
-const TOOL_ACTIONS: { [tool in Tool]: Action } = {
-  text: 'writing',
-  eraser: 'erasing',
-  select: 'selecting',
-  pan: 'panning',
-  arrow: 'drawing',
-  circle: 'drawing',
-  line: 'drawing',
-  pen: 'drawing',
-  rectangle: 'drawing',
-  rhombus: 'drawing',
-  triangle: 'drawing',
-  image: 'uploading',
-} as const
 
 const Board = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const textAreaRef = useRef<HTMLTextAreaElement>(null)
-  const { tool, options } = useTools((state) => ({
+  const { tool, options, setTool } = useTools((state) => ({
     tool: state.tool,
     options: state.options,
+    setTool: state.setTool,
   }))
   const { width, height } = useResizeObserver()
-  const { drawings, setDrawings, syncStorageDrawings } = useDrawnings()
+  const { drawings, setDrawings, syncStorageDrawings } = useDrawings()
   const { canvasScale, viewportTopLeft, handleZoom, setViewportTopLeft } = useZoom()
 
-  const { file } = useFile((state) => ({ file: state.file }))
   const [action, setAction] = useState<Action>('none')
   const [selectedElement, setSelectedElement] = useState<DrawingWithOffset | null>(null)
 
@@ -71,7 +57,9 @@ const Board = () => {
         continue
       }
 
+      /* requestAnimationFrame(function () { */
       drawElement(roughCanvas, context, element)
+      /*  }) */
     }
   }, [drawings, width, height, selectedElement, action, canvasScale, offset, viewportTopLeft])
 
@@ -195,9 +183,21 @@ const Board = () => {
     }
 
     if (isImage) {
-      if (!file) return
+      async function setImageElement() {
+        const base64Image = await openBase64File()
+        const id = generateId()
+        await db.files.add({
+          id,
+          dataURL: base64Image,
+        })
+        const element = { tool, id, x1: clientX, y1: clientY }
 
-      const elementId = generateId()
+        setDrawings([...drawings, element as any])
+        setTool('pan')
+        return
+      }
+
+      setImageElement()
     }
   }
 
@@ -455,4 +455,33 @@ const isPolygon = (tool: Tool | undefined) => {
     tool === 'rhombus' ||
     tool === 'text'
   )
+}
+
+export async function openBase64File() {
+  const blob = await fileOpen({
+    mimeTypes: ['image/*'],
+    extensions: ['.png', '.jpg', '.jpeg', '.webp'],
+  }).catch((e) => console.error(e))
+
+  if (!blob) return
+
+  const base64Image = await readFileAsUrl(blob)
+
+  return base64Image
+}
+
+export function readFileAsUrl(file: any) {
+  return new Promise(function (resolve, reject) {
+    let fr = new FileReader()
+
+    fr.readAsDataURL(file)
+
+    fr.onload = function () {
+      resolve(fr.result)
+    }
+
+    fr.onerror = function () {
+      reject(fr)
+    }
+  })
 }

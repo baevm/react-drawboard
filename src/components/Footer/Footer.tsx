@@ -1,11 +1,11 @@
-import { useDrawnings } from '@/hooks/useDrawings'
+import { useDrawings } from '@/hooks/useDrawings'
 import { useZoom } from '@/hooks/useZoom'
 import { IoArrowRedoOutline, IoArrowUndoOutline } from 'react-icons/io5'
 import { RxZoomIn, RxZoomOut } from 'react-icons/rx'
 import styles from './Footer.module.css'
 
 const Footer = () => {
-  const { undoDraw, redoDraw } = useDrawnings()
+  const { undoDraw, redoDraw } = useDrawings()
   const { canvasScale, handleZoom, resetZoom } = useZoom()
 
   const handleZoomIn = () => {

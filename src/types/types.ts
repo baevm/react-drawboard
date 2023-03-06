@@ -89,7 +89,14 @@ export type PenDrawing = BaseDrawing & {
   points: { x: number; y: number }[]
 }
 
-export type Drawing = StrictUnion<TextDrawing | PolygonDrawing | PenDrawing>
+export type ImageDrawing = BaseDrawing & {
+  tool: 'image'
+  dataURL: string
+  x1: number
+  y1: number
+}
+
+export type Drawing = StrictUnion<TextDrawing | PolygonDrawing | PenDrawing | ImageDrawing>
 export type Drawings = Drawing[]
 
 type UnionKeys<T> = T extends T ? keyof T : never

@@ -1,4 +1,5 @@
 import { Drawings } from '@/types'
+import { db } from '@/utils/indexdb'
 import { useEffect } from 'react'
 import { create } from 'zustand'
 
@@ -59,7 +60,7 @@ const drawingsStore = create<DrawingsStore>((set, get) => ({
     }),
 }))
 
-export const useDrawnings = () => {
+export const useDrawings = () => {
   const { drawings, setStoreDrawings, undoDraw, redoDraw } = drawingsStore((state) => ({
     drawings: state.drawings,
     setStoreDrawings: state.setStoreDrawings,
@@ -85,6 +86,7 @@ export const useDrawnings = () => {
   const clearDrawings = () => {
     setDrawings([])
     syncStorageDrawings([])
+    db.files.clear()
   }
 
   return { drawings, setDrawings, syncStorageDrawings, clearDrawings, undoDraw, redoDraw }
