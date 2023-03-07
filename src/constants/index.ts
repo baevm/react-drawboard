@@ -2,6 +2,8 @@ import { Action, Tool } from '@/types'
 
 export const DEVICE_PIXEL_RATIO = window.devicePixelRatio
 export const INDEXDB_NAME = 'fileStore'
+export const LOCALSTORAGE_KEY = 'drawings'
+
 
 const TOOL_ACTIONS: { [tool in Tool]: Action } = {
   text: 'writing',

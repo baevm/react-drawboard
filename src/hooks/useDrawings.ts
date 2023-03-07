@@ -1,9 +1,8 @@
+import { LOCALSTORAGE_KEY } from '@/constants'
 import { Drawings } from '@/types'
 import { db } from '@/utils/indexdb'
 import { useEffect } from 'react'
 import { create } from 'zustand'
-
-const LOCALSTORAGE_KEY = 'drawings'
 
 interface DrawingsStore {
   drawings: Drawings

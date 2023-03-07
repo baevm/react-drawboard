@@ -1,9 +1,18 @@
-import { DrawingOptions, Drawings, HEX, ImageDrawing, PenDrawing, PolygonDrawing, TextDrawing, Tool } from '@/types'
+import {
+  Drawing,
+  DrawingOptions,
+  Drawings,
+  HEX,
+  ImageDrawing,
+  PenDrawing,
+  PolygonDrawing,
+  TextDrawing,
+  Tool,
+} from '@/types'
 import { db } from '@/utils/indexdb'
 import getStroke from 'perfect-freehand'
 import rough from 'roughjs'
 import { RoughCanvas } from 'roughjs/bin/canvas'
-import { eraserIcon } from './Cursor'
 
 const roughGenerator = rough.generator()
 
@@ -18,7 +27,7 @@ export const createElement: CreateElement = (x1, y1, x2, y2, tool, id, options) 
         tool,
         points: [{ x: x2, y: y2 }],
         id,
-        ...drawingOptions,
+        options: drawingOptions,
       }
 
     case 'text':
@@ -30,7 +39,7 @@ export const createElement: CreateElement = (x1, y1, x2, y2, tool, id, options) 
         y2,
         id,
         text: '',
-        ...drawingOptions,
+        options: drawingOptions,
       }
 
     case 'image':
@@ -42,7 +51,7 @@ export const createElement: CreateElement = (x1, y1, x2, y2, tool, id, options) 
         y2,
         id,
         dataURL: '',
-        ...drawingOptions,
+        options: drawingOptions,
       }
 
     case 'circle':
@@ -119,16 +128,20 @@ export const createElement: CreateElement = (x1, y1, x2, y2, tool, id, options) 
   return { tool, x1, y1, x2, y2, id, options: roughElement.options, sets: roughElement.sets, shape: roughElement.shape }
 }
 
-const cachedFiles: any = []
-
+const cachedFiles: { [key: string]: any } = {}
 export const drawElement = async (roughCanvas: RoughCanvas, context: CanvasRenderingContext2D, element: any) => {
   switch (element.tool) {
     case 'pen':
       const stroke = getSvgPathFromStroke(
-        getStroke(element.points, { size: 4 + +element.strokeWidth, thinning: 0.5, smoothing: 0.5, streamline: 0.5 })
+        getStroke(element.points, {
+          size: 4 + +element.options.strokeWidth,
+          thinning: 0.5,
+          smoothing: 0.5,
+          streamline: 0.5,
+        })
       )
-      context.fillStyle = element.stroke
-      context.globalAlpha = element.strokeOpacity
+      context.fillStyle = element.options.stroke
+      context.globalAlpha = element.options.strokeOpacity
       context.fill(new Path2D(stroke))
       break
     case 'text':
@@ -139,29 +152,45 @@ export const drawElement = async (roughCanvas: RoughCanvas, context: CanvasRende
       context.fillText(element.text, element.x1, element.y1)
       break
     case 'image':
-      let cachedImage = cachedFiles.find((item: any) => item.id === element.id)
+      const image = await getMemoizedImage(element.id)
 
-      if (cachedImage) {
-        let image = new Image()
-        image.src = cachedImage.dataURL
-        context.drawImage(image, element.x1, element.y1)
-      } else {
-        let image = new Image()
-
-        let base64File = await db.files.where('id').equals(element.id).toArray()
-        cachedFiles.push(base64File[0])
-
-        image.src = base64File[0].dataURL
-
-        image.onload = function () {
-          context.drawImage(image, element.x1, element.y1)
-        }
-      }
+      context.drawImage(image, element.x1, element.y1)
       break
 
     default:
       roughCanvas.draw(element)
       break
+  }
+}
+
+const loadImage = memoize(async (id: string) => {
+  const res = await db.files.where('id').equals(id).first()
+
+  return new Promise((resolve, reject) => {
+    const image = new Image()
+
+    image.onload = () => {
+      resolve(image)
+    }
+
+    image.onerror = () => {
+      reject(image)
+    }
+
+    image.src = res?.dataURL as any
+  })
+})
+
+const getMemoizedImage: (v: string) => Promise<any> = memoize(loadImage)
+
+function memoize(fn: any) {
+  let cache: { [key: string]: any } = {}
+
+  return async function () {
+    const arg = arguments[0]
+
+    cache[arg] = cache[arg] || (await fn.apply(undefined, arguments))
+    return cache[arg]
   }
 }
 
@@ -180,6 +209,7 @@ const getToolOptions = (tool: Tool, options: DrawingOptions) => {
       return {
         stroke: options.strokeOpacity === 1 ? options.stroke : addAlpha(options.stroke, options.strokeOpacity),
         strokeWidth: +options.strokeWidth,
+        strokeOpacity: options.strokeOpacity,
       }
 
     case 'text':
@@ -187,6 +217,7 @@ const getToolOptions = (tool: Tool, options: DrawingOptions) => {
         stroke: options.strokeOpacity === 1 ? options.stroke : addAlpha(options.stroke, options.strokeOpacity),
         fontSize: options.fontSize,
         fontFamily: options.fontFamily,
+        strokeOpacity: options.strokeOpacity,
       }
 
     case 'pen':
@@ -200,8 +231,9 @@ const getToolOptions = (tool: Tool, options: DrawingOptions) => {
       return {
         stroke: options.strokeOpacity === 1 ? options.stroke : addAlpha(options.stroke, options.strokeOpacity),
         strokeWidth: +options.strokeWidth,
-        fill: options.backgroundFillStyle !== 'none' ? options.backgroundColor : undefined,
-        fillStyle: options.backgroundFillStyle !== 'none' ? options.backgroundFillStyle : undefined,
+        fill: options.fillStyle !== 'none' ? options.fill : undefined,
+        fillStyle: options.fillStyle !== 'none' ? options.fillStyle : undefined,
+        strokeOpacity: options.strokeOpacity,
       }
   }
 }

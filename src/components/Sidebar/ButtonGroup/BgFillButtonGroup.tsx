@@ -1,5 +1,5 @@
 import { useTools } from '@/hooks/useTools'
-import { BackgroundFillStyle } from '@/types'
+import { FillStyle } from '@/types'
 import * as ToggleGroup from '@radix-ui/react-toggle-group'
 import { IoSquare } from 'react-icons/io5'
 import { TbSquare, TbSquaresFilled } from 'react-icons/tb'
@@ -12,8 +12,8 @@ const BgFillButtonGroup = () => {
     setOptions: state.setOptions,
   }))
 
-  const handleChange = (value: BackgroundFillStyle) => {
-    setOptions({ backgroundFillStyle: value })
+  const handleChange = (value: FillStyle) => {
+    setOptions({ fillStyle: value })
   }
 
   return (
@@ -23,7 +23,7 @@ const BgFillButtonGroup = () => {
       <ToggleGroup.Root
         className={styles.ToggleGroup}
         type='single'
-        defaultValue={options.backgroundFillStyle}
+        defaultValue={options.fillStyle}
         onValueChange={handleChange}
         aria-label='Background fill style'>
         <ToggleGroup.Item className={styles.ToggleGroupItem} value='none' aria-label='none' title='No fill'>

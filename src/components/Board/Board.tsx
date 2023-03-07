@@ -3,7 +3,7 @@ import { useDrawings } from '@/hooks/useDrawings'
 import { useResizeObserver } from '@/hooks/useResizeObserver'
 import { useTools } from '@/hooks/useTools'
 import { useZoom } from '@/hooks/useZoom'
-import { Action, Drawing, Point, PolygonDrawing, Tool } from '@/types'
+import { Action, Drawing, DrawingOptions, Point, PolygonDrawing, Tool } from '@/types'
 import { generateId } from '@/utils/generateId'
 import { getCanvas } from '@/utils/getCanvas'
 import { db } from '@/utils/indexdb'
@@ -38,7 +38,6 @@ const Board = () => {
   const [selectedElement, setSelectedElement] = useState<DrawingWithOffset | null>(null)
 
   const [offset, setOffset] = useState({ x: 0, y: 0 })
-  const isResetRef = useRef(false)
   const lastMousePosRef = useRef({ x: 0, y: 0 })
   const lastOffsetRef = useRef({ x: 0, y: 0 })
 
@@ -57,9 +56,7 @@ const Board = () => {
         continue
       }
 
-      /* requestAnimationFrame(function () { */
       drawElement(roughCanvas, context, element)
-      /*  }) */
     }
   }, [drawings, width, height, selectedElement, action, canvasScale, offset, viewportTopLeft])
 
@@ -71,7 +68,6 @@ const Board = () => {
       context.translate(offsetDiff.x, offsetDiff.y)
       const diffPointCoords = diffPoints(viewportTopLeft, offsetDiff)
       setViewportTopLeft(diffPointCoords)
-      isResetRef.current = false
     }
   }, [offset, canvasScale])
 
@@ -96,7 +92,7 @@ const Board = () => {
   }
 
   // update element when drawing
-  const updateElement: UpdateElement = (x1, y1, x2, y2, tool, index, id, text) => {
+  const updateElement: UpdateElement = (x1, y1, x2, y2, tool, index, id, oldOptions, text) => {
     const drawingsCopy = [...drawings] as any
 
     switch (tool) {
@@ -107,15 +103,15 @@ const Board = () => {
       case 'text':
         const { context } = getCanvas()
         const width = context.measureText(text).width
-        const height = +options.fontSize
+        const height = +oldOptions.fontSize
         drawingsCopy[index] = {
-          ...createElement(x1, y1, x1 + width, y1 + height, tool, id, options),
+          ...createElement(x1, y1, x1 + width, y1 + height, tool, id, oldOptions),
           text,
         }
         break
 
       default:
-        drawingsCopy[index] = createElement(x1, y1, x2, y2, tool, id, options)
+        drawingsCopy[index] = createElement(x1, y1, x2, y2, tool, id, oldOptions)
         break
     }
 
@@ -231,10 +227,12 @@ const Board = () => {
     }
 
     if (isDrawing) {
+      // get index from last element
+      // because we just added new element
       const index = drawings.length - 1
-      const { x1, y1, id } = drawings[index] as any
+      const { x1, y1, id, options } = drawings[index] as any
 
-      updateElement(x1, y1, clientX, clientY, tool, index, id)
+      updateElement(x1, y1, clientX, clientY, tool, index, id, options)
       return
     }
 
@@ -254,7 +252,7 @@ const Board = () => {
     }
 
     if (isMovingPolygon) {
-      const { id, x1, x2, y1, y2, tool, offsetX, offsetY } = selectedElement as any
+      const { id, x1, x2, y1, y2, tool, offsetX, offsetY, options } = selectedElement as any
 
       const index = getIndexOfElement(id, drawings)
       const width = x2 - x1
@@ -265,12 +263,13 @@ const Board = () => {
       // moving text
       const text = tool === 'text' ? selectedElement!.text : null
 
-      updateElement(newX, newY, newX + width, newY + height, tool, index, id, text)
+      updateElement(newX, newY, newX + width, newY + height, tool, index, id, options, text)
       return
     }
 
     if (isResizing) {
-      const { id, tool, position, x1: oldX1, y1: oldY1, x2: oldX2, y2: oldY2 } = selectedElement as any
+      const { id, tool, position, x1: oldX1, y1: oldY1, x2: oldX2, y2: oldY2, options } = selectedElement as any
+
       const points = {
         x1: oldX1,
         y1: oldY1,
@@ -280,7 +279,7 @@ const Board = () => {
       const index = getIndexOfElement(id, drawings)
       const { x1, y1, x2, y2 } = resizePoints(clientX, clientY, position, points)
 
-      updateElement(x1, y1, x2, y2, tool, index, id)
+      updateElement(x1, y1, x2, y2, tool, index, id, options)
       return
     }
 
@@ -311,11 +310,11 @@ const Board = () => {
 
       const id = selectedElement.id
       const index = drawings.findIndex((element) => element.id === id)
-      const element = getElementById(id, drawings) as PolygonDrawing
+      const element = getElementById(id, drawings) as any
 
       if ((action === 'drawing' || action === 'resizing') && isPolygon(element.tool)) {
         const { x1, y1, x2, y2 } = adjustDrawingPoints(element)
-        updateElement(x1, y1, x2, y2, element.tool, index, id)
+        updateElement(x1, y1, x2, y2, element.tool, index, id, element.options)
       }
     }
 
@@ -325,13 +324,13 @@ const Board = () => {
   }
 
   const handleBlur = (e: any) => {
-    const { id, x1, y1, tool } = selectedElement as any
+    const { id, x1, y1, tool, options } = selectedElement as any
     const text = e.target.value
     setAction('none')
     setSelectedElement(null)
 
     const index = getIndexOfElement(id, drawings)
-    updateElement(x1, y1, null as any, null as any, tool, index, id, text)
+    updateElement(x1, y1, null as any, null as any, tool, index, id, options, text)
   }
 
   const handleContextMenu = (e: any) => {
@@ -415,6 +414,7 @@ type UpdateElement = (
   tool: Tool,
   index: number,
   id: string,
+  oldOptions: DrawingOptions,
   text?: any
 ) => void
 

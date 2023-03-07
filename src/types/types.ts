@@ -40,15 +40,15 @@ export type Action =
   | 'none'
 
 export type HEX = `#${string}`
-export type BackgroundFillStyle = 'solid' | 'hachure' | 'none'
+export type FillStyle = 'solid' | 'hachure' | 'none'
 export type StrokeWidth = '1' | '3' | '5'
 export type FontFamily = 'SourceSansPro' | 'handDrawn'
 export type FontSize = '14' | '24' | '32'
 
 export type DrawingOptions = {
   stroke: HEX
-  backgroundColor: HEX
-  backgroundFillStyle: BackgroundFillStyle
+  fill: HEX
+  fillStyle: FillStyle
   strokeWidth: StrokeWidth
   strokeOpacity: number
   fontFamily: FontFamily

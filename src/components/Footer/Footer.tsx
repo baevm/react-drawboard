@@ -1,18 +1,24 @@
 import { useDrawings } from '@/hooks/useDrawings'
 import { useZoom } from '@/hooks/useZoom'
+import { useHotkeys } from 'react-hotkeys-hook'
 import { IoArrowRedoOutline, IoArrowUndoOutline } from 'react-icons/io5'
 import { RxZoomIn, RxZoomOut } from 'react-icons/rx'
 import styles from './Footer.module.css'
 
+const ZOOMIN_VALUE = -100
+const ZOOMOUT_VALUE = 100
+
 const Footer = () => {
   const { undoDraw, redoDraw } = useDrawings()
   const { canvasScale, handleZoom, resetZoom } = useZoom()
+  useHotkeys('ctrl+z', undoDraw)
+  useHotkeys('ctrl+y', redoDraw)
 
   const handleZoomIn = () => {
-    handleZoom(-100, 'click')
+    handleZoom(ZOOMIN_VALUE, 'click')
   }
   const handleZoomOut = () => {
-    handleZoom(100, 'click')
+    handleZoom(ZOOMOUT_VALUE, 'click')
   }
 
   return (

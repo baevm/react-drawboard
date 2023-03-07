@@ -26,7 +26,7 @@ const Sidebar = () => {
   }
 
   const handleBgColorChange = (color: HEX) => {
-    setOptions({ backgroundColor: color })
+    setOptions({ fill: color })
   }
 
   if (!isSidebarVisible) {
@@ -70,11 +70,7 @@ const Sidebar = () => {
                 <BgFillButtonGroup />
               </div>
               <div className={styles.settings_item}>
-                <ColorPicker
-                  label='Background color'
-                  initialColor={options.backgroundColor}
-                  onChange={handleBgColorChange}
-                />
+                <ColorPicker label='Background color' initialColor={options.fill} onChange={handleBgColorChange} />
               </div>
             </>
           )}

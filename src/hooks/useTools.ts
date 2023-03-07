@@ -15,10 +15,10 @@ export const useTools = create<UseTools>()(
       tool: 'pen',
       options: {
         stroke: '#000000',
-        backgroundColor: '#ffffff',
+        fill: '#ffffff',
         strokeWidth: '1',
         strokeOpacity: 1,
-        backgroundFillStyle: 'none',
+        fillStyle: 'none',
         fontFamily: 'SourceSansPro',
         fontSize: '24',
       },
