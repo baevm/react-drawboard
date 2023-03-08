@@ -13,7 +13,7 @@ export const useMousePosition = () => {
     /* window.addEventListener('wheel', handleUpdateMouse) */
     return () => {
       window.removeEventListener('mousemove', handleUpdateMouse)
-     /*  window.removeEventListener('wheel', handleUpdateMouse) */
+      /*  window.removeEventListener('wheel', handleUpdateMouse) */
     }
   }, [])
 

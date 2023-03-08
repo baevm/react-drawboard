@@ -1,4 +1,4 @@
-import { Drawings, Point, PointPosition, PolygonDrawing } from '@/types'
+import { Drawing, Drawings, Point, PointPosition, PolygonDrawing } from '@/types'
 
 export const resizePoints = (
   clientX: number,
@@ -57,6 +57,20 @@ export const adjustDrawingPoints = (element: PolygonDrawing) => {
   return { x1, y1, x2, y2 }
 }
 
+export const calcElementOffsets = (element: Drawing, { x, y }: Point) => {
+  if (element.tool === 'pen') {
+    return {
+      offsetX: element.points.map((point) => x - point.x),
+      offsetY: element.points.map((point) => y - point.y),
+    }
+  } else {
+    return {
+      offsetX: x - element.x1,
+      offsetY: y - element.y1,
+    }
+  }
+}
+
 export function scalePoints(p1: Point, scale: number) {
   return { x: p1.x / scale, y: p1.y / scale }
 }
@@ -69,7 +83,7 @@ export function diffPoints(p1: Point, p2: Point) {
   return { x: p1.x - p2.x, y: p1.y - p2.y }
 }
 
-const posWithinDrawing = (x: number, y: number, element: any) => {
+const posWithinDrawing = (x: number, y: number, element: Drawing) => {
   const { tool, x1, x2, y1, y2 } = element
 
   switch (tool) {
@@ -139,5 +153,4 @@ const nearPoint = (x: number, y: number, x1: number, y1: number, name: PointPosi
   return Math.abs(x - x1) < 5 && Math.abs(y - y1) < 5 ? name : null
 }
 
-const distance = (a: { x: number; y: number }, b: { x: number; y: number }) =>
-  Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2))
+const distance = (a: Point, b: Point) => Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2))

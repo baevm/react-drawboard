@@ -4,10 +4,10 @@ import { useResizeObserver } from '@/hooks/useResizeObserver'
 import { useTools } from '@/hooks/useTools'
 import { useZoom } from '@/hooks/useZoom'
 import { Action, Drawing, DrawingOptions, Point, PolygonDrawing, Tool } from '@/types'
+import { openBase64File } from '@/utils/files'
 import { generateId } from '@/utils/generateId'
 import { getCanvas } from '@/utils/getCanvas'
 import { db } from '@/utils/indexdb'
-import { fileOpen } from 'browser-fs-access'
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import rough from 'roughjs'
 import styles from './Board.module.css'
@@ -16,6 +16,7 @@ import { createElement, drawElement, getElementById, getIndexOfElement } from '.
 import {
   addPoints,
   adjustDrawingPoints,
+  calcElementOffsets,
   diffPoints,
   getElementAtPoints,
   resizePoints,
@@ -116,6 +117,7 @@ const Board = () => {
     }
 
     setDrawings(drawingsCopy)
+    return
   }
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -157,7 +159,7 @@ const Board = () => {
 
       if (!element) return
 
-      const { offsetX, offsetY } = calcOffsets(element, { x: clientX, y: clientY })
+      const { offsetX, offsetY } = calcElementOffsets(element, { x: clientX, y: clientY })
       setSelectedElement({ ...element, offsetX, offsetY })
 
       if (element.position === 'inside') {
@@ -418,20 +420,6 @@ type UpdateElement = (
   text?: any
 ) => void
 
-const calcOffsets = (element: Drawing, { x, y }: Point) => {
-  if (element.tool === 'pen') {
-    return {
-      offsetX: element.points.map((point) => x - point.x),
-      offsetY: element.points.map((point) => y - point.y),
-    }
-  } else {
-    return {
-      offsetX: x - element.x1,
-      offsetY: y - element.y1,
-    }
-  }
-}
-
 const isDrawableTool = (tool: Tool) => {
   return (
     tool === 'pen' ||
@@ -455,33 +443,4 @@ const isPolygon = (tool: Tool | undefined) => {
     tool === 'rhombus' ||
     tool === 'text'
   )
-}
-
-export async function openBase64File() {
-  const blob = await fileOpen({
-    mimeTypes: ['image/*'],
-    extensions: ['.png', '.jpg', '.jpeg', '.webp'],
-  }).catch((e) => console.error(e))
-
-  if (!blob) return
-
-  const base64Image = await readFileAsUrl(blob)
-
-  return base64Image
-}
-
-export function readFileAsUrl(file: any) {
-  return new Promise(function (resolve, reject) {
-    let fr = new FileReader()
-
-    fr.readAsDataURL(file)
-
-    fr.onload = function () {
-      resolve(fr.result)
-    }
-
-    fr.onerror = function () {
-      reject(fr)
-    }
-  })
 }

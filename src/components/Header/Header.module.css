@@ -81,6 +81,10 @@ button {
     height: 30px;
   }
 
+  .toggle_group_item_key {
+    visibility: hidden;
+  }
+
   .header_settings {
     flex-direction: column;
   }

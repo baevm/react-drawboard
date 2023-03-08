@@ -1,11 +1,20 @@
+import { useDrawings } from '@/hooks/useDrawings'
 import { useTheme } from '@/hooks/useTheme'
+import { openJsonFile } from '@/utils/files'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { IoEllipsisHorizontal, IoMoonOutline, IoSunnyOutline } from 'react-icons/io5'
 import styles from './SettingsButton.module.css'
 
 export const SettingsButton = () => {
+  const { setDrawings } = useDrawings()
   const { theme, changeTheme } = useTheme()
- 
+
+  async function handleOpenFile() {
+    const file = await openJsonFile()
+    const drawings = JSON.parse(file as any).drawings
+    setDrawings(drawings)
+  }
+
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
@@ -16,7 +25,7 @@ export const SettingsButton = () => {
 
       <DropdownMenu.Portal>
         <DropdownMenu.Content className={styles.DropdownMenuContent} sideOffset={5}>
-          <DropdownMenu.Item className={styles.DropdownMenuItem}>
+          <DropdownMenu.Item className={styles.DropdownMenuItem} onClick={handleOpenFile}>
             Open <div className={styles.RightSlot}>⌘+O</div>
           </DropdownMenu.Item>
           <DropdownMenu.Item className={styles.DropdownMenuItem}>

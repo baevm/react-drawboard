@@ -54,6 +54,7 @@ button {
   padding: 0 5px 0 25px;
   user-select: none;
   outline: none;
+  cursor: pointer;
 }
 
 .DropdownMenuSubTrigger[data-state='open'] {

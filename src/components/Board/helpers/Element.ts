@@ -1,15 +1,6 @@
-import {
-  Drawing,
-  DrawingOptions,
-  Drawings,
-  HEX,
-  ImageDrawing,
-  PenDrawing,
-  PolygonDrawing,
-  TextDrawing,
-  Tool,
-} from '@/types'
+import { DrawingOptions, Drawings, HEX, ImageDrawing, PenDrawing, PolygonDrawing, TextDrawing, Tool } from '@/types'
 import { db } from '@/utils/indexdb'
+import { memoize } from '@/utils/memoize'
 import getStroke from 'perfect-freehand'
 import rough from 'roughjs'
 import { RoughCanvas } from 'roughjs/bin/canvas'
@@ -128,7 +119,6 @@ export const createElement: CreateElement = (x1, y1, x2, y2, tool, id, options) 
   return { tool, x1, y1, x2, y2, id, options: roughElement.options, sets: roughElement.sets, shape: roughElement.shape }
 }
 
-const cachedFiles: { [key: string]: any } = {}
 export const drawElement = async (roughCanvas: RoughCanvas, context: CanvasRenderingContext2D, element: any) => {
   switch (element.tool) {
     case 'pen':
@@ -163,6 +153,14 @@ export const drawElement = async (roughCanvas: RoughCanvas, context: CanvasRende
   }
 }
 
+export const getElementById = (id: string, drawings: Drawings) => {
+  return drawings.find((element) => element.id === id)!
+}
+
+export const getIndexOfElement = (id: string, drawings: Drawings) => {
+  return drawings.findIndex((element) => element.id === id)
+}
+
 const loadImage = memoize(async (id: string) => {
   const res = await db.files.where('id').equals(id).first()
 
@@ -177,30 +175,11 @@ const loadImage = memoize(async (id: string) => {
       reject(image)
     }
 
-    image.src = res?.dataURL as any
+    image.src = res?.dataURL
   })
 })
 
 const getMemoizedImage: (v: string) => Promise<any> = memoize(loadImage)
-
-function memoize(fn: any) {
-  let cache: { [key: string]: any } = {}
-
-  return async function () {
-    const arg = arguments[0]
-
-    cache[arg] = cache[arg] || (await fn.apply(undefined, arguments))
-    return cache[arg]
-  }
-}
-
-export const getElementById = (id: string, drawings: Drawings) => {
-  return drawings.find((element) => element.id === id)!
-}
-
-export const getIndexOfElement = (id: string, drawings: Drawings) => {
-  return drawings.findIndex((element) => element.id === id)
-}
 
 const getToolOptions = (tool: Tool, options: DrawingOptions) => {
   switch (tool) {
