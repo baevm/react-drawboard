@@ -50,13 +50,24 @@ const Board = () => {
     const storedTransform = context.getTransform()
     context.canvas.width = context.canvas.width
     context.setTransform(storedTransform)
+    context.save()
 
     const roughCanvas = rough.canvas(canvas!)
 
     for (const element of drawings) {
+      // if (selectedElement?.id === element.id) {
+      //   context.rect(element.x1 - 10, element.y1 - 10, element.x2 - element.x1 + 20, element.y2 - element.y1 + 20)
+      //   context.strokeStyle = '#bf94ff'
+      //   context.lineWidth = 2
+      //   context.stroke()
+      //   continue
+      // }
       if (action === 'writing' && selectedElement?.id === element.id) {
         continue
       }
+      context.restore()
+
+      console.log(element)
 
       drawElement(roughCanvas, context, element)
     }
@@ -355,6 +366,8 @@ const Board = () => {
     textAreaRef.current!.style.width = width + 5 + 'px'
   }
 
+  /*   console.log(selectedElement)
+   */
   // TODO: infinite canvas move
   return (
     <div className={styles.board_container}>

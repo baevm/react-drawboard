@@ -1,4 +1,4 @@
-import { DEVICE_PIXEL_RATIO } from '@/constants'
+import { MAX_CANVAS_SCALE, MIN_CANVAS_SCALE, ZOOM_SENSITIVITY } from '@/constants'
 import { Point } from '@/types'
 import { getCanvas } from '@/utils/getCanvas'
 import { create } from 'zustand'
@@ -10,10 +10,6 @@ interface useZoom {
   setCanvasScale: (s: number) => void
   setViewportTopLeft: (v: Point) => void
 }
-
-const ZOOM_SENSITIVITY = 1000 / DEVICE_PIXEL_RATIO
-const MIN_CANVAS_SCALE = 0.11
-const MAX_CANVAS_SCALE = 10
 
 const useZoomStore = create<useZoom>()((set) => ({
   canvasScale: 1,
