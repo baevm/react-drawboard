@@ -17,11 +17,12 @@ const getTheme = (): Theme => {
 }
 
 export const useTheme = () => {
-  const [theme, setTheme] = useState(getTheme())
+  const [theme, setTheme] = useState(() => getTheme())
 
   // set theme on mount
   useEffect(() => {
     const oldTheme = getTheme()
+
     document.body.dataset.theme = oldTheme
   }, [])
 

@@ -1,4 +1,4 @@
-import { useDrawings } from '@/hooks/useDrawings'
+import { useDrawings, useDrawingsActions } from '@/hooks/useDrawings'
 import { useTheme } from '@/hooks/useTheme'
 import { openJsonFile } from '@/utils/files'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
@@ -6,7 +6,7 @@ import { IoEllipsisHorizontal, IoMoonOutline, IoSunnyOutline } from 'react-icons
 import styles from './SettingsButton.module.css'
 
 export const SettingsButton = () => {
-  const { setDrawings } = useDrawings()
+  const { setDrawings } = useDrawingsActions()
   const { theme, changeTheme } = useTheme()
 
   async function handleOpenFile() {

@@ -1,5 +1,5 @@
 import { DEVICE_PIXEL_RATIO } from '@/constants'
-import { useDrawings } from '@/hooks/useDrawings'
+import { useDrawings, useDrawingsActions } from '@/hooks/useDrawings'
 import { useResizeObserver } from '@/hooks/useResizeObserver'
 import { useTools } from '@/hooks/useTools'
 import { useZoom } from '@/hooks/useZoom'
@@ -32,7 +32,8 @@ const Board = () => {
     setTool: state.setTool,
   }))
   const { width, height } = useResizeObserver()
-  const { drawings, setDrawings, syncStorageDrawings } = useDrawings()
+  const { drawings } = useDrawings()
+  const { setDrawings, syncStorageDrawings } = useDrawingsActions()
   const { canvasScale, viewportTopLeft, handleZoom, setViewportTopLeft } = useZoom()
 
   const [action, setAction] = useState<Action>('none')

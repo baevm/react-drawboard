@@ -3,12 +3,13 @@ import { Drawings } from '@/types'
 import { db } from '@/utils/indexdb'
 import { useEffect } from 'react'
 import { create } from 'zustand'
+import { shallow } from 'zustand/shallow'
 
 interface DrawingsStore {
   drawings: Drawings
   historyDrawings: Drawings
 
-  setStoreDrawings: (drawings: Drawings) => void
+  setDrawings: (drawings: Drawings) => void
   undoDraw: () => void
   redoDraw: () => void
 }
@@ -22,7 +23,7 @@ const drawingsStore = create<DrawingsStore>((set, get) => ({
   drawings: [],
   historyDrawings: [],
 
-  setStoreDrawings: (drawings: any) => set({ drawings, historyDrawings: [] }),
+  setDrawings: (drawings: any) => set({ drawings, historyDrawings: [] }),
 
   undoDraw: () =>
     set((state) => {
@@ -60,12 +61,13 @@ const drawingsStore = create<DrawingsStore>((set, get) => ({
 }))
 
 export const useDrawings = () => {
-  const { drawings, setStoreDrawings, undoDraw, redoDraw } = drawingsStore((state) => ({
-    drawings: state.drawings,
-    setStoreDrawings: state.setStoreDrawings,
-    undoDraw: state.undoDraw,
-    redoDraw: state.redoDraw,
-  }))
+  const { drawings, setDrawings } = drawingsStore(
+    (state) => ({
+      drawings: state.drawings,
+      setDrawings: state.setDrawings,
+    }),
+    shallow
+  )
 
   // get drawings from localstorage on mount
   useEffect(() => {
@@ -78,15 +80,19 @@ export const useDrawings = () => {
     }
   }, [])
 
-  const setDrawings = (newDrawings: Drawings) => {
-    setStoreDrawings(newDrawings)
-  }
+  return { drawings }
+}
 
+// https://github.com/pmndrs/zustand/issues/679#issuecomment-982084740
+export const useDrawingsActions = () => {
+  const { setDrawings, undoDraw, redoDraw } = drawingsStore(
+    (state) => ({ setDrawings: state.setDrawings, undoDraw: state.undoDraw, redoDraw: state.redoDraw }),
+    shallow
+  )
   const clearDrawings = () => {
     setDrawings([])
     syncStorageDrawings([])
     db.files.clear()
   }
-
-  return { drawings, setDrawings, syncStorageDrawings, clearDrawings, undoDraw, redoDraw }
+  return { setDrawings, undoDraw, redoDraw, clearDrawings, syncStorageDrawings }
 }
