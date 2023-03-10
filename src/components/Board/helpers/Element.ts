@@ -153,6 +153,34 @@ export const drawElement = async (roughCanvas: RoughCanvas, context: CanvasRende
   }
 }
 
+export const setSelectedElementBorder = (
+  context: CanvasRenderingContext2D,
+  tool: Tool,
+  { x1, y1, x2, y2 }: TwoPoints
+) => {
+  context.strokeStyle = '#bf94ff'
+  context.lineWidth = 1
+  switch (tool) {
+    case 'rectangle':
+      context.beginPath()
+      context.rect(x1 - 10, y1 - 10, x2 - x1 + 20, y2 - y1 + 20)
+      context.stroke()
+      break
+    case 'circle':
+      // x, y, (x1 + x2) / 2, (y1 + y2) / 2
+      const d = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2))
+      const centerX = (x1 + x2) / 2
+      const centerY = (y1 + y2) / 2
+      context.beginPath()
+      context.rect(centerX - d / 2, centerY - d / 2, d, d)
+      context.stroke()
+      break
+
+    default:
+      break
+  }
+}
+
 export const getElementById = (id: string, drawings: Drawings) => {
   return drawings.find((element) => element.id === id)!
 }
@@ -252,6 +280,13 @@ const addAlpha = (color: HEX, opacity: number): HEX => {
 }
 
 const average = (a: number, b: number) => (a + b) / 2
+
+type TwoPoints = {
+  x1: number
+  y1: number
+  x2: number
+  y2: number
+}
 
 type CreateElement = (
   x1: number,
