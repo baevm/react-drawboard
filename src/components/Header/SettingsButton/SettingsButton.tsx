@@ -1,6 +1,6 @@
 import { useDrawings, useDrawingsActions } from '@/hooks/useDrawings'
 import { useTheme } from '@/hooks/useTheme'
-import { openJsonFile } from '@/utils/files'
+import { openJsonFile } from '@/helpers/files'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { IoEllipsisHorizontal, IoMoonOutline, IoSunnyOutline } from 'react-icons/io5'
 import styles from './SettingsButton.module.css'

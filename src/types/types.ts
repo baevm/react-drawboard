@@ -1,4 +1,4 @@
-import { Drawable, Options, OpSet } from 'roughjs/bin/core'
+import { OpSet, Options } from 'roughjs/bin/core'
 
 export type PointPosition =
   | 'start'
@@ -58,6 +58,13 @@ export type DrawingOptions = {
 export type Point = {
   x: number
   y: number
+}
+
+export type TwoPoints = {
+  x1: number
+  y1: number
+  x2: number
+  y2: number
 }
 
 type BaseDrawing = {

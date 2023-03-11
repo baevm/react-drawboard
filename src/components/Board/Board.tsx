@@ -4,21 +4,21 @@ import { useResizeObserver } from '@/hooks/useResizeObserver'
 import { useTools } from '@/hooks/useTools'
 import { useZoom } from '@/hooks/useZoom'
 import { Action, Drawing, DrawingOptions, Point, PolygonDrawing, Tool } from '@/types'
-import { openBase64File } from '@/utils/files'
+import { openBase64File } from '@/helpers/files'
 import { generateId } from '@/utils/generateId'
 import { getCanvas } from '@/utils/getCanvas'
 import { db } from '@/utils/indexdb'
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import rough from 'roughjs'
 import styles from './Board.module.css'
-import { cursorForPosition, eraserIcon } from './helpers/Cursor'
+import { getResizeCursor, eraserIcon } from '../../helpers/cursor'
 import {
   createElement,
   drawElement,
   getElementById,
   getIndexOfElement,
   setSelectedElementBorder,
-} from './helpers/Element'
+} from '../../helpers/element'
 import {
   addPoints,
   adjustDrawingPoints,
@@ -27,7 +27,7 @@ import {
   getElementAtPoints,
   resizePoints,
   scalePoints,
-} from './helpers/Points'
+} from '../../helpers/points'
 
 const Board = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -236,7 +236,7 @@ const Board = () => {
     switch (tool) {
       case 'select':
         const element = getElementAtPoints(clientX, clientY, drawings)
-        style.cursor = element ? cursorForPosition(element.position) : 'default'
+        style.cursor = element ? getResizeCursor(element.position) : 'default'
         break
       case 'eraser':
         style.cursor = eraserIcon

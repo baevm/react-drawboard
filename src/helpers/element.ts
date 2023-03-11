@@ -1,9 +1,19 @@
-import { DrawingOptions, Drawings, HEX, ImageDrawing, PenDrawing, PolygonDrawing, TextDrawing, Tool } from '@/types'
-import { db } from '@/utils/indexdb'
-import { memoize } from '@/utils/memoize'
+import {
+  DrawingOptions,
+  Drawings,
+  ImageDrawing,
+  PenDrawing,
+  PolygonDrawing,
+  TextDrawing,
+  Tool,
+  TwoPoints,
+} from '@/types'
 import getStroke from 'perfect-freehand'
 import rough from 'roughjs'
 import { RoughCanvas } from 'roughjs/bin/canvas'
+import { addAlpha } from './color'
+import { getMemoizedImage } from './image'
+import { createCircleResizeHandles, createResizeHandles } from './resize'
 
 const roughGenerator = rough.generator()
 
@@ -157,7 +167,7 @@ export const setSelectedElementBorder = (
   tool: Tool,
   { x1, y1, x2, y2 }: TwoPoints
 ) => {
-  const OFFSET = 10
+  const OFFSET = 10 // offset between element and border
   context.strokeStyle = '#bf94ff'
   context.lineWidth = 1
 
@@ -168,6 +178,8 @@ export const setSelectedElementBorder = (
       const w = x2 - x1 + OFFSET
       const h = y2 - y1 + OFFSET
       context.beginPath()
+      createResizeHandles(context, { x1, y1, x2, y2 })
+      // element border
       context.rect(x1 - OFFSET / 2, y1 - OFFSET / 2, w, h)
       context.stroke()
       break
@@ -175,10 +187,13 @@ export const setSelectedElementBorder = (
 
     case 'circle': {
       const d = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2))
+      const r = d / 2
       const centerX = average(x1, x2)
       const centerY = average(y1, y2)
       context.beginPath()
-      context.rect(centerX - d / 2, centerY - d / 2, d, d)
+      createCircleResizeHandles(context, { centerX, centerY, r })
+      // element border
+      context.rect(centerX - r, centerY - r, d, d)
       context.stroke()
       break
     }
@@ -195,26 +210,6 @@ export const getElementById = (id: string, drawings: Drawings) => {
 export const getIndexOfElement = (id: string, drawings: Drawings) => {
   return drawings.findIndex((element) => element.id === id)
 }
-
-const loadImage = memoize(async (id: string) => {
-  const res = await db.files.where('id').equals(id).first()
-
-  return new Promise((resolve, reject) => {
-    const image = new Image()
-
-    image.onload = () => {
-      resolve(image)
-    }
-
-    image.onerror = () => {
-      reject(image)
-    }
-
-    image.src = res?.dataURL
-  })
-})
-
-const getMemoizedImage: (v: string) => Promise<any> = memoize(loadImage)
 
 const getToolOptions = (tool: Tool, options: DrawingOptions) => {
   switch (tool) {
@@ -281,19 +276,7 @@ const getSvgPathFromStroke = (points: any, closed = true) => {
   return result
 }
 
-const addAlpha = (color: HEX, opacity: number): HEX => {
-  const _opacity = Math.round(Math.min(Math.max(opacity || 1, 0), 1) * 255)
-  return (color + _opacity.toString(16).toUpperCase()) as HEX
-}
-
 const average = (a: number, b: number) => (a + b) / 2
-
-type TwoPoints = {
-  x1: number
-  y1: number
-  x2: number
-  y2: number
-}
 
 type CreateElement = (
   x1: number,
