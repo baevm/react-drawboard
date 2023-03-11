@@ -63,8 +63,9 @@ const Board = () => {
     for (const element of drawings) {
       const isActive = selectedElement?.id === element.id
       const isWritting = action === 'writing' && isActive
+      const isDrawing = action === 'drawing'
 
-      if (isActive) {
+      if (isActive && !isDrawing) {
         setSelectedElementBorder(context, element.tool, {
           x1: element.x1!,
           y1: element.y1!,

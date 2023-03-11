@@ -57,13 +57,12 @@ export const createElement: CreateElement = (x1, y1, x2, y2, tool, id, options) 
       roughElement = roughGenerator.rectangle(x1, y1, x2 - x1, y2 - y1, { ...drawingOptions })
       break
 
-    // TODO: RIGHT & EQUILATERAL
     case 'triangle':
-      const right = [
+      /* const right = [
         [x1, y2],
         [x2, y1],
         [x1, y1],
-      ]
+      ] */
       const equilateral = [
         [x1, y2],
         [x2, y2],
@@ -158,23 +157,31 @@ export const setSelectedElementBorder = (
   tool: Tool,
   { x1, y1, x2, y2 }: TwoPoints
 ) => {
+  const OFFSET = 10
   context.strokeStyle = '#bf94ff'
   context.lineWidth = 1
+
   switch (tool) {
     case 'rectangle':
+    case 'rhombus':
+    case 'triangle': {
+      const w = x2 - x1 + OFFSET
+      const h = y2 - y1 + OFFSET
       context.beginPath()
-      context.rect(x1 - 10, y1 - 10, x2 - x1 + 20, y2 - y1 + 20)
+      context.rect(x1 - OFFSET / 2, y1 - OFFSET / 2, w, h)
       context.stroke()
       break
-    case 'circle':
-      // x, y, (x1 + x2) / 2, (y1 + y2) / 2
+    }
+
+    case 'circle': {
       const d = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2))
-      const centerX = (x1 + x2) / 2
-      const centerY = (y1 + y2) / 2
+      const centerX = average(x1, x2)
+      const centerY = average(y1, y2)
       context.beginPath()
       context.rect(centerX - d / 2, centerY - d / 2, d, d)
       context.stroke()
       break
+    }
 
     default:
       break
