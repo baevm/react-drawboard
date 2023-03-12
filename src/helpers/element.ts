@@ -144,10 +144,10 @@ export const drawElement = async (roughCanvas: RoughCanvas, context: CanvasRende
       context.fill(new Path2D(stroke))
       break
     case 'text':
-      context.font = `${element.fontSize}px ${element.fontFamily}`
+      context.font = `${element.options.fontSize}px ${element.options.fontFamily}`
       context.textBaseline = 'top'
-      context.fillStyle = element.stroke
-      context.globalAlpha = element.strokeOpacity
+      context.fillStyle = element.options.stroke
+      context.globalAlpha = element.options.strokeOpacity
       context.fillText(element.text, element.x1, element.y1)
       break
     case 'image':

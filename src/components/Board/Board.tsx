@@ -11,14 +11,14 @@ import { db } from '@/utils/indexdb'
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import rough from 'roughjs'
 import styles from './Board.module.css'
-import { getResizeCursor, eraserIcon } from '../../helpers/cursor'
+import { getResizeCursor, eraserIcon } from '@/helpers/cursor'
 import {
   createElement,
   drawElement,
   getElementById,
   getIndexOfElement,
   setSelectedElementBorder,
-} from '../../helpers/element'
+} from '@/helpers/element'
 import {
   addPoints,
   adjustDrawingPoints,
@@ -27,7 +27,7 @@ import {
   getElementAtPoints,
   resizePoints,
   scalePoints,
-} from '../../helpers/points'
+} from '@/helpers/points'
 
 const Board = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -101,10 +101,11 @@ const Board = () => {
     lastOffsetRef.current = offset
   }, [offset])
 
-  // set value in textarea
+  // set value and size in textarea
   useEffect(() => {
     if (action === 'writing') {
       textAreaRef.current!.value! = selectedElement!.text!
+      resizeTextarea(selectedElement!.text!)
     }
   }, [action, selectedElement, textAreaRef])
 
@@ -141,12 +142,16 @@ const Board = () => {
     }
 
     setDrawings(drawingsCopy)
-    return
+    return drawingsCopy[index]
   }
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (action === 'writing') {
       return
+    }
+
+    if (selectedElement) {
+      setSelectedElement(null)
     }
 
     const isEraser = tool === 'eraser'
@@ -258,7 +263,8 @@ const Board = () => {
       const index = drawings.length - 1
       const { x1, y1, id, options } = drawings[index] as any
 
-      updateElement(x1, y1, clientX, clientY, tool, index, id, options)
+      const elem = updateElement(x1, y1, clientX, clientY, tool, index, id, options)
+      setSelectedElement(elem)
       return
     }
 
@@ -324,46 +330,54 @@ const Board = () => {
   const handleMouseUp = (e: React.MouseEvent) => {
     const { clientX, clientY } = getXY(e.clientX, e.clientY)
 
+    const isDrawing = action === 'drawing'
+    const isResizing = action === 'resizing'
+
     if (selectedElement) {
-      if (
+      const isTextEditMode =
         selectedElement.tool === 'text' &&
         clientX - selectedElement.offsetX === selectedElement.x1 &&
         clientY - selectedElement.offsetY === selectedElement.y1
-      ) {
+
+      if (isTextEditMode) {
         setAction('writing')
         return
       }
 
       const id = selectedElement.id
-      const index = drawings.findIndex((element) => element.id === id)
+      const index = getIndexOfElement(id, drawings)
       const element = getElementById(id, drawings) as any
 
-      if ((action === 'drawing' || action === 'resizing') && isPolygon(element.tool)) {
+      if ((isDrawing || isResizing) && isPolygon(element.tool)) {
         const { x1, y1, x2, y2 } = adjustDrawingPoints(element)
         updateElement(x1, y1, x2, y2, element.tool, index, id, element.options)
+      }
+
+      if (isDrawing) {
+        setSelectedElement(null)
       }
     }
 
     setAction('none')
     syncStorageDrawings(drawings)
-    setSelectedElement(null)
   }
 
   const handleBlur = (e: any) => {
     const { id, x1, y1, tool, options } = selectedElement as any
     const text = e.target.value
-    setAction('none')
-    setSelectedElement(null)
 
     const index = getIndexOfElement(id, drawings)
     updateElement(x1, y1, null as any, null as any, tool, index, id, options, text)
+
+    setAction('none')
+    setSelectedElement(null)
   }
 
   const handleContextMenu = (e: any) => {
     e.preventDefault()
   }
 
-  const resizeTextarea = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const resizeTextarea = (text: string) => {
     const { context } = getCanvas()
 
     // set context font to current font
@@ -371,16 +385,15 @@ const Board = () => {
     // even though it shows right
     context.font = `${options.fontSize}px ${options.fontFamily}`
 
-    // now measure width of text with correct font
-    const width = context!.measureText(e.target.value).width
+    // now measure width of text with correct font,
+    // if width is 0 (just created text element) then
+    // set width to 100
+    const width = context!.measureText(text).width || 100
 
     // set width of textarea with offset of 5 px
     textAreaRef.current!.style.width = width + 5 + 'px'
   }
 
-  /*   console.log(selectedElement)
-   */
-  // TODO: infinite canvas move
   return (
     <div className={styles.board_container}>
       <canvas
@@ -404,7 +417,7 @@ const Board = () => {
         <textarea
           ref={textAreaRef}
           onBlur={handleBlur}
-          onChange={resizeTextarea}
+          onChange={(e) => resizeTextarea(e.target.value)}
           style={{
             position: 'fixed',
             top: selectedElement?.y1! - 7,
@@ -412,7 +425,7 @@ const Board = () => {
             font: `${options.fontSize}px ${options.fontFamily}`,
             color: options.stroke,
             outline: 0,
-            border: '1px dashed black',
+            border: '1px dashed #bf94ff',
             backgroundColor: 'transparent',
             overflow: 'hidden',
             whiteSpace: 'pre',
@@ -444,7 +457,7 @@ type UpdateElement = (
   id: string,
   oldOptions: DrawingOptions,
   text?: any
-) => void
+) => any
 
 const isDrawableTool = (tool: Tool) => {
   return (

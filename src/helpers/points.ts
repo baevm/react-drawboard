@@ -1,11 +1,6 @@
-import { Drawing, Drawings, Point, PointPosition, PolygonDrawing } from '@/types'
+import { Drawing, Drawings, Point, PointPosition, PolygonDrawing, TwoPoints } from '@/types'
 
-export const resizePoints = (
-  clientX: number,
-  clientY: number,
-  position: PointPosition,
-  points: { x1: number; y1: number; x2: number; y2: number }
-) => {
+export const resizePoints = (clientX: number, clientY: number, position: PointPosition, points: TwoPoints) => {
   const { x1, y1, x2, y2 } = points
   switch (position) {
     case 'top-left':
