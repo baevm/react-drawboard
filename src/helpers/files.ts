@@ -1,4 +1,4 @@
-import { fileOpen, FileWithHandle } from 'browser-fs-access'
+import { fileOpen, FileWithHandle, fileSave } from 'browser-fs-access'
 
 export async function openBase64File() {
   const blob = await fileOpen({
@@ -24,6 +24,15 @@ export async function openJsonFile() {
   const base64File = await readFileAsText(blob)
 
   return base64File
+}
+
+export async function saveAsJson(json: any) {
+  const blob = new Blob([json], { type: 'application/json' })
+
+  const savedFile = await fileSave(blob, { fileName: 'test', extensions: ['.json'], mimeTypes: ['application/json'] })
+
+  console.log(savedFile)
+  return
 }
 
 export function readFileAsText(file: FileWithHandle) {

@@ -17,7 +17,7 @@ import { createCircleResizeHandles, createResizeHandles } from './resize'
 
 const roughGenerator = rough.generator()
 
-export const createElement: CreateElement = (x1, y1, x2, y2, tool, id, options) => {
+export const createElement: CreateElement = ({ x1, y1, x2, y2, tool, id, options }) => {
   let roughElement
 
   const drawingOptions = getToolOptions(tool, options)
@@ -278,12 +278,20 @@ const getSvgPathFromStroke = (points: any, closed = true) => {
 
 const average = (a: number, b: number) => (a + b) / 2
 
-type CreateElement = (
-  x1: number,
-  y1: number,
-  x2: number,
-  y2: number,
-  tool: Tool,
-  id: string,
+type CreateElement = ({
+  x1,
+  y1,
+  x2,
+  y2,
+  tool,
+  id,
+  options,
+}: {
+  x1: number
+  y1: number
+  x2: number
+  y2: number
+  tool: Tool
+  id: string
   options: DrawingOptions
-) => PenDrawing | PolygonDrawing | TextDrawing | ImageDrawing
+}) => PenDrawing | PolygonDrawing | TextDrawing | ImageDrawing

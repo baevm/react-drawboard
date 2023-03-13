@@ -131,13 +131,13 @@ const Board = () => {
         const width = context.measureText(text).width
         const height = +oldOptions.fontSize
         drawingsCopy[index] = {
-          ...createElement(x1, y1, x1 + width, y1 + height, tool, id, oldOptions),
+          ...createElement({ x1, y1, x2: x1 + width, y2: y1 + height, tool, id, options: oldOptions }),
           text,
         }
         break
 
       default:
-        drawingsCopy[index] = createElement(x1, y1, x2, y2, tool, id, oldOptions)
+        drawingsCopy[index] = createElement({ x1, y1, x2, y2, tool, id, options: oldOptions })
         break
     }
 
@@ -201,7 +201,15 @@ const Board = () => {
 
     if (isDraw) {
       const elementId = generateId()
-      const newElement = createElement(clientX, clientY, clientX, clientY, tool, elementId, options) as any
+      const newElement = createElement({
+        x1: clientX,
+        y1: clientY,
+        x2: clientX,
+        y2: clientY,
+        tool,
+        id: elementId,
+        options,
+      }) as any
 
       setDrawings([...drawings, newElement])
       setSelectedElement(newElement)
