@@ -130,6 +130,7 @@ const Board = () => {
         const { context } = getCanvas()
         const width = context.measureText(text).width
         const height = +oldOptions.fontSize
+
         drawingsCopy[index] = {
           ...createElement({ x1, y1, x2: x1 + width, y2: y1 + height, tool, id, options: oldOptions }),
           text,
@@ -335,13 +336,25 @@ const Board = () => {
     }
   }
 
+  // BUG: on high dpi onMouseUp get called by iteself ???
+  // causing textarea instantly disappear
+  // temp fix: isJustCreatedText
   const handleMouseUp = (e: React.MouseEvent) => {
+    console.log('caled')
     const { clientX, clientY } = getXY(e.clientX, e.clientY)
 
     const isDrawing = action === 'drawing'
     const isResizing = action === 'resizing'
 
     if (selectedElement) {
+      const isJustCreatedText =
+        selectedElement.tool === 'text' && clientX === selectedElement.x1 && clientY === selectedElement.y1
+
+      if (isJustCreatedText) {
+        setAction('writing')
+        return
+      }
+
       const isTextEditMode =
         selectedElement.tool === 'text' &&
         clientX - selectedElement.offsetX === selectedElement.x1 &&
@@ -410,7 +423,7 @@ const Board = () => {
         className={styles.board_canvas}
         onPointerDown={handleMouseDown}
         onPointerMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
+        onPointerUp={handleMouseUp}
         onContextMenu={handleContextMenu}
         onWheel={(e) => handleZoom(e.deltaY, 'wheel')}
         width={width * DEVICE_PIXEL_RATIO}
