@@ -336,9 +336,6 @@ const Board = () => {
     }
   }
 
-  // BUG: on high dpi onMouseUp get called by iteself ???
-  // causing textarea instantly disappear
-  // temp fix: isJustCreatedText
   const handleMouseUp = (e: React.MouseEvent) => {
     console.log('caled')
     const { clientX, clientY } = getXY(e.clientX, e.clientY)
