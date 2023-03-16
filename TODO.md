@@ -3,8 +3,7 @@
 - on high dpi onMouseUp get called by iteself ??? causing textarea instantly disappear. temp fix: isJustCreatedText
 - polygon element borders shaking when drawing because of handdrawn style
 - cant draw on top of picture
-- undo on picture not removing it from indexdb
-
+- text element not working on touchscreen
 
 
 ### TODO:

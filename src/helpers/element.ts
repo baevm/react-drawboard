@@ -3,6 +3,7 @@ import {
   Drawings,
   ImageDrawing,
   PenDrawing,
+  Point,
   PolygonDrawing,
   TextDrawing,
   Tool,
@@ -13,7 +14,12 @@ import rough from 'roughjs'
 import { RoughCanvas } from 'roughjs/bin/canvas'
 import { addAlpha } from './color'
 import { getMemoizedImage } from './image'
-import { createCircleResizeHandles, createResizeHandles } from './resize'
+import {
+  createCircleResizeHandles,
+  createLineResizeHandles,
+  createPenResizeHandles,
+  createResizeHandles,
+} from './resize'
 
 const roughGenerator = rough.generator()
 
@@ -165,7 +171,8 @@ export const drawElement = async (roughCanvas: RoughCanvas, context: CanvasRende
 export const setSelectedElementBorder = (
   context: CanvasRenderingContext2D,
   tool: Tool,
-  { x1, y1, x2, y2 }: TwoPoints
+  { x1, y1, x2, y2 }: TwoPoints,
+  points?: Point[]
 ) => {
   const OFFSET = 10 // offset between element and border
   context.strokeStyle = '#bf94ff'
@@ -178,7 +185,9 @@ export const setSelectedElementBorder = (
       const w = x2 - x1 + OFFSET
       const h = y2 - y1 + OFFSET
       context.beginPath()
+      // element handles
       createResizeHandles(context, { x1, y1, x2, y2 })
+      console.log({ x1, y1, x2, y2 })
       // element border
       context.rect(x1 - OFFSET / 2, y1 - OFFSET / 2, w, h)
       context.stroke()
@@ -191,10 +200,36 @@ export const setSelectedElementBorder = (
       const centerX = average(x1, x2)
       const centerY = average(y1, y2)
       context.beginPath()
+      // element handles
       createCircleResizeHandles(context, { centerX, centerY, r })
       // element border
       context.rect(centerX - r, centerY - r, d, d)
       context.stroke()
+      break
+    }
+
+    case 'line':
+    case 'arrow': {
+      context.beginPath()
+      createLineResizeHandles(context, { x1, y1, x2, y2 })
+      context.stroke()
+      break
+    }
+
+    case 'pen': {
+      if (!points) break
+
+      const pointsX = points.map((p) => p.x)
+      const pointsY = points.map((p) => p.y)
+
+      context.beginPath()
+      const minX = Math.min(...pointsX)
+      const maxX = Math.max(...pointsX)
+      const minY = Math.min(...pointsY)
+      const maxY = Math.max(...pointsY)
+      createPenResizeHandles(context, { x1: minX, y1: minY, x2: maxX, y2: maxY })
+      context.stroke()
+      context.strokeRect(minX, minY, maxX - minX, maxY - minY)
       break
     }
 

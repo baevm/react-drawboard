@@ -66,12 +66,17 @@ const Board = () => {
       const isDrawing = action === 'drawing'
 
       if (isActive && !isDrawing) {
-        setSelectedElementBorder(context, element.tool, {
-          x1: element.x1!,
-          y1: element.y1!,
-          x2: element.x2!,
-          y2: element.y2!,
-        })
+        setSelectedElementBorder(
+          context,
+          element.tool,
+          {
+            x1: element.x1!,
+            y1: element.y1!,
+            x2: element.x2!,
+            y2: element.y2!,
+          },
+          element.points
+        )
       }
 
       if (isWritting) {
@@ -337,7 +342,6 @@ const Board = () => {
   }
 
   const handleMouseUp = (e: React.MouseEvent) => {
-    console.log('caled')
     const { clientX, clientY } = getXY(e.clientX, e.clientY)
 
     const isDrawing = action === 'drawing'
@@ -405,7 +409,7 @@ const Board = () => {
 
     // now measure width of text with correct font,
     // if width is 0 (just created text element) then
-    // set width to 100
+    // set width to default textarea size: 100
     const width = context!.measureText(text).width || 100
 
     // set width of textarea with offset of 5 px

@@ -93,7 +93,7 @@ export type PolygonDrawing = BaseDrawing & {
 
 export type PenDrawing = BaseDrawing & {
   tool: 'pen'
-  points: { x: number; y: number }[]
+  points: Point[]
 }
 
 export type ImageDrawing = BaseDrawing & {
