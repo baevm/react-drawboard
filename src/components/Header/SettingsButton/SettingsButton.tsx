@@ -13,8 +13,8 @@ export const SettingsButton = () => {
   const { theme, changeTheme } = useTheme()
 
   async function handleOpenFile() {
-    const file = await openJsonFile()
-    const savedDrawings = JSON.parse(file as any).drawings as Drawings
+    const file = (await openJsonFile()) as string
+    const savedDrawings = JSON.parse(file).drawings as Drawings
     const createdDrawings = []
 
     for (const drawing of savedDrawings) {
@@ -22,17 +22,18 @@ export const SettingsButton = () => {
       // because it already contains text and points needed for drawing on the board
       if (drawing.tool === 'text' || drawing.tool === 'pen') {
         createdDrawings.push(drawing)
+      } else {
+        const newElement = createElement({
+          x1: drawing.x1!,
+          y1: drawing.y1!,
+          x2: drawing.x2!,
+          y2: drawing.y2!,
+          tool: drawing.tool,
+          id: drawing.id,
+          options: drawing.options as any,
+        })
+        createdDrawings.push(newElement)
       }
-      const newElement = createElement({
-        x1: drawing.x1!,
-        y1: drawing.y1!,
-        x2: drawing.x2!,
-        y2: drawing.y2!,
-        tool: drawing.tool,
-        id: drawing.id,
-        options: drawing.options as any,
-      })
-      createdDrawings.push(newElement)
     }
 
     setDrawings(createdDrawings)

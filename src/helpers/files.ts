@@ -31,11 +31,10 @@ export async function saveAsJson(json: any) {
 
   const savedFile = await fileSave(blob, { fileName: 'test', extensions: ['.json'], mimeTypes: ['application/json'] })
 
-  console.log(savedFile)
   return
 }
 
-export function readFileAsText(file: FileWithHandle) {
+function readFileAsText(file: FileWithHandle): Promise<string | ArrayBuffer | null> {
   return new Promise(function (resolve, reject) {
     let fr = new FileReader()
 
@@ -51,7 +50,7 @@ export function readFileAsText(file: FileWithHandle) {
   })
 }
 
-export function readFileAsUrl(file: FileWithHandle) {
+function readFileAsUrl(file: FileWithHandle): Promise<string | ArrayBuffer | null> {
   return new Promise(function (resolve, reject) {
     let fr = new FileReader()
 

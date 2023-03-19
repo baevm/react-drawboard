@@ -75,9 +75,6 @@ const Sidebar = () => {
             </>
           )}
 
-          <div className={styles.settings_item}>
-            <OpacitySlider />
-          </div>
         </div>
       </div>
     </>

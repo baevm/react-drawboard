@@ -39,6 +39,8 @@ export type Action =
   | 'uploading'
   | 'none'
 
+export type Cursor = 'default' | 'grab' | 'grabbing' | 'text' | 'crosshair' | 'nwse-resize' | 'nesw-resize' | 'move'
+
 export type HEX = `#${string}`
 export type FillStyle = 'solid' | 'hachure' | 'none'
 export type StrokeWidth = '1' | '3' | '5'
@@ -50,7 +52,6 @@ export type DrawingOptions = {
   fill: HEX
   fillStyle: FillStyle
   strokeWidth: StrokeWidth
-  strokeOpacity: number
   fontFamily: FontFamily
   fontSize: FontSize
 }
@@ -101,6 +102,8 @@ export type ImageDrawing = BaseDrawing & {
   dataURL: string
   x1: number
   y1: number
+  x2: number
+  y2: number
 }
 
 export type Drawing = StrictUnion<TextDrawing | PolygonDrawing | PenDrawing | ImageDrawing>

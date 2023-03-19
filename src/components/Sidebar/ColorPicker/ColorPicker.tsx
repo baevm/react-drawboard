@@ -1,6 +1,6 @@
 import { useClickOutside } from '@/hooks/useClickOutside'
 import { useRef, useState } from 'react'
-import { HexColorInput, HexColorPicker } from 'react-colorful'
+import { HexAlphaColorPicker, HexColorInput, HexColorPicker } from 'react-colorful'
 import ItemLabel from '../ItemLabel'
 import styles from './ColorPicker.module.css'
 import { useDebouncyFn } from 'use-debouncy'
@@ -41,7 +41,7 @@ export const ColorPicker = ({ label, onChange, initialColor }: Props) => {
       </div>
       {isColorPickerOpen && (
         <div ref={colorPickerRef} className={styles.color_popover}>
-          <HexColorPicker color={color} onChange={handleChangeColor} />
+          <HexAlphaColorPicker color={color} onChange={handleChangeColor} />
         </div>
       )}
     </>

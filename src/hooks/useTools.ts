@@ -17,7 +17,6 @@ export const useTools = create<UseTools>()(
         stroke: '#000000',
         fill: '#ffffff',
         strokeWidth: '1',
-        strokeOpacity: 1,
         fillStyle: 'none',
         fontFamily: 'SourceSansPro',
         fontSize: '24',

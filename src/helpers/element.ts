@@ -66,11 +66,11 @@ export const createElement: CreateElement = ({ x1, y1, x2, y2, tool, id, options
       const cy = (y1 + y2) / 2
       const r = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)) / 2
       const d = r * 2
-      roughElement = roughGenerator.circle(cx, cy, d, { ...drawingOptions })
+      roughElement = roughGenerator.circle(cx, cy, d, { ...drawingOptions, seed: 100 })
       break
 
     case 'rectangle':
-      roughElement = roughGenerator.rectangle(x1, y1, x2 - x1, y2 - y1, { ...drawingOptions })
+      roughElement = roughGenerator.rectangle(x1, y1, x2 - x1, y2 - y1, { ...drawingOptions, seed: 100 })
       break
 
     case 'triangle':
@@ -84,7 +84,7 @@ export const createElement: CreateElement = ({ x1, y1, x2, y2, tool, id, options
         [x2, y2],
         [average(x1, x2), y1],
       ]
-      roughElement = roughGenerator.polygon([...(equilateral as any)], { ...drawingOptions })
+      roughElement = roughGenerator.polygon([...(equilateral as any)], { ...drawingOptions, seed: 100 })
       break
 
     case 'rhombus':
@@ -94,7 +94,7 @@ export const createElement: CreateElement = ({ x1, y1, x2, y2, tool, id, options
         [x2, y1 + (y2 - y1) / 2],
         [x1 + (x2 - x1) / 2, y2],
       ]
-      roughElement = roughGenerator.polygon([...(rhombus as any)], { ...drawingOptions })
+      roughElement = roughGenerator.polygon([...(rhombus as any)], { ...drawingOptions, seed: 100 })
       break
 
     case 'arrow':
@@ -120,11 +120,11 @@ export const createElement: CreateElement = ({ x1, y1, x2, y2, tool, id, options
         [x135, y135],
         [x2, y2],
       ]
-      roughElement = roughGenerator.polygon([...(arrow as any)], { ...drawingOptions })
+      roughElement = roughGenerator.polygon([...(arrow as any)], { ...drawingOptions, seed: 100 })
       break
 
     case 'line':
-      roughElement = roughGenerator.line(x1, y1, x2, y2, { ...drawingOptions })
+      roughElement = roughGenerator.line(x1, y1, x2, y2, { ...drawingOptions, seed: 100 })
       break
 
     default:
@@ -137,7 +137,7 @@ export const createElement: CreateElement = ({ x1, y1, x2, y2, tool, id, options
 export const drawElement = async (roughCanvas: RoughCanvas, context: CanvasRenderingContext2D, element: any) => {
   switch (element.tool) {
     case 'pen':
-      const stroke = getSvgPathFromStroke(
+      const svgPath = getSvgPathFromStroke(
         getStroke(element.points, {
           size: 4 + +element.options.strokeWidth,
           thinning: 0.5,
@@ -146,14 +146,12 @@ export const drawElement = async (roughCanvas: RoughCanvas, context: CanvasRende
         })
       )
       context.fillStyle = element.options.stroke
-      context.globalAlpha = element.options.strokeOpacity
-      context.fill(new Path2D(stroke))
+      context.fill(new Path2D(svgPath))
       break
     case 'text':
       context.font = `${element.options.fontSize}px ${element.options.fontFamily}`
       context.textBaseline = 'top'
       context.fillStyle = element.options.stroke
-      context.globalAlpha = element.options.strokeOpacity
       context.fillText(element.text, element.x1, element.y1)
       break
     case 'image':
@@ -187,7 +185,6 @@ export const setSelectedElementBorder = (
       context.beginPath()
       // element handles
       createResizeHandles(context, { x1, y1, x2, y2 })
-      console.log({ x1, y1, x2, y2 })
       // element border
       context.rect(x1 - OFFSET / 2, y1 - OFFSET / 2, w, h)
       context.stroke()
@@ -233,6 +230,13 @@ export const setSelectedElementBorder = (
       break
     }
 
+    case 'image': {
+      context.beginPath()
+      createResizeHandles(context, { x1, y1, x2, y2 })
+      context.stroke()
+      break
+    }
+
     default:
       break
   }
@@ -251,33 +255,29 @@ const getToolOptions = (tool: Tool, options: DrawingOptions) => {
     case 'line':
     case 'arrow':
       return {
-        stroke: options.strokeOpacity === 1 ? options.stroke : addAlpha(options.stroke, options.strokeOpacity),
+        stroke: options.stroke,
         strokeWidth: +options.strokeWidth,
-        strokeOpacity: options.strokeOpacity,
       }
 
     case 'text':
       return {
-        stroke: options.strokeOpacity === 1 ? options.stroke : addAlpha(options.stroke, options.strokeOpacity),
+        stroke: options.stroke,
         fontSize: options.fontSize,
         fontFamily: options.fontFamily,
-        strokeOpacity: options.strokeOpacity,
       }
 
     case 'pen':
       return {
-        stroke: options.strokeOpacity === 1 ? options.stroke : addAlpha(options.stroke, options.strokeOpacity),
+        stroke: options.stroke,
         strokeWidth: +options.strokeWidth,
-        strokeOpacity: options.strokeOpacity,
       }
 
     default:
       return {
-        stroke: options.strokeOpacity === 1 ? options.stroke : addAlpha(options.stroke, options.strokeOpacity),
+        stroke: options.stroke,
         strokeWidth: +options.strokeWidth,
         fill: options.fillStyle !== 'none' ? options.fill : undefined,
         fillStyle: options.fillStyle !== 'none' ? options.fillStyle : undefined,
-        strokeOpacity: options.strokeOpacity,
       }
   }
 }

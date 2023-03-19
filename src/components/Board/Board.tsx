@@ -3,7 +3,7 @@ import { useDrawings, useDrawingsActions } from '@/hooks/useDrawings'
 import { useResizeObserver } from '@/hooks/useResizeObserver'
 import { useTools } from '@/hooks/useTools'
 import { useZoom } from '@/hooks/useZoom'
-import { Action, Drawing, DrawingOptions, Point, PolygonDrawing, Tool } from '@/types'
+import { Action, Drawing, DrawingOptions, PenDrawing, Point, PolygonDrawing, Tool } from '@/types'
 import { openBase64File } from '@/helpers/files'
 import { generateId } from '@/utils/generateId'
 import { getCanvas } from '@/utils/getCanvas'
@@ -11,7 +11,7 @@ import { db } from '@/utils/indexdb'
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import rough from 'roughjs'
 import styles from './Board.module.css'
-import { getResizeCursor, eraserIcon } from '@/helpers/cursor'
+import { getResizeCursor, setEraserCursor, setCursor } from '@/helpers/cursor'
 import {
   createElement,
   drawElement,
@@ -28,6 +28,7 @@ import {
   resizePoints,
   scalePoints,
 } from '@/helpers/points'
+import { loadHTMLImage } from '@/helpers/image'
 
 const Board = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -152,7 +153,7 @@ const Board = () => {
   }
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (action === 'writing') {
+    if (action === 'writing' || e.button > 1) {
       return
     }
 
@@ -231,7 +232,9 @@ const Board = () => {
           id,
           dataURL: base64Image,
         })
-        const element = { tool, id, x1: clientX, y1: clientY }
+        const image = await loadHTMLImage(base64Image as string)
+
+        const element = { tool, id, x1: clientX, y1: clientY, x2: image.width + clientX, y2: image.height + clientY }
 
         setDrawings([...drawings, element as any])
         setTool('pan')
@@ -255,19 +258,20 @@ const Board = () => {
     switch (tool) {
       case 'select':
         const element = getElementAtPoints(clientX, clientY, drawings)
-        style.cursor = element ? getResizeCursor(element.position) : 'default'
+        const cursor = element ? getResizeCursor(element.position!) : 'default'
+        setCursor(style, cursor)
         break
       case 'eraser':
-        style.cursor = eraserIcon
+        setEraserCursor(style)
         break
       case 'pan':
-        style.cursor = 'grab'
+        setCursor(style, 'grab')
         break
       case 'text':
-        style.cursor = 'text'
+        setCursor(style, 'text')
         break
       default:
-        style.cursor = 'crosshair'
+        setCursor(style, 'crosshair')
         break
     }
 
@@ -336,6 +340,7 @@ const Board = () => {
 
       const mouseDiff = diffPoints(currentMousePos, lastMousePos)
       setOffset((prevOffset) => addPoints(prevOffset, mouseDiff))
+      setCursor(style, 'grabbing')
 
       return
     }
