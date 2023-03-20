@@ -36,3 +36,7 @@ export const getImageFromDb = async (id: string) => {
 
   return res?.dataURL
 }
+
+export const resetImagesFromDb = async () => {
+  return db.files.clear()
+}

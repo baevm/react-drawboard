@@ -1,17 +1,5 @@
 import { DEVICE_PIXEL_RATIO } from '@/constants'
-import { useDrawings, useDrawingsActions } from '@/hooks/useDrawings'
-import { useResizeObserver } from '@/hooks/useResizeObserver'
-import { useTools } from '@/hooks/useTools'
-import { useZoom } from '@/hooks/useZoom'
-import { Action, Drawing, DrawingOptions, PenDrawing, Point, PolygonDrawing, Tool } from '@/types'
-import { openBase64File } from '@/helpers/files'
-import { generateId } from '@/utils/generateId'
-import { getCanvas } from '@/utils/getCanvas'
-import { db } from '@/utils/indexdb'
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import rough from 'roughjs'
-import styles from './Board.module.css'
-import { getResizeCursor, setEraserCursor, setCursor } from '@/helpers/cursor'
+import { getResizeCursor, setCursor, setEraserCursor } from '@/helpers/cursor'
 import {
   createElement,
   drawElement,
@@ -19,6 +7,8 @@ import {
   getIndexOfElement,
   setSelectedElementBorder,
 } from '@/helpers/element'
+import { openBase64File } from '@/helpers/files'
+import { loadHTMLImage, saveImageToDb } from '@/helpers/image'
 import {
   addPoints,
   adjustDrawingPoints,
@@ -28,7 +18,16 @@ import {
   resizePoints,
   scalePoints,
 } from '@/helpers/points'
-import { loadHTMLImage, saveImageToDb } from '@/helpers/image'
+import { useDrawings, useDrawingsActions } from '@/hooks/useDrawings'
+import { useResizeObserver } from '@/hooks/useResizeObserver'
+import { useTools } from '@/hooks/useTools'
+import { useZoom } from '@/hooks/useZoom'
+import { Action, Drawing, DrawingOptions, Tool } from '@/types'
+import { generateId } from '@/utils/generateId'
+import { getCanvas } from '@/utils/getCanvas'
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import rough from 'roughjs'
+import styles from './Board.module.css'
 
 const Board = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -91,7 +90,7 @@ const Board = () => {
         await drawElement(roughCanvas, context, element)
       }
     }
-    
+
     drawElements()
   }, [drawings, width, height, selectedElement, action, canvasScale, offset, viewportTopLeft])
 

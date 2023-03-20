@@ -19,7 +19,7 @@ const getTheme = (): Theme => {
 export const useTheme = () => {
   const [theme, setTheme] = useState(() => getTheme())
 
-  // set theme on mount
+  // set theme to data attribute on mount
   useEffect(() => {
     const oldTheme = getTheme()
 

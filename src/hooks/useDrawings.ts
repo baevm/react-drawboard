@@ -1,61 +1,72 @@
 import { LOCALSTORAGE_KEY } from '@/constants'
+import { resetImagesFromDb } from '@/helpers/image'
 import { Drawings } from '@/types'
-import { db } from '@/utils/indexdb'
 import { useEffect } from 'react'
 import { create } from 'zustand'
 import { shallow } from 'zustand/shallow'
 
 interface DrawingsStore {
   drawings: Drawings
-  historyDrawings: Drawings
+  historyDrawings: Drawings[]
+  currentStateIndex: number
 
   setDrawings: (drawings: Drawings) => void
+  setHistoryDrawings: (drawings: Drawings) => void
+  resetHistory: () => void
+  setCurrentStateIndex: () => void
   undoDraw: () => void
   redoDraw: () => void
 }
 
 // used to sync localstorage with store drawings
-const syncStorageDrawings = (newDrawings: Drawings) => {
+const saveDrawingsToLocalStorage = (newDrawings: Drawings) => {
   window.localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(newDrawings))
 }
 
 const drawingsStore = create<DrawingsStore>((set, get) => ({
   drawings: [],
-  historyDrawings: [],
+  historyDrawings: [[]],
+  currentStateIndex: 0,
 
-  setDrawings: (drawings: any) => set({ drawings, historyDrawings: [] }),
+  setDrawings: (drawings) => set({ drawings }),
+  setHistoryDrawings: (historyDrawings) => set({ historyDrawings: [...get().historyDrawings, historyDrawings] }),
+  resetHistory: () => set({ historyDrawings: [[]] }),
+  setCurrentStateIndex: () => set({ currentStateIndex: get().currentStateIndex + 1 }),
 
   undoDraw: () =>
-    set((state) => {
-      const last = state.drawings[state.drawings.length - 1]
-
-      if (!last) return {}
-
-      const newHistory = [...state.historyDrawings, last]
-      const newDraw = state.drawings.slice(0, -1)
-
-      syncStorageDrawings(newDraw)
-
-      return {
-        historyDrawings: newHistory,
-        drawings: newDraw,
-      }
-    }),
-
-  redoDraw: () =>
     set((state) => {
       if (state.historyDrawings.length === 0) {
         return {}
       }
 
-      const newHistory = state.historyDrawings.slice(0, -1)
-      const newDraw = [...state.drawings, state.historyDrawings[state.historyDrawings.length - 1]]
+      const newIndex = state.currentStateIndex !== 0 ? state.currentStateIndex - 1 : state.currentStateIndex
+      const currentDrawings = state.historyDrawings[newIndex]
 
-      syncStorageDrawings(newDraw)
+      saveDrawingsToLocalStorage(currentDrawings)
 
       return {
-        historyDrawings: newHistory,
-        drawings: newDraw,
+        currentStateIndex: newIndex,
+        drawings: currentDrawings,
+      }
+    }),
+
+  redoDraw: () =>
+    set((state) => {
+      const historyLength = state.historyDrawings.length
+      if (historyLength === 0) {
+        return {}
+      }
+
+      const newIndex =
+        state.currentStateIndex !== historyLength - 1 ? state.currentStateIndex + 1 : state.currentStateIndex
+
+      const currentDrawings = state.historyDrawings[newIndex]
+
+      saveDrawingsToLocalStorage(currentDrawings)
+
+      return {
+        currentStateIndex: newIndex,
+        drawings: currentDrawings,
       }
     }),
 }))
@@ -85,14 +96,29 @@ export const useDrawings = () => {
 
 // https://github.com/pmndrs/zustand/issues/679#issuecomment-982084740
 export const useDrawingsActions = () => {
-  const { setDrawings, undoDraw, redoDraw } = drawingsStore(
-    (state) => ({ setDrawings: state.setDrawings, undoDraw: state.undoDraw, redoDraw: state.redoDraw }),
+  const { setDrawings, setHistoryDrawings, undoDraw, redoDraw, setCurrentStateIndex, resetHistory } = drawingsStore(
+    (state) => ({
+      setDrawings: state.setDrawings,
+      undoDraw: state.undoDraw,
+      redoDraw: state.redoDraw,
+      setHistoryDrawings: state.setHistoryDrawings,
+      setCurrentStateIndex: state.setCurrentStateIndex,
+      resetHistory: state.resetHistory,
+    }),
     shallow
   )
   const clearDrawings = () => {
     setDrawings([])
-    syncStorageDrawings([])
-    db.files.clear()
+    resetHistory()
+    saveDrawingsToLocalStorage([])
+    resetImagesFromDb()
   }
+
+  const syncStorageDrawings = (drawings: Drawings) => {
+    saveDrawingsToLocalStorage(drawings)
+    setHistoryDrawings(drawings)
+    setCurrentStateIndex()
+  }
+
   return { setDrawings, undoDraw, redoDraw, clearDrawings, syncStorageDrawings }
 }
