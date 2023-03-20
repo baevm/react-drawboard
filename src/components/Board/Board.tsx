@@ -52,43 +52,47 @@ const Board = () => {
 
   // draw
   useLayoutEffect(() => {
-    const { canvas, context } = getCanvas()
+    async function drawElements() {
+      const { canvas, context } = getCanvas()
 
-    const storedTransform = context.getTransform()
-    context.canvas.width = context.canvas.width
-    context.setTransform(storedTransform)
-    context.save()
-
-    const roughCanvas = rough.canvas(canvas!)
-
-    for (const element of drawings) {
-      const isActive = selectedElement?.id === element.id
-      const isWritting = action === 'writing' && isActive
-      const isDrawing = action === 'drawing'
-
-      if (isActive && !isDrawing) {
-        setSelectedElementBorder(
-          context,
-          element.tool,
-          {
-            x1: element.x1!,
-            y1: element.y1!,
-            x2: element.x2!,
-            y2: element.y2!,
-          },
-          element.points
-        )
-      }
-
-      if (isWritting) {
-        continue
-      }
-
-      context.restore()
+      const storedTransform = context.getTransform()
+      context.canvas.width = context.canvas.width
+      context.setTransform(storedTransform)
       context.save()
 
-      drawElement(roughCanvas, context, element)
+      const roughCanvas = rough.canvas(canvas!)
+
+      for (const element of drawings) {
+        const isActive = selectedElement?.id === element.id
+        const isWritting = action === 'writing' && isActive
+        const isDrawing = action === 'drawing'
+
+        if (isActive && !isDrawing) {
+          setSelectedElementBorder(
+            context,
+            element.tool,
+            {
+              x1: element.x1!,
+              y1: element.y1!,
+              x2: element.x2!,
+              y2: element.y2!,
+            },
+            element.points
+          )
+        }
+
+        if (isWritting) {
+          continue
+        }
+
+        context.restore()
+        context.save()
+
+        await drawElement(roughCanvas, context, element)
+      }
     }
+    
+    drawElements()
   }, [drawings, width, height, selectedElement, action, canvasScale, offset, viewportTopLeft])
 
   // pan canvas when scale changes

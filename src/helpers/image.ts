@@ -13,8 +13,6 @@ export function loadHTMLImage(base64Image: string) {
   return new Promise<HTMLImageElement>((resolve, reject) => {
     const image = new Image()
 
-    image.src = base64Image
-
     image.onload = () => {
       resolve(image)
     }
@@ -22,6 +20,8 @@ export function loadHTMLImage(base64Image: string) {
     image.onerror = (error) => {
       reject(error)
     }
+
+    image.src = base64Image
   })
 }
 
