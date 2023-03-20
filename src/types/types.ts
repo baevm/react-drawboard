@@ -99,7 +99,7 @@ export type PenDrawing = BaseDrawing & {
 
 export type ImageDrawing = BaseDrawing & {
   tool: 'image'
-  dataURL: string
+  dataURL?: string
   x1: number
   y1: number
   x2: number

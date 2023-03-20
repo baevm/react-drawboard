@@ -28,7 +28,7 @@ import {
   resizePoints,
   scalePoints,
 } from '@/helpers/points'
-import { loadHTMLImage } from '@/helpers/image'
+import { loadHTMLImage, saveImageToDb } from '@/helpers/image'
 
 const Board = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -228,13 +228,20 @@ const Board = () => {
       async function setImageElement() {
         const base64Image = await openBase64File()
         const id = generateId()
-        await db.files.add({
-          id,
-          dataURL: base64Image,
-        })
-        const image = await loadHTMLImage(base64Image as string)
 
-        const element = { tool, id, x1: clientX, y1: clientY, x2: image.width + clientX, y2: image.height + clientY }
+        saveImageToDb({ id, dataURL: base64Image as string })
+
+        const HTMLImage = await loadHTMLImage(base64Image as string)
+
+        const element = createElement({
+          tool,
+          id,
+          x1: clientX,
+          y1: clientY,
+          x2: HTMLImage.width + clientX,
+          y2: HTMLImage.height + clientY,
+          options,
+        })
 
         setDrawings([...drawings, element as any])
         setTool('pan')

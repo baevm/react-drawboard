@@ -12,8 +12,7 @@ import {
 import getStroke from 'perfect-freehand'
 import rough from 'roughjs'
 import { RoughCanvas } from 'roughjs/bin/canvas'
-import { addAlpha } from './color'
-import { getMemoizedImage } from './image'
+import { getMemoizedHTMLImage } from './image'
 import {
   createCircleResizeHandles,
   createLineResizeHandles,
@@ -57,7 +56,6 @@ export const createElement: CreateElement = ({ x1, y1, x2, y2, tool, id, options
         x2,
         y2,
         id,
-        dataURL: '',
         options: drawingOptions,
       }
 
@@ -155,7 +153,7 @@ export const drawElement = async (roughCanvas: RoughCanvas, context: CanvasRende
       context.fillText(element.text, element.x1, element.y1)
       break
     case 'image':
-      const image = await getMemoizedImage(element.id)
+      const image = await getMemoizedHTMLImage(element.id)
 
       context.drawImage(image, element.x1, element.y1)
       break

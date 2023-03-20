@@ -1,38 +1,73 @@
 import { LOCALSTORAGE_KEY } from '@/constants'
 import { createElement } from '@/helpers/element'
 import { openJsonFile, saveAsJson } from '@/helpers/files'
+import { getImageFromDb, saveImageToDb } from '@/helpers/image'
 import { useDrawingsActions } from '@/hooks/useDrawings'
 import { useTheme } from '@/hooks/useTheme'
 import { Drawings } from '@/types'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
+import { useState } from 'react'
 import { IoEllipsisHorizontal, IoMoonOutline, IoSunnyOutline } from 'react-icons/io5'
 import styles from './SettingsButton.module.css'
 
 export const SettingsButton = () => {
+  const [error, setError] = useState(false)
   const { setDrawings } = useDrawingsActions()
   const { theme, changeTheme } = useTheme()
 
   async function handleOpenFile() {
     const file = (await openJsonFile()) as string
-    const savedDrawings = JSON.parse(file).drawings as Drawings
+
+    if (!file) return
+
+    const parsedFile = JSON.parse(file)
+    const savedDrawings = parsedFile.drawings as Drawings
+
+    if (!savedDrawings) {
+      setError(true)
+      return
+    }
+
     const createdDrawings = []
 
     for (const drawing of savedDrawings) {
       // we dont need to create new element for text and pen
       // because it already contains text and points needed for drawing on the board
-      if (drawing.tool === 'text' || drawing.tool === 'pen') {
-        createdDrawings.push(drawing)
-      } else {
-        const newElement = createElement({
-          x1: drawing.x1!,
-          y1: drawing.y1!,
-          x2: drawing.x2!,
-          y2: drawing.y2!,
-          tool: drawing.tool,
-          id: drawing.id,
-          options: drawing.options as any,
-        })
-        createdDrawings.push(newElement)
+      switch (drawing.tool) {
+        case 'text':
+        case 'pen': {
+          createdDrawings.push(drawing)
+          break
+        }
+
+        case 'image': {
+          saveImageToDb({ id: drawing.id, dataURL: drawing.dataURL! })
+          const newElement = createElement({
+            x1: drawing.x1!,
+            y1: drawing.y1!,
+            x2: drawing.x2!,
+            y2: drawing.y2!,
+            tool: drawing.tool,
+            id: drawing.id,
+            options: drawing.options!,
+          })
+          createdDrawings.push(newElement)
+          break
+        }
+
+        default: {
+          const newElement = createElement({
+            x1: drawing.x1!,
+            y1: drawing.y1!,
+            x2: drawing.x2!,
+            y2: drawing.y2!,
+            tool: drawing.tool,
+            id: drawing.id,
+            options: drawing.options as any,
+          })
+          createdDrawings.push(newElement)
+          break
+        }
       }
     }
 
@@ -46,14 +81,24 @@ export const SettingsButton = () => {
 
     const parsedDrawings = JSON.parse(drawings) as Drawings
 
-    // remove sets array from object
-    // as it takes too much memory
-    const noSetsDrawings = parsedDrawings.map((item) => {
-      const { sets, ...rest } = item
-      return rest
-    })
+    // remove sets from polygon elements
+    // add dataURL to image elements
+    let formattedDrawings = []
 
-    const jsonDrawings = { drawings: noSetsDrawings }
+    for (const drawing of parsedDrawings) {
+      const { sets, ...rest } = drawing
+
+      if (drawing.tool === 'image') {
+        const dataURL = await getImageFromDb(rest.id)
+        if (dataURL) {
+          rest.dataURL = dataURL
+        }
+      }
+
+      formattedDrawings.push(rest)
+    }
+
+    const jsonDrawings = { drawings: formattedDrawings }
 
     const stringifiedDrawings = JSON.stringify(jsonDrawings)
     saveAsJson(stringifiedDrawings)
