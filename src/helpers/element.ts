@@ -62,9 +62,9 @@ export const createElement: CreateElement = ({ x1, y1, x2, y2, tool, id, options
     case 'circle':
       const cx = (x1 + x2) / 2
       const cy = (y1 + y2) / 2
-      const r = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)) / 2
-      const d = r * 2
-      roughElement = roughGenerator.circle(cx, cy, d, { ...drawingOptions, seed: 100 })
+      const d = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2))
+
+      roughElement = roughGenerator.ellipse(cx, cy, x2 - x1, y2 - y1, { ...drawingOptions, seed: 100 })
       break
 
     case 'rectangle':
@@ -196,9 +196,9 @@ export const setSelectedElementBorder = (
       const centerY = average(y1, y2)
       context.beginPath()
       // element handles
-      createCircleResizeHandles(context, { centerX, centerY, r })
+      createCircleResizeHandles(context, { x1, y1, x2, y2 })
       // element border
-      context.rect(centerX - r, centerY - r, d, d)
+      context.rect(x1, y1, x2 - x1, y2 - y1)
       context.stroke()
       break
     }
@@ -309,7 +309,7 @@ const getSvgPathFromStroke = (points: any, closed = true) => {
   return result
 }
 
-const average = (a: number, b: number) => (a + b) / 2
+export const average = (a: number, b: number) => (a + b) / 2
 
 type CreateElement = ({
   x1,

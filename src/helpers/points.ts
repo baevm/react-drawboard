@@ -1,4 +1,5 @@
 import { Drawing, Drawings, Point, PointPosition, PolygonDrawing, TwoPoints } from '@/types'
+import { average } from './element'
 
 export const resizePoints = (clientX: number, clientY: number, position: PointPosition, points: TwoPoints) => {
   const { x1, y1, x2, y2 } = points
@@ -83,53 +84,52 @@ const posWithinDrawing = (x: number, y: number, element: Drawing) => {
 
   switch (tool) {
     case 'line':
-    case 'arrow':
+    case 'arrow': {
       const on = onLine(x1, y1, x2, y2, x, y)
       const start = nearPoint(x, y, x1, y1, 'start')
       const end = nearPoint(x, y, x2, y2, 'end')
       return start || end || on
+    }
 
     case 'rectangle':
+    case 'rhombus':
+    case 'triangle': {
       const topLeft = nearPoint(x, y, x1, y1, 'top-left')
       const topRight = nearPoint(x, y, x2, y1, 'top-right')
       const bottomLeft = nearPoint(x, y, x1, y2, 'bottom-left')
       const bottomRight = nearPoint(x, y, x2, y2, 'bottom-right')
       const inside = x >= x1 && x <= x2 && y >= y1 && y <= y2 ? 'inside' : null
       return topLeft || topRight || bottomLeft || bottomRight || inside
+    }
 
-    case 'circle':
-      const center = nearPoint(x, y, (x1 + x2) / 2, (y1 + y2) / 2, 'center')
-      const radius = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)) / 2
-      const onCircle = Math.pow(x - (x1 + x2) / 2, 2) + Math.pow(y - (y1 + y2) / 2, 2) <= Math.pow(radius, 2)
-      return center || (onCircle ? 'inside' : null)
+    case 'circle': {
+      const d = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2))
+      const r = d / 2
+      const topLeft = nearPoint(x, y, x1, y1, 'top-left')
+      const topRight = nearPoint(x, y, x2, y1, 'top-right')
+      const bottomLeft = nearPoint(x, y, x1, y2, 'bottom-left')
+      const bottomRight = nearPoint(x, y, x2, y2, 'bottom-right')
+      const insideCircle =
+        Math.pow(x - (x1 + x2) / 2, 2) + Math.pow(y - (y1 + y2) / 2, 2) <= Math.pow(r, 2) ? 'inside' : null
+      return topLeft || topRight || bottomLeft || bottomRight || insideCircle
+    }
 
-    case 'rhombus':
-      const top = nearPoint(x, y, (x1 + x2) / 2, y1, 'top')
-      const bottom = nearPoint(x, y, (x1 + x2) / 2, y2, 'bottom')
-      const left = nearPoint(x, y, x1, (y1 + y2) / 2, 'left')
-      const right = nearPoint(x, y, x2, (y1 + y2) / 2, 'right')
-      const insideRhombus = x >= x1 && x <= x2 && y >= y1 && y <= y2 ? 'inside' : null
-      return top || bottom || left || right || insideRhombus
-
-    case 'triangle':
-      const rightTriangle = nearPoint(x, y, x1, y2, 'right')
-      const equilateralTriangle = nearPoint(x, y, x1, y2, 'left')
-      const insideTriangle = x >= x1 && x <= x2 && y >= y1 && y <= y2 ? 'inside' : null
-      return rightTriangle || equilateralTriangle || insideTriangle
-
-    case 'pen':
+    case 'pen': {
       const betweenAnyPoint = element.points.some((point: Point, index: number) => {
         const nextPoint = element.points[index + 1]
         if (!nextPoint) return false
         return onLine(point.x, point.y, nextPoint.x, nextPoint.y, x, y, 5) != null
       })
       return betweenAnyPoint ? 'inside' : null
+    }
 
-    case 'image':
+    case 'image': {
       break
+    }
 
-    case 'text':
+    case 'text': {
       return x >= x1 && x <= x2 && y >= y1 && y <= y2 ? 'inside' : null
+    }
 
     default:
       throw new Error(`Type not recognised: ${tool}`)

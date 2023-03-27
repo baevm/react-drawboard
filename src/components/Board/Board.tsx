@@ -337,6 +337,9 @@ const Board = () => {
         y2: oldY2,
       }
       const index = getIndexOfElement(id, drawings)
+      console.log({ clientX, clientY })
+    
+
       const { x1, y1, x2, y2 } = resizePoints(clientX, clientY, position, points)
 
       updateElement(x1, y1, x2, y2, tool, index, id, options)
@@ -355,7 +358,6 @@ const Board = () => {
       return
     }
   }
-
   const handleMouseUp = (e: React.MouseEvent) => {
     const { clientX, clientY } = getXY(e.clientX, e.clientY)
 
