@@ -146,6 +146,10 @@ const Board = () => {
         }
         break
 
+      case 'image':
+        drawingsCopy[index] = { ...drawingsCopy[index], x1, y1, x2, y2, tool, id, options: oldOptions }
+        break
+
       default:
         drawingsCopy[index] = createElement({ x1, y1, x2, y2, tool, id, options: oldOptions })
         break
@@ -241,15 +245,17 @@ const Board = () => {
 
         const HTMLImage = await loadHTMLImage(base64Image as string)
 
-        const element = createElement({
+        const element = {
           tool,
           id,
           x1: clientX,
           y1: clientY,
           x2: HTMLImage.width + clientX,
           y2: HTMLImage.height + clientY,
+          width: HTMLImage.width,
+          height: HTMLImage.height,
           options,
-        })
+        }
 
         setDrawings([...drawings, element as any])
         setTool('pan')
@@ -274,6 +280,7 @@ const Board = () => {
       case 'select':
         const element = getElementAtPoints(clientX, clientY, drawings)
         const cursor = element && selectedElement && getResizeCursor(element.position!)
+
         if (cursor) {
           setCursor(style, cursor)
         } else if (element) {
@@ -348,11 +355,17 @@ const Board = () => {
         y2: oldY2,
       }
       const index = getIndexOfElement(id, drawings)
+      if (tool === 'image') {
+        const { x1, y1, x2, y2 } = resizePoints(clientX, clientY, position, points)
+        const newWidth = x2 - x1
+        const newHeight = y2 - y1
+        
+      } else {
+        const { x1, y1, x2, y2 } = resizePoints(clientX, clientY, position, points)
 
-      const { x1, y1, x2, y2 } = resizePoints(clientX, clientY, position, points)
-
-      updateElement(x1, y1, x2, y2, tool, index, id, options)
-      return
+        updateElement(x1, y1, x2, y2, tool, index, id, options)
+        return
+      }
     }
 
     if (isPanning) {
@@ -529,6 +542,7 @@ const isPolygon = (tool: Tool | undefined) => {
     tool === 'triangle' ||
     tool === 'rectangle' ||
     tool === 'rhombus' ||
-    tool === 'text'
+    tool === 'text' ||
+    tool === 'image'
   )
 }

@@ -1,5 +1,4 @@
 import { Drawing, Drawings, Point, PointPosition, PolygonDrawing, TwoPoints } from '@/types'
-import { average } from './element'
 
 export const resizePoints = (clientX: number, clientY: number, position: PointPosition, points: TwoPoints) => {
   const { x1, y1, x2, y2 } = points
@@ -93,7 +92,8 @@ const posWithinDrawing = (x: number, y: number, element: Drawing) => {
 
     case 'rectangle':
     case 'rhombus':
-    case 'triangle': {
+    case 'triangle':
+    case 'image': {
       const topLeft = nearPoint(x, y, x1, y1, 'top-left')
       const topRight = nearPoint(x, y, x2, y1, 'top-right')
       const bottomLeft = nearPoint(x, y, x1, y2, 'bottom-left')
@@ -121,10 +121,6 @@ const posWithinDrawing = (x: number, y: number, element: Drawing) => {
         return onLine(point.x, point.y, nextPoint.x, nextPoint.y, x, y, 5) != null
       })
       return betweenAnyPoint ? 'inside' : null
-    }
-
-    case 'image': {
-      break
     }
 
     case 'text': {

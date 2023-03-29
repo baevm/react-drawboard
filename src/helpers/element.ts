@@ -56,6 +56,8 @@ export const createElement: CreateElement = ({ x1, y1, x2, y2, tool, id, options
         x2,
         y2,
         id,
+        width: 0,
+        height: 0,
         options: drawingOptions,
       }
 
@@ -177,7 +179,8 @@ export const setSelectedElementBorder = (
   switch (tool) {
     case 'rectangle':
     case 'rhombus':
-    case 'triangle': {
+    case 'triangle':
+    case 'image': {
       const w = x2 - x1 + OFFSET
       const h = y2 - y1 + OFFSET
       context.beginPath()
@@ -225,13 +228,6 @@ export const setSelectedElementBorder = (
       createPenResizeHandles(context, { x1: minX, y1: minY, x2: maxX, y2: maxY })
       context.stroke()
       context.strokeRect(minX, minY, maxX - minX, maxY - minY)
-      break
-    }
-
-    case 'image': {
-      context.beginPath()
-      createResizeHandles(context, { x1, y1, x2, y2 })
-      context.stroke()
       break
     }
 

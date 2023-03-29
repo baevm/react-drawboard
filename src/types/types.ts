@@ -104,6 +104,8 @@ export type ImageDrawing = BaseDrawing & {
   y1: number
   x2: number
   y2: number
+  width: number
+  height: number
 }
 
 export type Drawing = StrictUnion<TextDrawing | PolygonDrawing | PenDrawing | ImageDrawing>
