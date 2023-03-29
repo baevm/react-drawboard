@@ -26,6 +26,6 @@ export const getResizeCursor = (position: PointPosition | null) => {
     case 'bottom-left':
       return 'nesw-resize'
     default:
-      return 'move'
+      return null
   }
 }

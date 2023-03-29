@@ -156,12 +156,20 @@ const Board = () => {
   }
 
   const handleMouseDown = (e: React.MouseEvent) => {
+    const { clientX, clientY } = getXY(e.clientX, e.clientY)
+
     if (action === 'writing' || e.button > 1) {
       return
     }
 
     if (selectedElement) {
-      setSelectedElement(null)
+      const clickedElement = getElementAtPoints(clientX, clientY, drawings)
+
+      if (!clickedElement) {
+        setSelectedElement(null)
+      } else if (clickedElement.position !== 'inside') {
+        setAction('resizing')
+      }
     }
 
     const isEraser = tool === 'eraser'
@@ -169,8 +177,6 @@ const Board = () => {
     const isPan = tool === 'pan' || e.button === 1
     const isDraw = isDrawableTool(tool)
     const isImage = tool === 'image'
-
-    const { clientX, clientY } = getXY(e.clientX, e.clientY)
 
     if (isPan) {
       // pageX, pageY used because
@@ -203,9 +209,8 @@ const Board = () => {
 
       if (element.position === 'inside') {
         setAction('moving')
-      } else {
-        setAction('resizing')
       }
+
       return
     }
 
@@ -262,14 +267,20 @@ const Board = () => {
     const isDrawing = action === 'drawing'
     const isMovingPen = action === 'moving' && selectedElement?.tool === 'pen'
     const isMovingPolygon = action === 'moving' && isPolygon(selectedElement?.tool)
-    const isResizing = action === 'resizing'
+    const isResizing = action === 'resizing' && selectedElement
     const isPanning = action === 'panning'
 
     switch (tool) {
       case 'select':
         const element = getElementAtPoints(clientX, clientY, drawings)
-        const cursor = element ? getResizeCursor(element.position!) : 'default'
-        setCursor(style, cursor)
+        const cursor = element && selectedElement && getResizeCursor(element.position!)
+        if (cursor) {
+          setCursor(style, cursor)
+        } else if (element) {
+          setCursor(style, 'move')
+        } else {
+          setCursor(style, 'default')
+        }
         break
       case 'eraser':
         setEraserCursor(style)
@@ -337,8 +348,6 @@ const Board = () => {
         y2: oldY2,
       }
       const index = getIndexOfElement(id, drawings)
-      console.log({ clientX, clientY })
-    
 
       const { x1, y1, x2, y2 } = resizePoints(clientX, clientY, position, points)
 
@@ -358,6 +367,7 @@ const Board = () => {
       return
     }
   }
+
   const handleMouseUp = (e: React.MouseEvent) => {
     const { clientX, clientY } = getXY(e.clientX, e.clientY)
 
