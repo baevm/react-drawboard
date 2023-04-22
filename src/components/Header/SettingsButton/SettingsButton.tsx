@@ -15,19 +15,7 @@ export const SettingsButton = () => {
   const { setDrawings } = useDrawingsActions()
   const { theme, changeTheme } = useTheme()
 
-  async function handleOpenFile() {
-    const file = (await openJsonFile()) as string
-
-    if (!file) return
-
-    const parsedFile = JSON.parse(file)
-    const savedDrawings = parsedFile.drawings as Drawings
-
-    if (!savedDrawings) {
-      setError(true)
-      return
-    }
-
+  const createDrawings = (savedDrawings: Drawings) => {
     const createdDrawings = []
 
     for (const drawing of savedDrawings) {
@@ -42,6 +30,7 @@ export const SettingsButton = () => {
 
         case 'image': {
           saveImageToDb({ id: drawing.id, dataURL: drawing.dataURL! })
+
           const newElement = createElement({
             x1: drawing.x1!,
             y1: drawing.y1!,
@@ -71,21 +60,15 @@ export const SettingsButton = () => {
       }
     }
 
-    setDrawings(createdDrawings)
+    return createdDrawings
   }
 
-  const handleSaveToFile = async () => {
-    const drawings = localStorage.getItem(LOCALSTORAGE_KEY)
-
-    if (!drawings) return
-
-    const parsedDrawings = JSON.parse(drawings) as Drawings
-
-    // remove sets from polygon elements
-    // add dataURL to image elements
+  // remove sets from polygon elements
+  // add dataURL to image elements
+  const formatDrawings = async (drawings: Drawings) => {
     let formattedDrawings = []
 
-    for (const drawing of parsedDrawings) {
+    for (const drawing of drawings) {
       const { sets, ...rest } = drawing
 
       if (drawing.tool === 'image') {
@@ -98,9 +81,35 @@ export const SettingsButton = () => {
       formattedDrawings.push(rest)
     }
 
-    const jsonDrawings = { drawings: formattedDrawings }
+    return formattedDrawings
+  }
 
-    const stringifiedDrawings = JSON.stringify(jsonDrawings)
+  const handleOpenFile = async () => {
+    const file = (await openJsonFile()) as string
+
+    if (!file) return
+
+    const parsedFile = JSON.parse(file)
+    const savedDrawings = parsedFile.drawings as Drawings | null
+
+    if (!savedDrawings) {
+      setError(true)
+      return
+    }
+
+    const createdDrawings = createDrawings(savedDrawings)
+    setDrawings(createdDrawings)
+  }
+
+  const handleSaveToFile = async () => {
+    const drawings = localStorage.getItem(LOCALSTORAGE_KEY)
+
+    if (!drawings) return
+
+    const parsedDrawings = JSON.parse(drawings) as Drawings
+    const formattedDrawings = formatDrawings(parsedDrawings)
+
+    const stringifiedDrawings = JSON.stringify({ drawings: formattedDrawings })
     saveAsJson(stringifiedDrawings)
   }
 

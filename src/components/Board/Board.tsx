@@ -18,11 +18,12 @@ import {
   resizePoints,
   scalePoints,
 } from '@/helpers/points'
+import { isAdjustableTool, isDrawableTool } from '@/helpers/tool'
 import { useDrawings, useDrawingsActions } from '@/hooks/useDrawings'
 import { useResizeObserver } from '@/hooks/useResizeObserver'
 import { useTools } from '@/hooks/useTools'
 import { useZoom } from '@/hooks/useZoom'
-import { Action, Drawing, DrawingOptions, Tool } from '@/types'
+import { Action, Drawing, DrawingOptions, PointPosition, Tool } from '@/types'
 import { generateId } from '@/utils/generateId'
 import { getCanvas } from '@/utils/getCanvas'
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
@@ -119,7 +120,7 @@ const Board = () => {
   }, [action, selectedElement, textAreaRef])
 
   // scale to high dpi & zoom & pan
-  const getXY = (x: number, y: number) => {
+  const getScaledXY = (x: number, y: number) => {
     return {
       clientX: (x * DEVICE_PIXEL_RATIO) / canvasScale + viewportTopLeft.x,
       clientY: (y * DEVICE_PIXEL_RATIO) / canvasScale + viewportTopLeft.y,
@@ -131,28 +132,42 @@ const Board = () => {
     const drawingsCopy = [...drawings] as any
 
     switch (tool) {
-      case 'pen':
+      case 'pen': {
         drawingsCopy[index].points = [...drawingsCopy[index].points, { x: x2, y: y2 }]
         break
+      }
 
-      case 'text':
+      case 'text': {
         const { context } = getCanvas()
         const width = context.measureText(text).width
-        const height = +oldOptions.fontSize
+        const height = +oldOptions.fontSize!
 
         drawingsCopy[index] = {
-          ...createElement({ x1, y1, x2: x1 + width, y2: y1 + height, tool, id, options: oldOptions }),
+          ...drawingsCopy[index],
+          x1,
+          y1,
+          x2: x1 + width,
+          y2: y1 + height,
+          tool,
+          id,
+          options: oldOptions,
           text,
         }
         break
+      }
 
-      case 'image':
-        drawingsCopy[index] = { ...drawingsCopy[index], x1, y1, x2, y2, tool, id, options: oldOptions }
+      case 'image': {
+        const width = x2 - x1
+        const height = y2 - y1
+
+        drawingsCopy[index] = { ...drawingsCopy[index], x1, y1, x2, y2, width, height, tool, id, options: oldOptions }
         break
+      }
 
-      default:
+      default: {
         drawingsCopy[index] = createElement({ x1, y1, x2, y2, tool, id, options: oldOptions })
         break
+      }
     }
 
     setDrawings(drawingsCopy)
@@ -160,7 +175,7 @@ const Board = () => {
   }
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    const { clientX, clientY } = getXY(e.clientX, e.clientY)
+    const { clientX, clientY } = getScaledXY(e.clientX, e.clientY)
 
     if (action === 'writing' || e.button > 1) {
       return
@@ -209,7 +224,7 @@ const Board = () => {
       if (!element) return
 
       const { offsetX, offsetY } = calcElementOffsets(element, { x: clientX, y: clientY })
-      setSelectedElement({ ...element, offsetX, offsetY })
+      setSelectedElement({ ...(element as DrawingWithOffset), offsetX, offsetY })
 
       if (element.position === 'inside') {
         setAction('moving')
@@ -267,19 +282,19 @@ const Board = () => {
   }
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    const { clientX, clientY } = getXY(e.clientX, e.clientY)
+    const { clientX, clientY } = getScaledXY(e.clientX, e.clientY)
     const { style } = e.target as HTMLElement
 
     const isDrawing = action === 'drawing'
     const isMovingPen = action === 'moving' && selectedElement?.tool === 'pen'
-    const isMovingPolygon = action === 'moving' && isPolygon(selectedElement?.tool)
+    const isMovingPolygon = action === 'moving' && isAdjustableTool(selectedElement?.tool)
     const isResizing = action === 'resizing' && selectedElement
     const isPanning = action === 'panning'
 
     switch (tool) {
       case 'select':
         const element = getElementAtPoints(clientX, clientY, drawings)
-        const cursor = element && selectedElement && getResizeCursor(element.position!)
+        const cursor = element && selectedElement && getResizeCursor(element.position)
 
         if (cursor) {
           setCursor(style, cursor)
@@ -346,24 +361,24 @@ const Board = () => {
     }
 
     if (isResizing) {
-      const { id, tool, position, x1: oldX1, y1: oldY1, x2: oldX2, y2: oldY2, options } = selectedElement as any
+      const { id, tool, position, x1: oldX1, y1: oldY1, x2: oldX2, y2: oldY2, options } = selectedElement
 
       const points = {
-        x1: oldX1,
-        y1: oldY1,
-        x2: oldX2,
-        y2: oldY2,
+        x1: oldX1!,
+        y1: oldY1!,
+        x2: oldX2!,
+        y2: oldY2!,
       }
+
       const index = getIndexOfElement(id, drawings)
       if (tool === 'image') {
         const { x1, y1, x2, y2 } = resizePoints(clientX, clientY, position, points)
-        const newWidth = x2 - x1
-        const newHeight = y2 - y1
-        
+
+        updateElement(x1, y1, x2, y2, tool, index, id, options!)
       } else {
         const { x1, y1, x2, y2 } = resizePoints(clientX, clientY, position, points)
 
-        updateElement(x1, y1, x2, y2, tool, index, id, options)
+        updateElement(x1, y1, x2, y2, tool, index, id, options!)
         return
       }
     }
@@ -382,7 +397,7 @@ const Board = () => {
   }
 
   const handleMouseUp = (e: React.MouseEvent) => {
-    const { clientX, clientY } = getXY(e.clientX, e.clientY)
+    const { clientX, clientY } = getScaledXY(e.clientX, e.clientY)
 
     const isDrawing = action === 'drawing'
     const isResizing = action === 'resizing'
@@ -410,7 +425,7 @@ const Board = () => {
       const index = getIndexOfElement(id, drawings)
       const element = getElementById(id, drawings) as any
 
-      if ((isDrawing || isResizing) && isPolygon(element.tool)) {
+      if ((isDrawing || isResizing) && isAdjustableTool(element.tool)) {
         const { x1, y1, x2, y2 } = adjustDrawingPoints(element)
         updateElement(x1, y1, x2, y2, element.tool, index, id, element.options)
       }
@@ -424,7 +439,7 @@ const Board = () => {
     syncStorageDrawings(drawings)
   }
 
-  const handleBlur = (e: any) => {
+  const handleTextAreaBlur = (e: any) => {
     const { id, x1, y1, tool, options } = selectedElement as any
     const text = e.target.value
 
@@ -478,7 +493,7 @@ const Board = () => {
       {action === 'writing' ? (
         <textarea
           ref={textAreaRef}
-          onBlur={handleBlur}
+          onBlur={handleTextAreaBlur}
           onChange={(e) => resizeTextarea(e.target.value)}
           style={{
             position: 'fixed',
@@ -507,6 +522,7 @@ export default Board
 type DrawingWithOffset = Drawing & {
   offsetX?: any | any[]
   offsetY?: any | any[]
+  position: PointPosition
 }
 
 type UpdateElement = (
@@ -520,29 +536,3 @@ type UpdateElement = (
   oldOptions: DrawingOptions,
   text?: any
 ) => any
-
-const isDrawableTool = (tool: Tool) => {
-  return (
-    tool === 'pen' ||
-    tool === 'arrow' ||
-    tool === 'circle' ||
-    tool === 'line' ||
-    tool === 'triangle' ||
-    tool === 'rectangle' ||
-    tool === 'rhombus' ||
-    tool === 'text'
-  )
-}
-
-const isPolygon = (tool: Tool | undefined) => {
-  return (
-    tool === 'arrow' ||
-    tool === 'circle' ||
-    tool === 'line' ||
-    tool === 'triangle' ||
-    tool === 'rectangle' ||
-    tool === 'rhombus' ||
-    tool === 'text' ||
-    tool === 'image'
-  )
-}

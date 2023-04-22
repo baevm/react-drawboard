@@ -1,4 +1,5 @@
 import { OpSet, Options } from 'roughjs/bin/core'
+import { StrictUnion } from './utility'
 
 export type PointPosition =
   | 'start'
@@ -49,11 +50,11 @@ export type FontSize = '14' | '24' | '32'
 
 export type DrawingOptions = {
   stroke: HEX
-  fill: HEX
-  fillStyle: FillStyle
   strokeWidth: StrokeWidth
-  fontFamily: FontFamily
-  fontSize: FontSize
+  fill?: HEX
+  fillStyle?: FillStyle
+  fontFamily?: FontFamily
+  fontSize?: FontSize
 }
 
 export type Point = {
@@ -79,6 +80,7 @@ export type TextDrawing = BaseDrawing & {
   x2: number
   y1: number
   y2: number
+  options: DrawingOptions
 }
 
 export type PolygonDrawing = BaseDrawing & {
@@ -87,7 +89,7 @@ export type PolygonDrawing = BaseDrawing & {
   x2: number
   y1: number
   y2: number
-  options: Options
+  options: DrawingOptions
   shape: string
   readonly sets: OpSet[]
 }
@@ -95,6 +97,7 @@ export type PolygonDrawing = BaseDrawing & {
 export type PenDrawing = BaseDrawing & {
   tool: 'pen'
   points: Point[]
+  options: DrawingOptions
 }
 
 export type ImageDrawing = BaseDrawing & {
@@ -110,7 +113,3 @@ export type ImageDrawing = BaseDrawing & {
 
 export type Drawing = StrictUnion<TextDrawing | PolygonDrawing | PenDrawing | ImageDrawing>
 export type Drawings = Drawing[]
-
-type UnionKeys<T> = T extends T ? keyof T : never
-type StrictUnionHelper<T, TAll> = T extends any ? T & Partial<Record<Exclude<UnionKeys<TAll>, keyof T>, never>> : never
-type StrictUnion<T> = StrictUnionHelper<T, T>

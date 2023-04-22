@@ -80,14 +80,23 @@ export const useDrawings = () => {
     shallow
   )
 
+  function resetDrawings() {
+    setDrawings([])
+    saveDrawingsToLocalStorage([])
+  }
+
   // get drawings from localstorage on mount
   useEffect(() => {
     const items = localStorage.getItem(LOCALSTORAGE_KEY)
     if (items) {
-      const parsedItems = JSON.parse(items) as Drawings
-      setDrawings(parsedItems)
+      try {
+        const parsedItems = JSON.parse(items) as Drawings
+        setDrawings(parsedItems)
+      } catch (error) {
+        resetDrawings()
+      }
     } else {
-      setDrawings([])
+      resetDrawings()
     }
   }, [])
 

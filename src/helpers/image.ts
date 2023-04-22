@@ -3,7 +3,6 @@ import memoize from 'fast-memoize'
 
 export const loadSavedHTMLImage = async (id: string) => {
   const base64Image = await getImageFromDb(id)
-
   return loadHTMLImage(base64Image)
 }
 
@@ -27,13 +26,11 @@ export function loadHTMLImage(base64Image: string) {
 
 export const saveImageToDb = async ({ id, dataURL }: { id: string; dataURL: string }) => {
   const res = await db.files.add({ id, dataURL })
-
   return res
 }
 
 export const getImageFromDb = async (id: string) => {
   const res = await db.files.where('id').equals(id).first()
-
   return res?.dataURL
 }
 

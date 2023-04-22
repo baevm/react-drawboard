@@ -19,10 +19,28 @@ import {
   createPenResizeHandles,
   createResizeHandles,
 } from './resize'
+import { getToolOptions } from './tool'
 
 const roughGenerator = rough.generator()
+const ROUGH_SEED = 100
 
-export const createElement: CreateElement = ({ x1, y1, x2, y2, tool, id, options }) => {
+export const createElement = ({
+  x1,
+  y1,
+  x2,
+  y2,
+  tool,
+  id,
+  options,
+}: {
+  x1: number
+  y1: number
+  x2: number
+  y2: number
+  tool: Tool
+  id: string
+  options: DrawingOptions
+}) => {
   let roughElement
 
   const drawingOptions = getToolOptions(tool, options)
@@ -64,13 +82,12 @@ export const createElement: CreateElement = ({ x1, y1, x2, y2, tool, id, options
     case 'circle':
       const cx = (x1 + x2) / 2
       const cy = (y1 + y2) / 2
-      const d = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2))
 
-      roughElement = roughGenerator.ellipse(cx, cy, x2 - x1, y2 - y1, { ...drawingOptions, seed: 100 })
+      roughElement = roughGenerator.ellipse(cx, cy, x2 - x1, y2 - y1, { ...drawingOptions, seed: ROUGH_SEED })
       break
 
     case 'rectangle':
-      roughElement = roughGenerator.rectangle(x1, y1, x2 - x1, y2 - y1, { ...drawingOptions, seed: 100 })
+      roughElement = roughGenerator.rectangle(x1, y1, x2 - x1, y2 - y1, { ...drawingOptions, seed: ROUGH_SEED })
       break
 
     case 'triangle':
@@ -84,7 +101,7 @@ export const createElement: CreateElement = ({ x1, y1, x2, y2, tool, id, options
         [x2, y2],
         [average(x1, x2), y1],
       ]
-      roughElement = roughGenerator.polygon([...(equilateral as any)], { ...drawingOptions, seed: 100 })
+      roughElement = roughGenerator.polygon([...(equilateral as any)], { ...drawingOptions, seed: ROUGH_SEED })
       break
 
     case 'rhombus':
@@ -94,7 +111,7 @@ export const createElement: CreateElement = ({ x1, y1, x2, y2, tool, id, options
         [x2, y1 + (y2 - y1) / 2],
         [x1 + (x2 - x1) / 2, y2],
       ]
-      roughElement = roughGenerator.polygon([...(rhombus as any)], { ...drawingOptions, seed: 100 })
+      roughElement = roughGenerator.polygon([...(rhombus as any)], { ...drawingOptions, seed: ROUGH_SEED })
       break
 
     case 'arrow':
@@ -120,11 +137,11 @@ export const createElement: CreateElement = ({ x1, y1, x2, y2, tool, id, options
         [x135, y135],
         [x2, y2],
       ]
-      roughElement = roughGenerator.polygon([...(arrow as any)], { ...drawingOptions, seed: 100 })
+      roughElement = roughGenerator.polygon([...(arrow as any)], { ...drawingOptions, seed: ROUGH_SEED })
       break
 
     case 'line':
-      roughElement = roughGenerator.line(x1, y1, x2, y2, { ...drawingOptions, seed: 100 })
+      roughElement = roughGenerator.line(x1, y1, x2, y2, { ...drawingOptions, seed: ROUGH_SEED })
       break
 
     default:
@@ -156,8 +173,7 @@ export const drawElement = async (roughCanvas: RoughCanvas, context: CanvasRende
       break
     case 'image':
       const image = await getMemoizedHTMLImage(element.id)
-
-      context.drawImage(image, element.x1, element.y1)
+      context.drawImage(image, element.x1, element.y1, element.width, element.height)
       break
 
     default:
@@ -193,10 +209,6 @@ export const setSelectedElementBorder = (
     }
 
     case 'circle': {
-      const d = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2))
-      const r = d / 2
-      const centerX = average(x1, x2)
-      const centerY = average(y1, y2)
       context.beginPath()
       // element handles
       createCircleResizeHandles(context, { x1, y1, x2, y2 })
@@ -219,12 +231,12 @@ export const setSelectedElementBorder = (
 
       const pointsX = points.map((p) => p.x)
       const pointsY = points.map((p) => p.y)
-
-      context.beginPath()
       const minX = Math.min(...pointsX)
       const maxX = Math.max(...pointsX)
       const minY = Math.min(...pointsY)
       const maxY = Math.max(...pointsY)
+
+      context.beginPath()
       createPenResizeHandles(context, { x1: minX, y1: minY, x2: maxX, y2: maxY })
       context.stroke()
       context.strokeRect(minX, minY, maxX - minX, maxY - minY)
@@ -242,38 +254,6 @@ export const getElementById = (id: string, drawings: Drawings) => {
 
 export const getIndexOfElement = (id: string, drawings: Drawings) => {
   return drawings.findIndex((element) => element.id === id)
-}
-
-const getToolOptions = (tool: Tool, options: DrawingOptions) => {
-  switch (tool) {
-    case 'line':
-    case 'arrow':
-      return {
-        stroke: options.stroke,
-        strokeWidth: +options.strokeWidth,
-      }
-
-    case 'text':
-      return {
-        stroke: options.stroke,
-        fontSize: options.fontSize,
-        fontFamily: options.fontFamily,
-      }
-
-    case 'pen':
-      return {
-        stroke: options.stroke,
-        strokeWidth: +options.strokeWidth,
-      }
-
-    default:
-      return {
-        stroke: options.stroke,
-        strokeWidth: +options.strokeWidth,
-        fill: options.fillStyle !== 'none' ? options.fill : undefined,
-        fillStyle: options.fillStyle !== 'none' ? options.fillStyle : undefined,
-      }
-  }
 }
 
 const getSvgPathFromStroke = (points: any, closed = true) => {
@@ -306,21 +286,3 @@ const getSvgPathFromStroke = (points: any, closed = true) => {
 }
 
 export const average = (a: number, b: number) => (a + b) / 2
-
-type CreateElement = ({
-  x1,
-  y1,
-  x2,
-  y2,
-  tool,
-  id,
-  options,
-}: {
-  x1: number
-  y1: number
-  x2: number
-  y2: number
-  tool: Tool
-  id: string
-  options: DrawingOptions
-}) => PenDrawing | PolygonDrawing | TextDrawing | ImageDrawing
