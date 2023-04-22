@@ -1,4 +1,5 @@
 # React drawboard
+**Live at**: [:globe_with_meridians: https://paint.dezzerlol.tech/](https://paint.dezzerlol.tech/)
 
 ### Made with:
 - react
@@ -16,6 +17,7 @@
   - [x] Adaptive design
   - [x] Zoom and panning on the canvas
   - [x] Export drawings as json
+  - [x] Undo/redo  
   - [ ] Export drawings as image
   - [ ] Collaboration
-  - [ ] Undo/redo  
+  
