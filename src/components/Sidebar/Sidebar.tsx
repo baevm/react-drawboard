@@ -69,7 +69,7 @@ const Sidebar = () => {
                 <BgFillButtonGroup />
               </div>
               <div className={styles.settings_item}>
-                <ColorPicker label='Background color' initialColor={options.fill} onChange={handleBgColorChange} />
+                <ColorPicker label='Background color' initialColor={options.fill!} onChange={handleBgColorChange} />
               </div>
             </>
           )}

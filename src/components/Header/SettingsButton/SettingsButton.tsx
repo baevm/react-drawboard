@@ -97,7 +97,7 @@ export const SettingsButton = () => {
       return
     }
 
-    const createdDrawings = createDrawings(savedDrawings)
+    const createdDrawings = createDrawings(savedDrawings) as any
     setDrawings(createdDrawings)
   }
 
