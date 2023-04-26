@@ -7,4 +7,4 @@
 - TS doc
 
 ### REFACTOR:
-- on high dpi onMouseUp gets called by iteself (why?) causing textarea to instantly disappear. temp fix: isJustCreatedText
+- on high screen dpi onMouseUp gets called by iteself (why?) causing textarea to instantly disappear. temp fix: isJustCreatedText

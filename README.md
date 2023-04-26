@@ -20,4 +20,5 @@
   - [x] Undo/redo  
   - [ ] Export drawings as image
   - [ ] Collaboration
+  - [ ] Tests
   
