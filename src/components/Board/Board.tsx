@@ -76,6 +76,8 @@ const Board = () => {
               y1: element.y1!,
               x2: element.x2!,
               y2: element.y2!,
+              x3: element.x3,
+              y3: element.y3,
             },
             element.points
           )

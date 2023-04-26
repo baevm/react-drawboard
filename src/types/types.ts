@@ -69,6 +69,11 @@ export type TwoPoints = {
   y2: number
 }
 
+export type ThreePoints = TwoPoints & {
+  x3?: number
+  y3?: number
+}
+
 type BaseDrawing = {
   id: string
 }
@@ -84,11 +89,24 @@ export type TextDrawing = BaseDrawing & {
 }
 
 export type PolygonDrawing = BaseDrawing & {
-  tool: 'rectangle' | 'triangle' | 'circle' | 'rhombus' | 'line' | 'arrow'
+  tool: 'rectangle' | 'circle' | 'rhombus' | 'line' | 'arrow'
   x1: number
   x2: number
   y1: number
   y2: number
+  options: DrawingOptions
+  shape: string
+  readonly sets: OpSet[]
+}
+
+export type TriangleDrawing = BaseDrawing & {
+  tool: 'triangle'
+  x1: number
+  x2: number
+  y1: number
+  y2: number
+  x3: number
+  y3: number
   options: DrawingOptions
   shape: string
   readonly sets: OpSet[]
@@ -111,5 +129,5 @@ export type ImageDrawing = BaseDrawing & {
   height: number
 }
 
-export type Drawing = StrictUnion<TextDrawing | PolygonDrawing | PenDrawing | ImageDrawing>
+export type Drawing = StrictUnion<TextDrawing | PolygonDrawing | TriangleDrawing | PenDrawing | ImageDrawing>
 export type Drawings = Drawing[]

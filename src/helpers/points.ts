@@ -1,5 +1,9 @@
-import { Drawing, Drawings, Point, PointPosition, PolygonDrawing, TwoPoints } from '@/types'
+import { Drawing, Drawings, Point, PointPosition, PolygonDrawing, TriangleDrawing, TwoPoints } from '@/types'
+import { Circle } from './geometry/Circle'
+import { Line } from './geometry/Line'
+import { Rectangle } from './geometry/Rectangle'
 import { isPolygonTool } from './tool'
+import { Triangle } from './geometry/Triangle'
 
 export const resizePoints = (clientX: number, clientY: number, position: PointPosition, points: TwoPoints) => {
   const { x1, y1, x2, y2 } = points
@@ -31,7 +35,7 @@ export const getElementAtPoints = (clientX: number, clientY: number, elements: D
   return element
 }
 
-export const adjustDrawingPoints = (element: PolygonDrawing) => {
+export const adjustDrawingPoints = (element: PolygonDrawing | TriangleDrawing) => {
   const { x1, y1, x2, y2, tool } = element
 
   if (tool === 'line') {
@@ -91,17 +95,15 @@ const posWithinDrawing = (clientX: number, clientY: number, element: Drawing) =>
   switch (tool) {
     case 'line':
     case 'arrow': {
-      const on = onLine(x1, y1, x2, y2, clientX, clientY)
+      const on = Line.isOnLine({ x1, y1, x2, y2 }, clientX, clientY)
       const start = nearPoint(clientX, clientY, x1, y1, 'start')
       const end = nearPoint(clientX, clientY, x2, y2, 'end')
       return start || end || on
     }
 
-    // check for triangle separtely
-    // because it can be upside down
     case 'triangle': {
       const { topLeft, topRight, bottomLeft, bottomRight } = getClickPosition({ clientX, clientY, x1, x2, y1, y2 })
-      const inside = (clientX >= x1 && clientX <= x2) || (clientX <= x1 && clientX >= x2) ? 'inside' : null
+      const inside = Triangle.isInside(clientX, clientY, { x1, y1, x2, y2 }) ? 'inside' : null
       return topLeft || topRight || bottomLeft || bottomRight || inside
     }
 
@@ -109,30 +111,23 @@ const posWithinDrawing = (clientX: number, clientY: number, element: Drawing) =>
     case 'rectangle':
     case 'image': {
       const { topLeft, topRight, bottomLeft, bottomRight } = getClickPosition({ clientX, clientY, x1, x2, y1, y2 })
-      const inside = clientX >= x1 && clientX <= x2 && clientY >= y1 && clientY <= y2 ? 'inside' : null
+      const inside = Rectangle.isInside(clientX, clientY, { x1, x2, y1, y2 }) ? 'inside' : null
       return topLeft || topRight || bottomLeft || bottomRight || inside
     }
 
     case 'circle': {
       const { topLeft, topRight, bottomLeft, bottomRight } = getClickPosition({ clientX, clientY, x1, x2, y1, y2 })
-      const d = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2))
-      const r = d / 2
-      const insideCircle =
-        Math.pow(clientX - (x1 + x2) / 2, 2) + Math.pow(clientY - (y1 + y2) / 2, 2) <= Math.pow(r, 2) ? 'inside' : null
+      const insideCircle = Circle.isInside(clientX, clientY, { x1, x2, y1, y2 }) ? 'inside' : null
       return topLeft || topRight || bottomLeft || bottomRight || insideCircle
     }
 
     case 'pen': {
-      const betweenAnyPoint = element.points.some((point: Point, index: number) => {
-        const nextPoint = element.points[index + 1]
-        if (!nextPoint) return false
-        return onLine(point.x, point.y, nextPoint.x, nextPoint.y, clientX, clientY, 5) != null
-      })
+      const betweenAnyPoint = Line.isBetweenAnyPoint(element.points, { x: clientX, y: clientY })
       return betweenAnyPoint ? 'inside' : null
     }
 
     case 'text': {
-      return clientX >= x1 && clientX <= x2 && clientY >= y1 && clientY <= y2 ? 'inside' : null
+      return Rectangle.isInside(clientX, clientY, { x1, x2, y1, y2 }) ? 'inside' : null
     }
 
     default:
@@ -163,16 +158,6 @@ const getClickPosition = ({
   return { topLeft, topRight, bottomLeft, bottomRight }
 }
 
-const onLine = (x1: number, y1: number, x2: number, y2: number, x: number, y: number, maxDistance = 1) => {
-  const a = { x: x1, y: y1 }
-  const b = { x: x2, y: y2 }
-  const c = { x, y }
-  const offset = distance(a, b) - (distance(a, c) + distance(b, c))
-  return Math.abs(offset) < maxDistance ? 'inside' : null
-}
-
 const nearPoint = (x: number, y: number, x1: number, y1: number, name: PointPosition) => {
   return Math.abs(x - x1) < 5 && Math.abs(y - y1) < 5 ? name : null
 }
-
-const distance = (a: Point, b: Point) => Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2))

@@ -1,23 +1,18 @@
-import {
-  DrawingOptions,
-  Drawings,
-  ImageDrawing,
-  PenDrawing,
-  Point,
-  PolygonDrawing,
-  TextDrawing,
-  Tool,
-  TwoPoints,
-} from '@/types'
+import { DrawingOptions, Drawings, Point, ThreePoints, Tool, TwoPoints } from '@/types'
 import getStroke from 'perfect-freehand'
 import rough from 'roughjs'
 import { RoughCanvas } from 'roughjs/bin/canvas'
+import { Circle } from './geometry/Circle'
+import { Line } from './geometry/Line'
+import { Rhombus } from './geometry/Rhombus'
+import { Triangle } from './geometry/Triangle'
 import { getMemoizedHTMLImage } from './image'
 import {
   createCircleResizeHandles,
   createLineResizeHandles,
   createPenResizeHandles,
   createResizeHandles,
+  createTriangleResizeHandles,
 } from './resize'
 import { getToolOptions } from './tool'
 
@@ -80,10 +75,8 @@ export const createElement = ({
       }
 
     case 'circle':
-      const cx = (x1 + x2) / 2
-      const cy = (y1 + y2) / 2
-
-      roughElement = roughGenerator.ellipse(cx, cy, x2 - x1, y2 - y1, { ...drawingOptions, seed: ROUGH_SEED })
+      const { centerX, centerY } = Circle.center({ x1, y1, x2, y2 })
+      roughElement = roughGenerator.ellipse(centerX, centerY, x2 - x1, y2 - y1, { ...drawingOptions, seed: ROUGH_SEED })
       break
 
     case 'rectangle':
@@ -91,52 +84,29 @@ export const createElement = ({
       break
 
     case 'triangle':
-      /* const right = [
-        [x1, y2],
-        [x2, y1],
-        [x1, y1],
-      ] */
-      const equilateral = [
-        [x1, y2],
-        [x2, y2],
-        [average(x1, x2), y1],
-      ]
-      roughElement = roughGenerator.polygon([...(equilateral as any)], { ...drawingOptions, seed: ROUGH_SEED })
-      break
+      const eq = Triangle.createEquilateral({ x1, y1, x2, y2 })
+      roughElement = roughGenerator.polygon([...(eq as any)], { ...drawingOptions, seed: ROUGH_SEED })
+      return {
+        tool,
+        x1,
+        y1,
+        x2,
+        y2,
+        x3: eq[2][0],
+        y3: eq[2][1],
+        id,
+        options: roughElement.options,
+        sets: roughElement.sets,
+        shape: roughElement.shape,
+      }
 
     case 'rhombus':
-      const rhombus = [
-        [x1, y1 + (y2 - y1) / 2],
-        [x1 + (x2 - x1) / 2, y1],
-        [x2, y1 + (y2 - y1) / 2],
-        [x1 + (x2 - x1) / 2, y2],
-      ]
+      const rhombus = Rhombus.create({ x1, y1, x2, y2 })
       roughElement = roughGenerator.polygon([...(rhombus as any)], { ...drawingOptions, seed: ROUGH_SEED })
       break
 
     case 'arrow':
-      let PI = Math.PI
-      let degreesInRadians225 = (225 * PI) / 180
-      let degreesInRadians135 = (135 * PI) / 180
-
-      // calc the angle of the line
-      let dx = x2 - x1
-      let dy = y2 - y1
-      let angle = Math.atan2(dy, dx)
-
-      // calc arrowhead points
-      let x225 = x2 + 20 * Math.cos(angle + degreesInRadians225)
-      let y225 = y2 + 20 * Math.sin(angle + degreesInRadians225)
-      let x135 = x2 + 20 * Math.cos(angle + degreesInRadians135)
-      let y135 = y2 + 20 * Math.sin(angle + degreesInRadians135)
-
-      const arrow = [
-        [x1, y1],
-        [x2, y2],
-        [x225, y225],
-        [x135, y135],
-        [x2, y2],
-      ]
+      const arrow = Line.createLineWithArrow({ x1, y1, x2, y2 })
       roughElement = roughGenerator.polygon([...(arrow as any)], { ...drawingOptions, seed: ROUGH_SEED })
       break
 
@@ -185,7 +155,7 @@ export const drawElement = async (roughCanvas: RoughCanvas, context: CanvasRende
 export const setSelectedElementBorder = (
   context: CanvasRenderingContext2D,
   tool: Tool,
-  { x1, y1, x2, y2 }: TwoPoints,
+  { x1, y1, x2, y2, x3, y3 }: ThreePoints,
   points?: Point[]
 ) => {
   const OFFSET = 10 // offset between element and border
@@ -195,7 +165,6 @@ export const setSelectedElementBorder = (
   switch (tool) {
     case 'rectangle':
     case 'rhombus':
-    case 'triangle':
     case 'image': {
       const w = x2 - x1 + OFFSET
       const h = y2 - y1 + OFFSET
@@ -204,6 +173,27 @@ export const setSelectedElementBorder = (
       createResizeHandles(context, { x1, y1, x2, y2 })
       // element border
       context.rect(x1 - OFFSET / 2, y1 - OFFSET / 2, w, h)
+      context.stroke()
+      break
+    }
+
+    case 'triangle': {
+      context.beginPath()
+      // element handles
+      createTriangleResizeHandles(context, {
+        x1,
+        y1,
+        x2,
+        y2,
+        x3,
+        y3,
+      })
+      // element border
+
+      context.moveTo(x3 as number, y3 as number)
+      context.lineTo(x1, y1)
+      context.lineTo(x2, y2)
+      context.closePath()
       context.stroke()
       break
     }
