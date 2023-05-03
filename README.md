@@ -1,6 +1,8 @@
 # React drawboard
 **Live at**: [:globe_with_meridians: https://paint.dezzerlol.tech/](https://paint.dezzerlol.tech/)
 
+![Drawboard screenshot](drwbrd.png)
+
 ### Made with:
 - react
 - vite
