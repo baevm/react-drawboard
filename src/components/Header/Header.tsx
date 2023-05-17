@@ -5,7 +5,7 @@ import * as RadioGroup from '@radix-ui/react-radio-group'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { ClearCanvasButton } from './ClearCanvasButton'
 import styles from './Header.module.css'
-import { SettingsButton } from './SettingsButton'
+import { SettingsButton } from './Settings'
 
 const Header = () => {
   const { tool, setTool } = useTools((state) => ({

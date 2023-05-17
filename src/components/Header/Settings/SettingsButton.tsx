@@ -7,13 +7,19 @@ import { useTheme } from '@/hooks/useTheme'
 import { Drawings } from '@/types'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { IoEllipsisHorizontal, IoMoonOutline, IoSunnyOutline } from 'react-icons/io5'
+import LanguageSelect from './LanguageSelect/LanguageSelect'
 import styles from './SettingsButton.module.css'
 
 export const SettingsButton = () => {
   const [error, setError] = useState(false)
   const { setDrawings } = useDrawingsActions()
   const { theme, changeTheme } = useTheme()
+  const {
+    t,
+    i18n: { changeLanguage, language },
+  } = useTranslation()
 
   const createDrawings = (savedDrawings: Drawings) => {
     const createdDrawings = []
@@ -123,9 +129,12 @@ export const SettingsButton = () => {
 
       <DropdownMenu.Portal>
         <DropdownMenu.Content className={styles.DropdownMenuContent} sideOffset={5}>
+          <DropdownMenu.Arrow className={styles.DropdownMenuArrow} />
+
           <DropdownMenu.Item className={styles.DropdownMenuItem} onClick={handleOpenFile}>
-            Open <div className={styles.RightSlot}>⌘+O</div>
+            {t('settings.open')} <div className={styles.RightSlot}>⌘+O</div>
           </DropdownMenu.Item>
+
           <DropdownMenu.Item className={styles.DropdownMenuItem} onClick={handleSaveToFile}>
             Save to <div className={styles.RightSlot}>⌘+S</div>
           </DropdownMenu.Item>
@@ -158,7 +167,13 @@ export const SettingsButton = () => {
               Light
             </DropdownMenu.RadioItem>
           </DropdownMenu.RadioGroup>
-          <DropdownMenu.Arrow className={styles.DropdownMenuArrow} />
+
+          <DropdownMenu.Separator className={styles.DropdownMenuSeparator} />
+
+          <DropdownMenu.Label className={styles.DropdownMenuLabel}>Language</DropdownMenu.Label>
+          <div style={{ maxWidth: '180px' }}>
+            <LanguageSelect />
+          </div>
         </DropdownMenu.Content>
       </DropdownMenu.Portal>
     </DropdownMenu.Root>

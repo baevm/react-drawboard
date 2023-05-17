@@ -4,6 +4,7 @@ import { HelmetProvider } from 'react-helmet-async'
 import { IconContext } from 'react-icons'
 import App from './App'
 import './index.css'
+import '../i18n.ts'
 
 const helmetContext = {}
 

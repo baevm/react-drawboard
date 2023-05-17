@@ -19,9 +19,6 @@ button {
   will-change: transform, opacity;
 }
 
-.item_icon {
-}
-
 .DropdownMenuContent[data-side='top'],
 .DropdownMenuSubContent[data-side='top'] {
   animation-name: slideDownAndFade;
