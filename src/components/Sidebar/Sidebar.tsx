@@ -7,6 +7,7 @@ import WidthButtonGroup from './ButtonGroup/WidthButtonGroup'
 import BgFillButtonGroup from './ButtonGroup/BgFillButtonGroup'
 import FontSizeButtonGroup from './ButtonGroup/FontSizeButtonGroup'
 import FontFamilyButtonGroup from './ButtonGroup/FontFamilyButtonGroup'
+import { useTranslation } from 'react-i18next'
 
 const Sidebar = () => {
   const { tool, options, setOptions } = useTools((state) => ({
@@ -14,6 +15,7 @@ const Sidebar = () => {
     options: state.options,
     setOptions: state.setOptions,
   }))
+  const { t } = useTranslation()
 
   const isPolygonSettings = tool === 'circle' || tool === 'rectangle' || tool === 'triangle' || tool === 'rhombus'
   const isStrokeWidth = isPolygonSettings || tool === 'pen' || tool === 'line' || tool === 'arrow'
@@ -43,7 +45,7 @@ const Sidebar = () => {
       <div className={styles.sidebar_container}>
         <div className={styles.sidebar_wrapper}>
           <div className={styles.settings_item}>
-            <ColorPicker label='Stroke' initialColor={options.stroke} onChange={handleLineColorChange} />
+            <ColorPicker label={t('sidebar.stroke')} initialColor={options.stroke} onChange={handleLineColorChange} />
           </div>
 
           {isStrokeWidth && (
@@ -69,11 +71,10 @@ const Sidebar = () => {
                 <BgFillButtonGroup />
               </div>
               <div className={styles.settings_item}>
-                <ColorPicker label='Background color' initialColor={options.fill!} onChange={handleBgColorChange} />
+                <ColorPicker label={t('sidebar.bgColor')} initialColor={options.fill!} onChange={handleBgColorChange} />
               </div>
             </>
           )}
-
         </div>
       </div>
     </>

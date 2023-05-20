@@ -7,6 +7,6 @@ export const MIN_CANVAS_SCALE = 0.11
 export const MAX_CANVAS_SCALE = 10
 
 export const LANGUAGES = [
-  { label: 'English', value: 'en' },
-  { label: 'Русский', value: 'ru' },
+  { label: 'English', value: 'en-US' },
+  { label: 'Русский', value: 'ru-RU' },
 ]

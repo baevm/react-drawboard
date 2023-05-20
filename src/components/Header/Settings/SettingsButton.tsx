@@ -16,10 +16,7 @@ export const SettingsButton = () => {
   const [error, setError] = useState(false)
   const { setDrawings } = useDrawingsActions()
   const { theme, changeTheme } = useTheme()
-  const {
-    t,
-    i18n: { changeLanguage, language },
-  } = useTranslation()
+  const { t } = useTranslation()
 
   const createDrawings = (savedDrawings: Drawings) => {
     const createdDrawings = []
@@ -136,41 +133,41 @@ export const SettingsButton = () => {
           </DropdownMenu.Item>
 
           <DropdownMenu.Item className={styles.DropdownMenuItem} onClick={handleSaveToFile}>
-            Save to <div className={styles.RightSlot}>⌘+S</div>
+            {t('settings.saveTo')} <div className={styles.RightSlot}>⌘+S</div>
           </DropdownMenu.Item>
 
           <DropdownMenu.Item className={styles.DropdownMenuItem}>
-            Save image <div className={styles.RightSlot}>⌘+J</div>
+            {t('settings.saveImage')} <div className={styles.RightSlot}>⌘+J</div>
           </DropdownMenu.Item>
 
           <DropdownMenu.Separator className={styles.DropdownMenuSeparator} />
 
           <DropdownMenu.Item className={styles.DropdownMenuItem} disabled>
-            Collaboration
+            {t('settings.collaboration')}
           </DropdownMenu.Item>
 
           <DropdownMenu.Separator className={styles.DropdownMenuSeparator} />
 
-          <DropdownMenu.Label className={styles.DropdownMenuLabel}>Theme</DropdownMenu.Label>
+          <DropdownMenu.Label className={styles.DropdownMenuLabel}>{t('settings.theme')}</DropdownMenu.Label>
           <DropdownMenu.RadioGroup value={theme} onValueChange={changeTheme}>
             <DropdownMenu.RadioItem className={styles.DropdownMenuRadioItem} value='dark'>
               <DropdownMenu.ItemIndicator className={styles.DropdownMenuItemIndicator}>
                 <IoMoonOutline size={14} className={styles.item_icon} />
               </DropdownMenu.ItemIndicator>
-              Dark
+              {t('settings.dark')}
             </DropdownMenu.RadioItem>
 
             <DropdownMenu.RadioItem className={styles.DropdownMenuRadioItem} value='light'>
               <DropdownMenu.ItemIndicator className={styles.DropdownMenuItemIndicator}>
                 <IoSunnyOutline size={14} className={styles.item_icon} />
               </DropdownMenu.ItemIndicator>
-              Light
+              {t('settings.light')}
             </DropdownMenu.RadioItem>
           </DropdownMenu.RadioGroup>
 
           <DropdownMenu.Separator className={styles.DropdownMenuSeparator} />
 
-          <DropdownMenu.Label className={styles.DropdownMenuLabel}>Language</DropdownMenu.Label>
+          <DropdownMenu.Label className={styles.DropdownMenuLabel}>{t('settings.language')}</DropdownMenu.Label>
           <div style={{ maxWidth: '180px' }}>
             <LanguageSelect />
           </div>

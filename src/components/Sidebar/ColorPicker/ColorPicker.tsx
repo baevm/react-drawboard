@@ -1,10 +1,10 @@
 import { useClickOutside } from '@/hooks/useClickOutside'
+import { HEX } from '@/types'
 import { useRef, useState } from 'react'
-import { HexAlphaColorPicker, HexColorInput, HexColorPicker } from 'react-colorful'
+import { HexAlphaColorPicker, HexColorInput } from 'react-colorful'
+import { useDebouncyFn } from 'use-debouncy'
 import ItemLabel from '../ItemLabel'
 import styles from './ColorPicker.module.css'
-import { useDebouncyFn } from 'use-debouncy'
-import { HEX } from '@/types'
 
 type Props = {
   label: string
@@ -37,7 +37,13 @@ export const ColorPicker = ({ label, onChange, initialColor }: Props) => {
           onClick={() => setIsColorPickerOpen(true)}
           className={styles.item_swatch}
         />
-        <HexColorInput color={color} onChange={setColor} className={styles.color_input} style={{ color }} />
+        <HexColorInput
+          color={color}
+          onChange={setColor}
+          className={styles.color_input}
+          alpha={true}
+          style={{ color, fontWeight: 600 }}
+        />
       </div>
       {isColorPickerOpen && (
         <div ref={colorPickerRef} className={styles.color_popover}>

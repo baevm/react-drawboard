@@ -1,7 +1,63 @@
 {
   "translation": {
     "settings": {
-      "open": "Open"
+      "open": "Open",
+      "saveTo": "Save to",
+      "saveImage": "Save image",
+      "collaboration": "Collaboration",
+      "theme": "Theme",
+      "dark": "Dark",
+      "light": "Light",
+      "language": "Language",
+      "selectLanguage": "Select language"
+    },
+    "sidebar": {
+      "stroke": "Stroke",
+      "bgColor": "Background color",
+      "lineWidth": "Line width",
+      "thin": "Thin",
+      "regular": "Regular",
+      "bold": "Bold",
+      "fontSize": "Font size",
+      "small": "Small",
+      "medium": "Medium",
+      "large": "Large",
+      "fontFamily": "Font family",
+      "default": "Default",
+      "handWritten": "Hand written",
+      "bgFillStyle": "Background fill style",
+      "noFill": "No fill",
+      "fill": "Fill",
+      "hachure": "Hachure"
+    },
+    "header": {
+      "settings": "Settings",
+      "select": "Select",
+      "pan": "Move",
+      "pen": "Pen",
+      "line": "Line",
+      "circle": "Circle",
+      "rectangle": "Rectangle",
+      "triangle": "Triangle",
+      "rhombus": "Rhombus",
+      "arrow": "Arrow",
+      "text": "Text",
+      "image": "Image",
+      "eraser": "Eraser",
+      "reset": "Reset board",
+      "resetBoard": "This action will clear your board. Are you sure?"
+    },
+    "footer": {
+      "undo": "Undo",
+      "redo": "Redo",
+      "zoomOut": "Zoom out",
+      "resetZoom": "Reset zoom",
+      "zoomIn": "Zoom in"
+    },
+    "ui": {
+      "cancel": "Cancel",
+      "yes": "Да",
+      "confirmTitle": "Are you absolutely sure?"
     }
   }
 }

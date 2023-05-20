@@ -1,12 +1,14 @@
 import { useDrawings, useDrawingsActions } from '@/hooks/useDrawings'
 import * as AlertDialog from '@radix-ui/react-alert-dialog'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { IoTrashOutline } from 'react-icons/io5'
 import styles from './ClearCanvasButton.module.css'
 
 export const ClearCanvasButton = () => {
   const { setDrawings, clearDrawings } = useDrawingsActions()
   const [open, setOpen] = useState(false)
+  const { t } = useTranslation()
 
   const handleClearCanvas = () => {
     clearDrawings()
@@ -15,23 +17,23 @@ export const ClearCanvasButton = () => {
   return (
     <AlertDialog.Root open={open} onOpenChange={setOpen}>
       <AlertDialog.Trigger asChild>
-        <button title='Reset board'>
+        <button title={t('header.reset') as string}>
           <IoTrashOutline />
         </button>
       </AlertDialog.Trigger>
       <AlertDialog.Portal>
         <AlertDialog.Overlay className={styles.AlertDialogOverlay} />
         <AlertDialog.Content className={styles.AlertDialogContent}>
-          <AlertDialog.Title className={styles.AlertDialogTitle}>Are you absolutely sure?</AlertDialog.Title>
+          <AlertDialog.Title className={styles.AlertDialogTitle}>{t('ui.confirmTitle')}</AlertDialog.Title>
           <AlertDialog.Description className={styles.AlertDialogDescription}>
-            This action will clear your board. Are you sure?
+            {t('header.resetBoard')}
           </AlertDialog.Description>
           <div style={{ display: 'flex', gap: 25, justifyContent: 'flex-end' }}>
             <AlertDialog.Cancel asChild>
-              <button className={`${styles.Button} ${styles.mauve}`}>Cancel</button>
+              <button className={`${styles.Button} ${styles.mauve}`}>{t('ui.cancel')}</button>
             </AlertDialog.Cancel>
             <AlertDialog.Action asChild onClick={handleClearCanvas}>
-              <button className={`${styles.Button} ${styles.red}`}>Yes</button>
+              <button className={`${styles.Button} ${styles.red}`}>{t('ui.yes')}</button>
             </AlertDialog.Action>
           </div>
         </AlertDialog.Content>

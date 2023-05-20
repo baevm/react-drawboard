@@ -1,7 +1,63 @@
 {
   "translation": {
     "settings": {
-      "open": "Открыть"
+      "open": "Открыть",
+      "saveTo": "Сохранить в",
+      "saveImage": "Сохранить изображение",
+      "collaboration": "Коллаборация",
+      "theme": "Тема",
+      "dark": "Темная",
+      "light": "Светлая",
+      "language": "Язык",
+      "selectLanguage": "Выбор языка"
+    },
+    "sidebar": {
+      "stroke": "Цвет",
+      "bgColor": "Цвет фона",
+      "lineWidth": "Толщина линий",
+      "thin": "Тонкий",
+      "regular": "Обычный",
+      "bold": "Жирный",
+      "fontSize": "Размер шрифта",
+      "small": "Малый",
+      "medium": "Средний",
+      "large": "Большой",
+      "fontFamily": "Стиль шрифта",
+      "default": "Обычный",
+      "handWritten": "От руки",
+      "bgFillStyle": "Заливка",
+      "noFill": "Без заливки",
+      "fill": "Однотонная",
+      "hachure": "Штрих"
+    },
+    "header": {
+      "settings": "Настройки",
+      "select": "Выбрать",
+      "pan": "Перемещение",
+      "pen": "Ручка",
+      "line": "Линия",
+      "circle": "Круг",
+      "rectangle": "Прямоугольник",
+      "triangle": "Треугольник",
+      "rhombus": "Ромб",
+      "arrow": "Стрелка",
+      "text": "Текст",
+      "image": "Изображение",
+      "eraser": "Ластик",
+      "reset": "Очистить холст",
+      "resetBoard": "Это действие очистит холст. Вы уверены?"
+    },
+    "footer": {
+      "undo": "Шаг назад",
+      "redo": "Шаг вперед",
+      "zoomOut": "Уменьшить",
+      "resetZoom": "Сбросить масштаб",
+      "zoomIn": "Увеличить"
+    },
+    "ui": {
+      "cancel": "Отмена",
+      "yes": "Да",
+      "confirmTitle": "Вы уверены?"
     }
   }
 }

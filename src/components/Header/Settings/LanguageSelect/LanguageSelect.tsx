@@ -12,10 +12,14 @@ const LanguageSelect = () => {
     i18n: { changeLanguage, language },
   } = useTranslation()
 
+  function handleChangeLanguage(lang: any) {
+    changeLanguage(lang)
+  }
+
   return (
-    <Select.Root>
+    <Select.Root defaultValue={language} onValueChange={handleChangeLanguage}>
       <Select.Trigger className={styles.SelectTrigger} aria-label='Language'>
-        <Select.Value placeholder='Select language' />
+        <Select.Value placeholder={t('settings.selectLanguage')} />
         <Select.Icon className={styles.SelectIcon}>
           <IoChevronDown size='14px' />
         </Select.Icon>

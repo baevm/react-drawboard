@@ -3,6 +3,7 @@ import { useTools } from '@/hooks/useTools'
 import { Tool } from '@/types'
 import * as RadioGroup from '@radix-ui/react-radio-group'
 import { useHotkeys } from 'react-hotkeys-hook'
+import { useTranslation } from 'react-i18next'
 import { ClearCanvasButton } from './ClearCanvasButton'
 import styles from './Header.module.css'
 import { SettingsButton } from './Settings'
@@ -12,6 +13,7 @@ const Header = () => {
     setTool: state.setTool,
     tool: state.tool,
   }))
+  const { t } = useTranslation()
 
   // add set cursor for tool function
   const handleChangeTool = (value: Tool) => {
@@ -34,7 +36,7 @@ const Header = () => {
             <ToolButton
               key={value}
               value={value}
-              label={label}
+              label={t('header.' + value)}
               icon={icon}
               toolKey={key}
               handleChangeTool={() => handleChangeTool(value)}

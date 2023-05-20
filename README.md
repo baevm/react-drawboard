@@ -20,6 +20,7 @@
   - [x] Zoom and panning on the canvas
   - [x] Export drawings as json
   - [x] Undo/redo  
+  - [x] i18n (ru, en)
   - [ ] Export drawings as image
   - [ ] Collaboration
   - [ ] Tests

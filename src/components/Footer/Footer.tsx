@@ -1,6 +1,7 @@
 import { useDrawingsActions } from '@/hooks/useDrawings'
 import { useZoom } from '@/hooks/useZoom'
 import { useHotkeys } from 'react-hotkeys-hook'
+import { useTranslation } from 'react-i18next'
 import { IoArrowRedoOutline, IoArrowUndoOutline } from 'react-icons/io5'
 import { RxZoomIn, RxZoomOut } from 'react-icons/rx'
 import styles from './Footer.module.css'
@@ -9,6 +10,7 @@ const ZOOMIN_VALUE = -100
 const ZOOMOUT_VALUE = 100
 
 const Footer = () => {
+  const { t } = useTranslation()
   const { undoDraw, redoDraw } = useDrawingsActions()
   const { canvasScale, handleZoom, resetZoom } = useZoom()
   useHotkeys('ctrl+z', undoDraw)
@@ -24,21 +26,21 @@ const Footer = () => {
   return (
     <div className={styles.footer_container}>
       <div className={styles.ToggleGroup} role='group'>
-        <button onClick={undoDraw} className={styles.ToggleGroupItem} title='Undo'>
+        <button onClick={undoDraw} className={styles.ToggleGroupItem} title={t('footer.undo') as string}>
           <IoArrowUndoOutline />
         </button>
-        <button onClick={redoDraw} className={styles.ToggleGroupItem} title='Redo'>
+        <button onClick={redoDraw} className={styles.ToggleGroupItem} title={t('footer.redo') as string}>
           <IoArrowRedoOutline />
         </button>
       </div>
       <div className={styles.ToggleGroup}>
-        <button onClick={handleZoomOut} className={styles.ToggleGroupItem} title='Zoom out'>
+        <button onClick={handleZoomOut} className={styles.ToggleGroupItem} title={t('footer.zoomOut') as string}>
           <RxZoomOut />
         </button>
-        <button className={styles.ToggleGroupItem} onClick={resetZoom} title='Reset zoom'>
+        <button className={styles.ToggleGroupItem} onClick={resetZoom} title={t('footer.resetZoom') as string}>
           {Math.floor(100 * canvasScale)}%
         </button>
-        <button onClick={handleZoomIn} className={styles.ToggleGroupItem} title='Zoom in'>
+        <button onClick={handleZoomIn} className={styles.ToggleGroupItem} title={t('footer.zoomIn') as string}>
           <RxZoomIn />
         </button>
       </div>

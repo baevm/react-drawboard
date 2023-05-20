@@ -23,6 +23,7 @@
     "dexie-react-hooks": "^1.1.1",
     "fast-memoize": "^2.5.2",
     "i18next": "^22.4.15",
+    "i18next-browser-languagedetector": "^7.0.1",
     "nanoid": "^4.0.1",
     "perfect-freehand": "^1.2.0",
     "react": "^18.2.0",
