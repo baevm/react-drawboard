@@ -5,6 +5,7 @@ import { getImageFromDb, saveImageToDb } from '@/helpers/image'
 import { useDrawingsActions } from '@/hooks/useDrawings'
 import { useTheme } from '@/hooks/useTheme'
 import { Drawings } from '@/types'
+import { getCanvas } from '@/utils/getCanvas'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -100,8 +101,8 @@ export const SettingsButton = () => {
       return
     }
 
-    const createdDrawings = createDrawings(savedDrawings) as any
-    setDrawings(createdDrawings)
+    const drawings = createDrawings(savedDrawings) as any
+    setDrawings(drawings)
   }
 
   const handleSaveToFile = async () => {
@@ -114,6 +115,33 @@ export const SettingsButton = () => {
 
     const stringifiedDrawings = JSON.stringify({ drawings: formattedDrawings })
     saveAsJson(stringifiedDrawings)
+  }
+
+  const handleCreateScreenshot = async () => {
+    const { canvas, context } = getCanvas()
+    let link = document.createElement('a')
+    const str = new Date().toISOString().slice(0, 16).replace('T', ' ')
+
+    link.download = `drawboard-${str}.png`
+
+    // create a dummy canvas
+    // to set background color later
+    let destinationCanvas = document.createElement('canvas')
+    destinationCanvas.width = canvas.width
+    destinationCanvas.height = canvas.height
+
+    let destCtx = destinationCanvas.getContext('2d') as CanvasRenderingContext2D
+
+    //create a rectangle with the desired color
+    destCtx.fillStyle = '#FFFFFF'
+    destCtx.fillRect(0, 0, canvas.width, canvas.height)
+
+    //draw the original canvas onto the destination canvas
+    destCtx.drawImage(canvas, 0, 0)
+
+    // save image from dummy canvas
+    link.href = destinationCanvas.toDataURL('image/png')
+    link.click()
   }
 
   return (
@@ -136,7 +164,7 @@ export const SettingsButton = () => {
             {t('settings.saveTo')} <div className={styles.RightSlot}>⌘+S</div>
           </DropdownMenu.Item>
 
-          <DropdownMenu.Item className={styles.DropdownMenuItem}>
+          <DropdownMenu.Item className={styles.DropdownMenuItem} onClick={handleCreateScreenshot}>
             {t('settings.saveImage')} <div className={styles.RightSlot}>⌘+J</div>
           </DropdownMenu.Item>
 
