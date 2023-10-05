@@ -56,7 +56,7 @@
     },
     "ui": {
       "cancel": "Cancel",
-      "yes": "Да",
+      "yes": "Yes",
       "confirmTitle": "Are you absolutely sure?"
     }
   }
