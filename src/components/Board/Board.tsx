@@ -1,5 +1,5 @@
 import { DEVICE_PIXEL_RATIO } from '@/constants'
-import { getResizeCursor, setCursor, setEraserCursor } from '@/helpers/cursor'
+import { setCursor, updateCurrentCursor } from '@/helpers/cursor'
 import {
   createElement,
   drawElement,
@@ -23,7 +23,7 @@ import { useDrawings, useDrawingsActions } from '@/hooks/useDrawings'
 import { useResizeObserver } from '@/hooks/useResizeObserver'
 import { useTools } from '@/hooks/useTools'
 import { useZoom } from '@/hooks/useZoom'
-import { Action, Drawing, DrawingOptions, PointPosition, Tool } from '@/types'
+import { Action, DrawingOptions, DrawingWithOffset, Tool } from '@/types'
 import { generateId } from '@/utils/generateId'
 import { getCanvas } from '@/utils/getCanvas'
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
@@ -293,32 +293,7 @@ const Board = () => {
     const isResizing = action === 'resizing' && selectedElement
     const isPanning = action === 'panning'
 
-    switch (tool) {
-      case 'select':
-        const element = getElementAtPoints(clientX, clientY, drawings)
-        const cursor = element && selectedElement && getResizeCursor(element.position)
-
-        if (cursor) {
-          setCursor(style, cursor)
-        } else if (element) {
-          setCursor(style, 'move')
-        } else {
-          setCursor(style, 'default')
-        }
-        break
-      case 'eraser':
-        setEraserCursor(style)
-        break
-      case 'pan':
-        setCursor(style, 'grab')
-        break
-      case 'text':
-        setCursor(style, 'text')
-        break
-      default:
-        setCursor(style, 'crosshair')
-        break
-    }
+    updateCurrentCursor(tool, clientX, clientY, drawings, selectedElement, style)
 
     if (isDrawing) {
       // get index from last element
@@ -373,16 +348,11 @@ const Board = () => {
       }
 
       const index = getIndexOfElement(id, drawings)
-      if (tool === 'image') {
-        const { x1, y1, x2, y2 } = resizePoints(clientX, clientY, position, points)
 
-        updateElement(x1, y1, x2, y2, tool, index, id, options!)
-      } else {
-        const { x1, y1, x2, y2 } = resizePoints(clientX, clientY, position, points)
+      const { x1, y1, x2, y2 } = resizePoints(clientX, clientY, position, points)
 
-        updateElement(x1, y1, x2, y2, tool, index, id, options!)
-        return
-      }
+      updateElement(x1, y1, x2, y2, tool, index, id, options!)
+      return
     }
 
     if (isPanning) {
@@ -399,6 +369,12 @@ const Board = () => {
   }
 
   const handleMouseUp = (e: React.MouseEvent) => {
+    // avoid saving text element with empty text
+    if (selectedElement?.tool === 'text' && selectedElement.text === '') {
+      setAction('none')
+      return
+    }
+
     const { clientX, clientY } = getScaledXY(e.clientX, e.clientY)
 
     const isDrawing = action === 'drawing'
@@ -441,7 +417,13 @@ const Board = () => {
     syncStorageDrawings(drawings)
   }
 
-  const handleTextAreaBlur = (e: any) => {
+  const handleTextAreaBlur = (e: React.FocusEvent<HTMLTextAreaElement>) => {
+    console.log(e)
+
+    if (e.target.value === '') {
+      return
+    }
+
     const { id, x1, y1, tool, options } = selectedElement as any
     const text = e.target.value
 
@@ -452,7 +434,7 @@ const Board = () => {
     setSelectedElement(null)
   }
 
-  const handleContextMenu = (e: any) => {
+  const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault()
   }
 
@@ -520,12 +502,6 @@ const Board = () => {
 }
 
 export default Board
-
-type DrawingWithOffset = Drawing & {
-  offsetX?: any | any[]
-  offsetY?: any | any[]
-  position: PointPosition
-}
 
 type UpdateElement = (
   x1: number,

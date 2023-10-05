@@ -127,7 +127,7 @@ export const drawElement = async (roughCanvas: RoughCanvas, context: CanvasRende
       const svgPath = getSvgPathFromStroke(
         getStroke(element.points, {
           size: 4 + +element.options.strokeWidth,
-          thinning: 0.5,
+          thinning: 0.6,
           smoothing: 0.5,
           streamline: 0.5,
         })

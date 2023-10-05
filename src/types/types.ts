@@ -131,3 +131,9 @@ export type ImageDrawing = BaseDrawing & {
 
 export type Drawing = StrictUnion<TextDrawing | PolygonDrawing | TriangleDrawing | PenDrawing | ImageDrawing>
 export type Drawings = Drawing[]
+
+export type DrawingWithOffset = Drawing & {
+  offsetX?: any | any[]
+  offsetY?: any | any[]
+  position: PointPosition
+}
