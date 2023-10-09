@@ -2,14 +2,16 @@ import { DrawingOptions, Tool } from '@/types'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-interface UseTools {
+interface UseBoardState {
   tool: Tool
   options: DrawingOptions
+  currentBoard: string
   setTool: (t: Tool) => void
   setOptions: (o: Partial<DrawingOptions>) => void
+  setCurrentBoard: (b: string) => void
 }
 
-export const useTools = create<UseTools>()(
+export const useBoardState = create<UseBoardState>()(
   persist(
     (set, get) => ({
       tool: 'pen',
@@ -21,12 +23,14 @@ export const useTools = create<UseTools>()(
         fontFamily: 'SourceSansPro',
         fontSize: '24',
       },
+      currentBoard: 'default',
       setTool: (tool) => set({ tool }),
       setOptions: (newOptions) => set({ options: { ...get().options, ...newOptions } }),
+      setCurrentBoard: (board) => set({ currentBoard: board }),
     }),
     {
-      name: 'current-tool',
-      partialize: (state) => ({ tool: state.tool, options: state.options }),
+      name: 'current-state',
+      partialize: (state) => ({ tool: state.tool, options: state.options, currentBoard: state.currentBoard }),
     }
   )
 )

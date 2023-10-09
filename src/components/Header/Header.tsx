@@ -1,5 +1,5 @@
 import { TOOLS } from '@/constants/tools'
-import { useTools } from '@/hooks/useTools'
+import { useBoardState } from '@/hooks/useBoardState'
 import { Tool } from '@/types'
 import * as RadioGroup from '@radix-ui/react-radio-group'
 import { useHotkeys } from 'react-hotkeys-hook'
@@ -11,7 +11,7 @@ import { IoCloseSharp, IoFolderOutline } from 'react-icons/io5'
 import BoardsBar from './BoardsBarButton/BoardsBar'
 
 const Header = () => {
-  const { tool, setTool } = useTools((state) => ({
+  const { tool, setTool } = useBoardState((state) => ({
     setTool: state.setTool,
     tool: state.tool,
   }))

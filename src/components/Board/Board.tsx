@@ -21,7 +21,7 @@ import {
 import { isAdjustableTool, isDrawableTool } from '@/helpers/tool'
 import { useDrawings, useDrawingsActions } from '@/hooks/useDrawings'
 import { useResizeObserver } from '@/hooks/useResizeObserver'
-import { useTools } from '@/hooks/useTools'
+import { useBoardState } from '@/hooks/useBoardState'
 import { useZoom } from '@/hooks/useZoom'
 import { Action, DrawingOptions, DrawingWithOffset, Tool } from '@/types'
 import { generateId } from '@/utils/generateId'
@@ -33,13 +33,14 @@ import styles from './Board.module.css'
 const Board = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const textAreaRef = useRef<HTMLTextAreaElement>(null)
-  const { tool, options, setTool } = useTools((state) => ({
+  const { tool, currentBoard, options, setTool } = useBoardState((state) => ({
     tool: state.tool,
+    currentBoard: state.currentBoard,
     options: state.options,
     setTool: state.setTool,
   }))
   const { width, height } = useResizeObserver()
-  const { drawings } = useDrawings()
+  const { drawings } = useDrawings(currentBoard)
   const { setDrawings, syncStorageDrawings } = useDrawingsActions()
   const { canvasScale, viewportTopLeft, handleZoom, setViewportTopLeft } = useZoom()
 
@@ -61,6 +62,8 @@ const Board = () => {
       context.save()
 
       const roughCanvas = rough.canvas(canvas!)
+
+      console.log({ currentBoard, drawings })
 
       for (const element of drawings) {
         const isActive = selectedElement?.id === element.id
@@ -172,7 +175,9 @@ const Board = () => {
       }
     }
 
-    setDrawings(drawingsCopy)
+    console.log(drawingsCopy)
+
+    setDrawings(currentBoard, drawingsCopy)
     return drawingsCopy[index]
   }
 
@@ -216,7 +221,7 @@ const Board = () => {
       const index = getIndexOfElement(element.id, drawings)
       const elementsCopy = [...drawings]
       elementsCopy.splice(index, 1)
-      setDrawings(elementsCopy)
+      setDrawings(currentBoard, elementsCopy)
       return
     }
 
@@ -247,7 +252,7 @@ const Board = () => {
         options,
       }) as any
 
-      setDrawings([...drawings, newElement])
+      setDrawings(currentBoard, [...drawings, newElement])
       setSelectedElement(newElement)
       setAction(tool === 'text' ? 'writing' : 'drawing')
       return
@@ -274,7 +279,7 @@ const Board = () => {
           options,
         }
 
-        setDrawings([...drawings, element as any])
+        setDrawings(currentBoard, [...drawings, element as any])
         setTool('pan')
         return
       }
@@ -317,7 +322,7 @@ const Board = () => {
         ...drawingsCopy[index],
         points: newPoints,
       }
-      setDrawings(drawingsCopy)
+      setDrawings(currentBoard, drawingsCopy)
       return
     }
 
@@ -414,7 +419,7 @@ const Board = () => {
     }
 
     setAction('none')
-    syncStorageDrawings(drawings)
+    syncStorageDrawings(currentBoard, drawings)
   }
 
   const handleTextAreaBlur = (e: React.FocusEvent<HTMLTextAreaElement>) => {

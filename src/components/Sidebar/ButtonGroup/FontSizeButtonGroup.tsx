@@ -2,12 +2,12 @@ import React from 'react'
 import ItemLabel from '../ItemLabel'
 import styles from './ButtonGroup.module.css'
 import * as ToggleGroup from '@radix-ui/react-toggle-group'
-import { useTools } from '@/hooks/useTools'
+import { useBoardState } from '@/hooks/useBoardState'
 import { FontSize } from '@/types'
 import { useTranslation } from 'react-i18next'
 
 const FontSizeButtonGroup = () => {
-  const { options, setOptions } = useTools((state) => ({
+  const { options, setOptions } = useBoardState((state) => ({
     options: state.options,
     setOptions: state.setOptions,
   }))

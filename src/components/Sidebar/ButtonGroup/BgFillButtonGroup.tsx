@@ -1,4 +1,4 @@
-import { useTools } from '@/hooks/useTools'
+import { useBoardState } from '@/hooks/useBoardState'
 import { FillStyle } from '@/types'
 import * as ToggleGroup from '@radix-ui/react-toggle-group'
 import { useTranslation } from 'react-i18next'
@@ -8,7 +8,7 @@ import ItemLabel from '../ItemLabel'
 import styles from './ButtonGroup.module.css'
 
 const BgFillButtonGroup = () => {
-  const { options, setOptions } = useTools((state) => ({
+  const { options, setOptions } = useBoardState((state) => ({
     options: state.options,
     setOptions: state.setOptions,
   }))

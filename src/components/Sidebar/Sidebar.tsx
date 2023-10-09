@@ -1,4 +1,4 @@
-import { useTools } from '@/hooks/useTools'
+import { useBoardState } from '@/hooks/useBoardState'
 import { HEX } from '@/types'
 import { IoMenu } from 'react-icons/io5'
 import { ColorPicker } from './ColorPicker'
@@ -10,7 +10,7 @@ import FontFamilyButtonGroup from './ButtonGroup/FontFamilyButtonGroup'
 import { useTranslation } from 'react-i18next'
 
 const Sidebar = () => {
-  const { tool, options, setOptions } = useTools((state) => ({
+  const { tool, options, setOptions } = useBoardState((state) => ({
     tool: state.tool,
     options: state.options,
     setOptions: state.setOptions,
