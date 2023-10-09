@@ -7,6 +7,8 @@ import { useTranslation } from 'react-i18next'
 import { ClearCanvasButton } from './ClearCanvasButton'
 import styles from './Header.module.css'
 import { SettingsButton } from './Settings'
+import { IoCloseSharp, IoFolderOutline } from 'react-icons/io5'
+import BoardsBar from './BoardsBarButton/BoardsBar'
 
 const Header = () => {
   const { tool, setTool } = useTools((state) => ({
@@ -15,14 +17,15 @@ const Header = () => {
   }))
   const { t } = useTranslation()
 
-  // add set cursor for tool function
   const handleChangeTool = (value: Tool) => {
     setTool(value)
   }
 
   return (
     <div className={styles.header_container}>
-      <div className={styles.header_settings}>
+      <div style={{ marginLeft: '0.5rem' }}></div>
+
+      <section className={styles.header_settings}>
         <div className={`${styles.toggle_group_item} ${styles.toggle_group_aside}`}>
           <SettingsButton />
         </div>
@@ -46,7 +49,9 @@ const Header = () => {
         <div className={`${styles.toggle_group_item} ${styles.toggle_group_aside}`}>
           <ClearCanvasButton />
         </div>
-      </div>
+      </section>
+
+      <BoardsBar />
     </div>
   )
 }

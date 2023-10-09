@@ -1,4 +1,4 @@
-import { useDrawings, useDrawingsActions } from '@/hooks/useDrawings'
+import { useDrawingsActions } from '@/hooks/useDrawings'
 import * as AlertDialog from '@radix-ui/react-alert-dialog'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -6,7 +6,7 @@ import { IoTrashOutline } from 'react-icons/io5'
 import styles from './ClearCanvasButton.module.css'
 
 export const ClearCanvasButton = () => {
-  const { setDrawings, clearDrawings } = useDrawingsActions()
+  const { clearDrawings } = useDrawingsActions()
   const [open, setOpen] = useState(false)
   const { t } = useTranslation()
 

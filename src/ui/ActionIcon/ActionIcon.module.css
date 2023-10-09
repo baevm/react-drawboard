@@ -1,0 +1,9 @@
+.actionicon {
+  cursor: pointer;
+  border: 0;
+  padding: 5px;
+}
+
+.actionicon:active {
+  transform: translateY(0.0625rem);
+}
