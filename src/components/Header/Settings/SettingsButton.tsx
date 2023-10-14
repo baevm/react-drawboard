@@ -101,8 +101,8 @@ export const SettingsButton = () => {
       return
     }
 
-    const drawings = createDrawings(savedDrawings) as any
-    setDrawings(drawings)
+    const drawings = createDrawings(savedDrawings) as Drawings
+    setDrawings('default', drawings)
   }
 
   const handleSaveToFile = async () => {

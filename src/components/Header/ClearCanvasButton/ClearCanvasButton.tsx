@@ -1,17 +1,19 @@
 import { useDrawingsActions } from '@/hooks/useDrawings'
+import { useToggle } from '@/hooks/useToggle'
 import * as AlertDialog from '@radix-ui/react-alert-dialog'
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { IoTrashOutline } from 'react-icons/io5'
 import styles from './ClearCanvasButton.module.css'
+import { useBoardState } from '@/hooks/useBoardState'
 
 export const ClearCanvasButton = () => {
   const { clearDrawings } = useDrawingsActions()
-  const [open, setOpen] = useState(false)
+  const { currentBoard } = useBoardState()
+  const [open, setOpen] = useToggle(false)
   const { t } = useTranslation()
 
   const handleClearCanvas = () => {
-    clearDrawings()
+    clearDrawings(currentBoard)
   }
 
   return (

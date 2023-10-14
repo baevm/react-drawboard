@@ -1,10 +1,11 @@
 import { useDrawingsActions } from '@/hooks/useDrawings'
-import { useZoom } from '@/hooks/useZoom'
+import { ZOOM_TYPE, useZoom } from '@/hooks/useZoom'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useTranslation } from 'react-i18next'
 import { IoArrowRedoOutline, IoArrowUndoOutline } from 'react-icons/io5'
 import { RxZoomIn, RxZoomOut } from 'react-icons/rx'
 import styles from './Footer.module.css'
+import { useBoardState } from '@/hooks/useBoardState'
 
 const ZOOMIN_VALUE = -100
 const ZOOMOUT_VALUE = 100
@@ -13,23 +14,34 @@ const Footer = () => {
   const { t } = useTranslation()
   const { undoDraw, redoDraw } = useDrawingsActions()
   const { canvasScale, handleZoom, resetZoom } = useZoom()
-  useHotkeys('ctrl+z', undoDraw)
-  useHotkeys('ctrl+y', redoDraw)
+  const { currentBoard } = useBoardState()
+
+  const undo = () => undoDraw(currentBoard)
+  const redo = () => redoDraw(currentBoard)
+
+  useHotkeys('ctrl+z', undo)
+  useHotkeys('ctrl+y', redo)
 
   const handleZoomIn = () => {
-    handleZoom(ZOOMIN_VALUE, 'click')
+    handleZoom(ZOOMIN_VALUE, ZOOM_TYPE.click)
   }
   const handleZoomOut = () => {
-    handleZoom(ZOOMOUT_VALUE, 'click')
+    handleZoom(ZOOMOUT_VALUE, ZOOM_TYPE.click)
   }
 
   return (
     <div className={styles.footer_container}>
       <div className={styles.ToggleGroup} role='group'>
-        <button onClick={undoDraw} className={styles.ToggleGroupItem} title={t('footer.undo') as string}>
+        <button
+          onClick={undo}
+          className={styles.ToggleGroupItem}
+          title={t('footer.undo') as string}>
           <IoArrowUndoOutline />
         </button>
-        <button onClick={redoDraw} className={styles.ToggleGroupItem} title={t('footer.redo') as string}>
+        <button
+          onClick={redo}
+          className={styles.ToggleGroupItem}
+          title={t('footer.redo') as string}>
           <IoArrowRedoOutline />
         </button>
       </div>

@@ -74,6 +74,8 @@ button {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .bar_header {
@@ -85,11 +87,13 @@ button {
 .bar_content {
   display: flex;
   flex-direction: column;
+  gap: 15px;
 }
 
 .miniboard {
   border: 1px solid var(--border-color);
   height: 150px;
+  cursor: pointer;
 }
 
 .miniboard_img {
@@ -100,6 +104,25 @@ button {
 
 .miniboard_name {
   color: var(--text-primary-color);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.miniboard_active {
+  font-weight: 600;
+  color: var(--text-active-color);
+}
+
+.miniboard_footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.name_editable {
+  text-decoration: underline;
+  outline: none;
 }
 
 .bar_create_board_button {
@@ -108,7 +131,7 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 32px;
+  min-height: 32px;
   border: 1px solid var(--border-color);
   cursor: pointer;
 }

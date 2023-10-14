@@ -22,7 +22,7 @@ import { isAdjustableTool, isDrawableTool } from '@/helpers/tool'
 import { useDrawings, useDrawingsActions } from '@/hooks/useDrawings'
 import { useResizeObserver } from '@/hooks/useResizeObserver'
 import { useBoardState } from '@/hooks/useBoardState'
-import { useZoom } from '@/hooks/useZoom'
+import { ZOOM_TYPE, useZoom } from '@/hooks/useZoom'
 import { Action, DrawingOptions, DrawingWithOffset, Tool } from '@/types'
 import { generateId } from '@/utils/generateId'
 import { getCanvas } from '@/utils/getCanvas'
@@ -54,6 +54,10 @@ const Board = () => {
   // draw
   useLayoutEffect(() => {
     async function drawElements() {
+      if (!drawings) {
+        return
+      }
+
       const { canvas, context } = getCanvas()
 
       const storedTransform = context.getTransform()
@@ -62,8 +66,6 @@ const Board = () => {
       context.save()
 
       const roughCanvas = rough.canvas(canvas!)
-
-      console.log({ currentBoard, drawings })
 
       for (const element of drawings) {
         const isActive = selectedElement?.id === element.id
@@ -174,8 +176,6 @@ const Board = () => {
         break
       }
     }
-
-    console.log(drawingsCopy)
 
     setDrawings(currentBoard, drawingsCopy)
     return drawingsCopy[index]
@@ -470,7 +470,7 @@ const Board = () => {
         onPointerMove={handleMouseMove}
         onPointerUp={handleMouseUp}
         onContextMenu={handleContextMenu}
-        onWheel={(e) => handleZoom(e.deltaY, 'wheel')}
+        onWheel={(e) => handleZoom(e.deltaY, ZOOM_TYPE.wheel)}
         width={width * DEVICE_PIXEL_RATIO}
         height={height * DEVICE_PIXEL_RATIO}
         style={{

@@ -70,6 +70,7 @@
   --text-secondary-color: var(--mauve8);
   --text-disabled-color: var(--mauve8);
   --text-hover-color: var(--blackA12);
+  --text-active-color: var(--violet9);
 }
 
 body[data-theme='dark'] {
@@ -94,6 +95,7 @@ body[data-theme='dark'] {
   --text-secondary-color: var(--mauve11);
   --text-disabled-color: var(--mauve10);
   --text-hover-color: var(--mauve1);
+  --text-active-color: var(--violet9);
 }
 
 /*

@@ -3,12 +3,18 @@ import { Point } from '@/types'
 import { getCanvas } from '@/utils/getCanvas'
 import { create } from 'zustand'
 import { useMousePosition } from './useMousePosition'
+import { addPoints } from '@/helpers/points'
 
 interface useZoom {
   canvasScale: number
   viewportTopLeft: Point
   setCanvasScale: (s: number) => void
   setViewportTopLeft: (v: Point) => void
+}
+
+export enum ZOOM_TYPE {
+  wheel = 'wheel',
+  click = 'click',
 }
 
 const useZoomStore = create<useZoom>()((set) => ({
@@ -27,7 +33,7 @@ export const useZoom = () => {
   }))
   const { mousePos } = useMousePosition()
 
-  const handleZoom = (deltaY: number, type: 'wheel' | 'click') => {
+  const handleZoom = (deltaY: number, type: ZOOM_TYPE) => {
     // check if canvas scale is less than minimum and action is zoom-out
     // check if canvas scale is bigger than maximum and action is zoom-in
     if (
@@ -41,8 +47,8 @@ export const useZoom = () => {
 
     const zoom = 1 - deltaY / ZOOM_SENSITIVITY
 
-    const viewportX = type === 'click' ? window.innerWidth / 2 : mousePos.x
-    const viewportY = type === 'click' ? window.innerHeight / 2 : mousePos.y
+    const viewportX = type === ZOOM_TYPE.click ? window.innerWidth / 2 : mousePos.x
+    const viewportY = type === ZOOM_TYPE.click ? window.innerHeight / 2 : mousePos.y
 
     const viewportTopLeftDelta = {
       x: (viewportX / canvasScale) * (1 - 1 / zoom),
@@ -69,8 +75,4 @@ export const useZoom = () => {
   }
 
   return { canvasScale, viewportTopLeft, handleZoom, setViewportTopLeft, resetZoom }
-}
-
-function addPoints(p1: Point, p2: Point) {
-  return { x: p1.x + p2.x, y: p1.y + p2.y }
 }
