@@ -142,8 +142,12 @@ export const drawElement = async (roughCanvas: RoughCanvas, context: CanvasRende
       context.fillText(element.text, element.x1, element.y1)
       break
     case 'image':
-      const image = await getMemoizedHTMLImage(element.id)
-      context.drawImage(image, element.x1, element.y1, element.width, element.height)
+      try {
+        const image = await getMemoizedHTMLImage(element.id)
+        context.drawImage(image, element.x1, element.y1, element.width, element.height)
+      } catch (error) {
+        console.error(error)
+      }
       break
 
     default:

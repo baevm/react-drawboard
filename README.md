@@ -1,7 +1,7 @@
 # React drawboard
 **Live at**: [:globe_with_meridians: https://paint.dezzerlol.tech/](https://paint.dezzerlol.tech/)
 
-![Drawboard screenshot](drwbrd.png)
+![Drawboard screenshot](./assets/drwbrd.png)
 
 ### Made with:
 - react
@@ -21,7 +21,7 @@
   - [x] Export drawings as json
   - [x] Undo/redo  
   - [x] i18n (ru, en)
-  - [ ] Export drawings as image
+  - [x] Export drawings as image
   - [ ] Collaboration
   - [ ] Tests
   

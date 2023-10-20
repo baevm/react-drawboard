@@ -8,7 +8,7 @@ import {
   setSelectedElementBorder,
 } from '@/helpers/element'
 import { openBase64File } from '@/helpers/files'
-import { loadHTMLImage, saveImageToDb } from '@/helpers/image'
+import { createHTMLImage, saveImageToDb } from '@/helpers/image'
 import {
   addPoints,
   adjustDrawingPoints,
@@ -265,7 +265,7 @@ const Board = () => {
 
         saveImageToDb({ id, dataURL: base64Image as string })
 
-        const HTMLImage = await loadHTMLImage(base64Image as string)
+        const HTMLImage = await createHTMLImage(base64Image as string)
 
         const element = {
           tool,
@@ -279,8 +279,11 @@ const Board = () => {
           options,
         }
 
-        setDrawings(currentBoard, [...drawings, element as any])
+        const newDrawings = [...drawings, element as any]
+
         setTool('pan')
+        setDrawings(currentBoard, newDrawings)
+        syncStorageDrawings(currentBoard, newDrawings)
         return
       }
 
@@ -423,8 +426,6 @@ const Board = () => {
   }
 
   const handleTextAreaBlur = (e: React.FocusEvent<HTMLTextAreaElement>) => {
-    console.log(e)
-
     if (e.target.value === '') {
       return
     }

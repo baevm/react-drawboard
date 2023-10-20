@@ -3,12 +3,12 @@ import memoize from 'fast-memoize'
 
 export const loadSavedHTMLImage = async (id: string) => {
   const base64Image = await getImageFromDb(id)
-  return loadHTMLImage(base64Image)
+  return createHTMLImage(base64Image)
 }
 
 export const getMemoizedHTMLImage = memoize(loadSavedHTMLImage)
 
-export function loadHTMLImage(base64Image: string) {
+export function createHTMLImage(base64Image: string) {
   return new Promise<HTMLImageElement>((resolve, reject) => {
     const image = new Image()
 

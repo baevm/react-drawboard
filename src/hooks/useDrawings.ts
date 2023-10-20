@@ -1,13 +1,11 @@
-import { LOCALSTORAGE_KEY } from '@/constants'
+import { DEFAULT_BOARD_KEY, BOARDS_LS_KEY } from '@/constants'
+import { getBoardsFromLS, saveBoardsToLS, saveBoardToLS } from '@/helpers/boards'
 import { resetImagesFromDb } from '@/helpers/image'
-import { Drawings } from '@/types'
+import { BoardHistory, Boards, Drawings } from '@/types'
 import { useEffect } from 'react'
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 import { shallow } from 'zustand/shallow'
-
-type Boards = Record<string, Drawings>
-type BoardHistory = Record<string, Drawings[]>
 
 interface DrawingsStore {
   boards: Boards
@@ -17,35 +15,16 @@ interface DrawingsStore {
   createBoard: (name: string) => void
   updateBoardName: (oldName: string, newName: string) => void
   setBoards: (boards: Boards) => void
+  deleteBoard: (key: string) => void
 
   setDrawings: (key: string, drawings: Drawings) => void
-  resetDrawings: () => void
+  resetDrawings: (key: string) => void
 
   setHistoryDrawings: (key: string, drawings: Drawings) => void
-  resetHistory: () => void
   setBoardsStateIndex: (key: string) => void
 
   undoDraw: (key: string) => void
   redoDraw: (key: string) => void
-}
-
-const saveBoardsToLS = (boards: Boards) => {
-  window.localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(boards))
-}
-
-// used to sync localstorage with store drawings
-const saveDrawingsToLocalStorage = (board: string, newDrawings: Drawings) => {
-  let oldBoards = window.localStorage.getItem(LOCALSTORAGE_KEY)
-
-  if (oldBoards) {
-    let currentBoards: Record<string, Drawings> = JSON.parse(oldBoards)
-
-    currentBoards[board] = newDrawings
-
-    saveBoardsToLS(currentBoards)
-  } else {
-    saveBoardsToLS({ [board]: newDrawings })
-  }
 }
 
 // remove devtools later
@@ -71,14 +50,13 @@ const drawingsStore = create<DrawingsStore>()(
         }
       }),
 
-    resetHistory: () =>
-      set({
-        historyDrawings: { default: [[]] },
-      }),
-
-    resetDrawings: () =>
-      set({
-        boards: { default: [] },
+    resetDrawings: (key) =>
+      set((state) => {
+        return {
+          boards: { ...state.boards, [key]: [] },
+          historyDrawings: { ...state.historyDrawings, [key]: [[]] },
+          boardsStateIndex: { ...state.boardsStateIndex, [key]: 0 },
+        }
       }),
 
     setBoardsStateIndex: (key) =>
@@ -92,7 +70,7 @@ const drawingsStore = create<DrawingsStore>()(
           return {}
         }
 
-        saveDrawingsToLocalStorage(name, [])
+        saveBoardToLS(name, [])
 
         return {
           boards: { ...state.boards, [name]: [] },
@@ -108,7 +86,7 @@ const drawingsStore = create<DrawingsStore>()(
 
         Object.keys(boards).map((board) => {
           indexes[board] = 0
-          history[board] = [[]]
+          history[board] = [boards[board]]
         })
 
         return {
@@ -125,13 +103,32 @@ const drawingsStore = create<DrawingsStore>()(
         }
 
         const boards = state.boards
+        const historyDrawings = state.historyDrawings
 
         boards[newName] = boards[oldName]
+        historyDrawings[newName] = historyDrawings[oldName]
+
         delete boards[oldName]
+        delete historyDrawings[oldName]
 
         saveBoardsToLS(boards)
 
-        return { boards }
+        return { boards, historyDrawings }
+      }),
+
+    deleteBoard: (key) =>
+      set((state) => {
+        const boards = state.boards
+
+        if (key in boards) {
+          delete boards[key]
+        }
+
+        saveBoardsToLS(boards)
+
+        return {
+          boards,
+        }
       }),
 
     undoDraw: (key) =>
@@ -143,11 +140,9 @@ const drawingsStore = create<DrawingsStore>()(
         const oldIndex = state.boardsStateIndex[key]
         const newIndex = oldIndex !== 0 ? oldIndex - 1 : oldIndex
 
-        console.log(oldIndex, newIndex, state.historyDrawings)
-
         const currentDrawings = state.historyDrawings[key][newIndex]
 
-        saveDrawingsToLocalStorage(key, currentDrawings)
+        saveBoardToLS(key, currentDrawings)
 
         return {
           boardsStateIndex: { ...state.boardsStateIndex, [key]: newIndex },
@@ -163,12 +158,11 @@ const drawingsStore = create<DrawingsStore>()(
         }
 
         const oldIndex = state.boardsStateIndex[key]
-
         const newIndex = oldIndex !== historyLength - 1 ? oldIndex + 1 : oldIndex
 
         const currentDrawings = state.historyDrawings[key][newIndex]
 
-        saveDrawingsToLocalStorage(key, currentDrawings)
+        saveBoardToLS(key, currentDrawings)
 
         return {
           boardsStateIndex: { ...state.boardsStateIndex, [key]: newIndex },
@@ -190,25 +184,20 @@ export const useDrawings = (board: string) => {
     shallow
   )
 
-  function resetDrawings() {
-    resetDrawingsStore()
-    saveDrawingsToLocalStorage('default', [])
+  function resetDrawings(board: string) {
+    resetDrawingsStore(board)
+    saveBoardToLS(DEFAULT_BOARD_KEY, [])
   }
 
   // get drawings from localstorage on mount
   useEffect(() => {
-    const items = localStorage.getItem(LOCALSTORAGE_KEY)
+    const items = getBoardsFromLS()
 
     if (items) {
-      try {
-        const parsedItems = JSON.parse(items) as Record<string, Drawings>
-        setDrawings(board, parsedItems[board])
-        setBoards(parsedItems)
-      } catch (error) {
-        resetDrawings()
-      }
+      setDrawings(board, items[board])
+      setBoards(items)
     } else {
-      resetDrawings()
+      resetDrawings(board)
     }
   }, [])
 
@@ -223,10 +212,10 @@ export const useDrawingsActions = () => {
     undoDraw,
     redoDraw,
     setBoardsStateIndex,
-    resetHistory,
     resetDrawings,
     createBoard,
     updateBoardName,
+    deleteBoard,
   } = drawingsStore(
     (state) => ({
       setDrawings: state.setDrawings,
@@ -234,22 +223,22 @@ export const useDrawingsActions = () => {
       redoDraw: state.redoDraw,
       setHistoryDrawings: state.setHistoryDrawings,
       setBoardsStateIndex: state.setBoardsStateIndex,
-      resetHistory: state.resetHistory,
       resetDrawings: state.resetDrawings,
       createBoard: state.createBoard,
       updateBoardName: state.updateBoardName,
+      deleteBoard: state.deleteBoard,
     }),
     shallow
   )
+
   const clearDrawings = (board: string) => {
-    resetDrawings()
-    resetHistory()
-    saveDrawingsToLocalStorage(board, [])
+    resetDrawings(board)
+    saveBoardToLS(board, [])
     resetImagesFromDb()
   }
 
   const syncStorageDrawings = (board: string, drawings: Drawings) => {
-    saveDrawingsToLocalStorage(board, drawings)
+    saveBoardToLS(board, drawings)
     setHistoryDrawings(board, drawings)
     setBoardsStateIndex(board)
   }
@@ -262,5 +251,6 @@ export const useDrawingsActions = () => {
     createBoard,
     updateBoardName,
     syncStorageDrawings,
+    deleteBoard,
   }
 }

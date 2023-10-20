@@ -5,12 +5,12 @@ interface ActionIconProps extends HTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode
 }
 
-const ActionIcon = ({ children, ...props }: ActionIconProps) => {
+const ActionIcon = React.forwardRef((props: ActionIconProps, ref: React.LegacyRef<HTMLButtonElement> | undefined) => {
   return (
-    <button className={styles.actionicon} {...props}>
-      {children}
+    <button className={styles.actionicon} ref={ref} {...props}>
+      {props.children}
     </button>
   )
-}
+})
 
 export default ActionIcon

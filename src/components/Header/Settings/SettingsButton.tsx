@@ -1,4 +1,4 @@
-import { LOCALSTORAGE_KEY } from '@/constants'
+import { BOARDS_LS_KEY } from '@/constants'
 import { createElement } from '@/helpers/element'
 import { openJsonFile, saveAsJson } from '@/helpers/files'
 import { getImageFromDb, saveImageToDb } from '@/helpers/image'
@@ -106,7 +106,7 @@ export const SettingsButton = () => {
   }
 
   const handleSaveToFile = async () => {
-    const drawings = localStorage.getItem(LOCALSTORAGE_KEY)
+    const drawings = localStorage.getItem(BOARDS_LS_KEY)
 
     if (!drawings) return
 
@@ -118,7 +118,7 @@ export const SettingsButton = () => {
   }
 
   const handleCreateScreenshot = async () => {
-    const { canvas, context } = getCanvas()
+    const { canvas } = getCanvas()
     let link = document.createElement('a')
     const str = new Date().toISOString().slice(0, 16).replace('T', ' ')
 

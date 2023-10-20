@@ -137,3 +137,6 @@ export type DrawingWithOffset = Drawing & {
   offsetY?: any | any[]
   position: PointPosition
 }
+
+export type Boards = Record<string, Drawings>
+export type BoardHistory = Record<string, Drawings[]>

@@ -1,0 +1,55 @@
+/* reset */
+button {
+  all: unset;
+}
+
+.toggle_group_item {
+  background-color: var(--ui-background-color);
+  height: 40px;
+  width: 40px;
+  display: flex;
+  font-size: 15px;
+  line-height: 1;
+  align-items: center;
+  justify-content: center;
+  color: var(--icon-color);
+  cursor: pointer;
+  border-radius: 5px;
+  position: relative;
+}
+
+.toggle_group_item > button {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggle_group_item:hover {
+  background-color: var(--hover-button-color);
+}
+.toggle_group_item[data-state='checked'],
+.toggle_group_item:active {
+  background-color: var(--active-button-color);
+}
+
+.toggle_group_item:focus {
+  position: relative;
+}
+
+.toggle_group_aside {
+  box-shadow: var(--button-shadow);
+}
+
+@media (max-width: 768px) {
+  .toggle_group_item {
+    width: 30px;
+    height: 30px;
+  }
+
+  .toggle_group_aside {
+    order: 3;
+  }
+}
+

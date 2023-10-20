@@ -1,0 +1,102 @@
+@import '@radix-ui/colors/blackA.css';
+@import '@radix-ui/colors/mauve.css';
+@import '@radix-ui/colors/red.css';
+
+/* reset */
+button {
+  all: unset;
+}
+
+.AlertDialogOverlay {
+  background-color: var(--blackA9);
+  position: fixed;
+  inset: 0;
+  animation: overlayShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 9999;
+}
+
+.AlertDialogContent {
+  background-color: var(--ui-background-color);
+  border-radius: 6px;
+  box-shadow: hsl(206 22% 7% / 35%) 0px 10px 38px -10px, hsl(206 22% 7% / 20%) 0px 10px 20px -15px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90vw;
+  max-width: 500px;
+  max-height: 85vh;
+  padding: 25px;
+  animation: contentShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 99999;
+}
+.AlertDialogContent:focus {
+  outline: none;
+}
+
+.AlertDialogTitle {
+  margin: 0;
+  color: var(--text-primary-color);
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.AlertDialogDescription {
+  margin-bottom: 20px;
+  color: var(--mauve10);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.Button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  padding: 0 15px;
+  font-size: 15px;
+  line-height: 1;
+  font-weight: 500;
+  height: 35px;
+}
+
+.Button.red {
+  background-color: var(--alert-button-color);
+  color: var(--red11);
+}
+.Button.red:hover {
+  background-color: var(--alert-button-hover-color);
+}
+.Button.red:focus {
+  box-shadow: 0 0 0 2px var(--red7);
+}
+.Button.mauve {
+  background-color: var(--secondary-button-color);
+  color: black;
+}
+.Button.mauve:hover {
+  background-color: var(--secondary-button-hover-color);
+}
+.Button.mauve:focus {
+  box-shadow: 0 0 0 2px var(--mauve7);
+}
+
+@keyframes overlayShow {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes contentShow {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}

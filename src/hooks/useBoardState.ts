@@ -6,9 +6,9 @@ interface UseBoardState {
   tool: Tool
   options: DrawingOptions
   currentBoard: string
-  setTool: (t: Tool) => void
-  setOptions: (o: Partial<DrawingOptions>) => void
-  setCurrentBoard: (b: string) => void
+  setTool: (tool: Tool) => void
+  setOptions: (option: Partial<DrawingOptions>) => void
+  setCurrentBoard: (board: string) => void
 }
 
 export const useBoardState = create<UseBoardState>()(

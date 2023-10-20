@@ -4,11 +4,10 @@ import { Tool } from '@/types'
 import * as RadioGroup from '@radix-ui/react-radio-group'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useTranslation } from 'react-i18next'
+import BoardsBarButton from './BoardsBarButton/BoardsBarButton'
 import { ClearCanvasButton } from './ClearCanvasButton'
 import styles from './Header.module.css'
 import { SettingsButton } from './Settings'
-import { IoCloseSharp, IoFolderOutline } from 'react-icons/io5'
-import BoardsBar from './BoardsBarButton/BoardsBar'
 
 const Header = () => {
   const { tool, setTool } = useBoardState((state) => ({
@@ -51,7 +50,7 @@ const Header = () => {
         </div>
       </section>
 
-      <BoardsBar />
+      <BoardsBarButton />
     </div>
   )
 }
