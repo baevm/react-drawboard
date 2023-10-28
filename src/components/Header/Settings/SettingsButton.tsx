@@ -4,7 +4,7 @@ import { openJsonFile, saveAsJson } from '@/helpers/files'
 import { getImageFromDb, saveImageToDb } from '@/helpers/image'
 import { useDrawingsActions } from '@/hooks/useDrawings'
 import { useTheme } from '@/hooks/useTheme'
-import { Drawings } from '@/types'
+import { Drawings, TwoPoints } from '@/types'
 import { getCanvas } from '@/helpers/canvas'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { useState } from 'react'
@@ -35,11 +35,15 @@ export const SettingsButton = () => {
         case 'image': {
           saveImageToDb({ id: drawing.id, dataURL: drawing.dataURL! })
 
-          const newElement = createElement({
+          const twoPoints: TwoPoints = {
             x1: drawing.x1!,
             y1: drawing.y1!,
             x2: drawing.x2!,
             y2: drawing.y2!,
+          }
+
+          const newElement = createElement({
+            tp: twoPoints,
             tool: drawing.tool,
             id: drawing.id,
             options: drawing.options!,
@@ -49,11 +53,15 @@ export const SettingsButton = () => {
         }
 
         default: {
-          const newElement = createElement({
+          const twoPoints: TwoPoints = {
             x1: drawing.x1!,
             y1: drawing.y1!,
             x2: drawing.x2!,
             y2: drawing.y2!,
+          }
+
+          const newElement = createElement({
+            tp: twoPoints,
             tool: drawing.tool,
             id: drawing.id,
             options: drawing.options as any,
