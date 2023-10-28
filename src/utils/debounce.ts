@@ -1,11 +1,11 @@
-export const debounce = (callback: (args: any) => void, delay = 500) => {
+export const debounce = (callback: any, delay = 500) => {
   let timer: NodeJS.Timer
 
-  return (args: any) => {
+  return (...args: any) => {
     clearTimeout(timer)
 
     timer = setTimeout(() => {
-      callback(args)
+      callback(...args)
     }, delay)
   }
 }

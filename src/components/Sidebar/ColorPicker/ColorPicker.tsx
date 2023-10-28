@@ -1,8 +1,8 @@
 import { useClickOutside } from '@/hooks/useClickOutside'
+import { useDebouncedFn } from '@/hooks/useDebouncedFn'
 import { HEX } from '@/types'
 import { useRef, useState } from 'react'
 import { HexAlphaColorPicker, HexColorInput } from 'react-colorful'
-import { useDebouncyFn } from 'use-debouncy'
 import ItemLabel from '../ItemLabel'
 import styles from './ColorPicker.module.css'
 
@@ -19,7 +19,7 @@ export const ColorPicker = ({ label, onChange, initialColor }: Props) => {
 
   useClickOutside(colorPickerRef, () => setIsColorPickerOpen(false))
 
-  const debouncedOnChange = useDebouncyFn((value) => {
+  const debouncedOnChange = useDebouncedFn((value) => {
     onChange(value)
   }, 250)
 
