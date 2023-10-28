@@ -1,4 +1,5 @@
 import { TwoPoints } from '@/types'
+import { ROUGH_SEED, roughGenerator } from '../rough'
 
 export class Circle {
   static diameter({ x1, y1, x2, y2 }: TwoPoints) {
@@ -15,5 +16,14 @@ export class Circle {
     const { centerX, centerY } = this.center({ x1, y1, x2, y2 })
     const r = this.diameter({ x1, y1, x2, y2 }) / 2
     return Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2) <= Math.pow(r, 2)
+  }
+
+  static createRoughCircle(tp: TwoPoints, options: any) {
+    const { centerX, centerY } = Circle.center(tp)
+
+    return roughGenerator.ellipse(centerX, centerY, tp.x2 - tp.x1, tp.y2 - tp.y1, {
+      ...options,
+      seed: ROUGH_SEED,
+    })
   }
 }

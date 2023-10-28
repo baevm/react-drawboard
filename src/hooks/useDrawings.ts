@@ -180,6 +180,7 @@ export const useDrawings = (board: string) => {
       setDrawings: state.setDrawings,
       setBoards: state.setBoards,
       resetDrawingsStore: state.resetDrawings,
+      historyDrawings: state.historyDrawings
     }),
     shallow
   )
@@ -188,6 +189,7 @@ export const useDrawings = (board: string) => {
     resetDrawingsStore(board)
     saveBoardToLS(DEFAULT_BOARD_KEY, [])
   }
+
 
   // get drawings from localstorage on mount
   useEffect(() => {

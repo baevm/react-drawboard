@@ -15,28 +15,24 @@ import {
   createTriangleResizeHandles,
 } from './resize'
 import { getToolOptions } from './tool'
+import { Rectangle } from './geometry/Rectangle'
+import { Drawable } from 'roughjs/bin/core'
 
 const roughGenerator = rough.generator()
 const ROUGH_SEED = 100
 
 export const createElement = ({
-  x1,
-  y1,
-  x2,
-  y2,
+  tp,
   tool,
   id,
   options,
 }: {
-  x1: number
-  y1: number
-  x2: number
-  y2: number
+  tp: TwoPoints
   tool: Tool
   id: string
   options: DrawingOptions
 }) => {
-  let roughElement
+  let roughElement: Drawable
 
   const drawingOptions = getToolOptions(tool, options)
 
@@ -44,7 +40,7 @@ export const createElement = ({
     case 'pen':
       return {
         tool,
-        points: [{ x: x2, y: y2 }],
+        points: [{ x: tp.x2, y: tp.y2 }],
         id,
         options: drawingOptions,
       }
@@ -52,10 +48,10 @@ export const createElement = ({
     case 'text':
       return {
         tool,
-        x1,
-        y1,
-        x2,
-        y2,
+        x1: tp.x1,
+        y1: tp.y1,
+        x2: tp.x2,
+        y2: tp.y2,
         id,
         text: '',
         options: drawingOptions,
@@ -64,10 +60,10 @@ export const createElement = ({
     case 'image':
       return {
         tool,
-        x1,
-        y1,
-        x2,
-        y2,
+        x1: tp.x1,
+        y1: tp.y1,
+        x2: tp.x2,
+        y2: tp.y2,
         id,
         width: 0,
         height: 0,
@@ -75,23 +71,22 @@ export const createElement = ({
       }
 
     case 'circle':
-      const { centerX, centerY } = Circle.center({ x1, y1, x2, y2 })
-      roughElement = roughGenerator.ellipse(centerX, centerY, x2 - x1, y2 - y1, { ...drawingOptions, seed: ROUGH_SEED })
+      roughElement = Circle.createRoughCircle(tp, drawingOptions)
       break
 
     case 'rectangle':
-      roughElement = roughGenerator.rectangle(x1, y1, x2 - x1, y2 - y1, { ...drawingOptions, seed: ROUGH_SEED })
+      roughElement = Rectangle.createRoughRectangle(tp, drawingOptions)
       break
 
     case 'triangle':
-      const eq = Triangle.createEquilateral({ x1, y1, x2, y2 })
-      roughElement = roughGenerator.polygon([...(eq as any)], { ...drawingOptions, seed: ROUGH_SEED })
+      let { element, eq } = Triangle.createRoughEqTriangle(tp, drawingOptions)
+      roughElement = element
       return {
         tool,
-        x1,
-        y1,
-        x2,
-        y2,
+        x1: tp.x1,
+        y1: tp.y1,
+        x2: tp.x2,
+        y2: tp.y2,
         x3: eq[2][0],
         y3: eq[2][1],
         id,
@@ -101,24 +96,32 @@ export const createElement = ({
       }
 
     case 'rhombus':
-      const rhombus = Rhombus.create({ x1, y1, x2, y2 })
-      roughElement = roughGenerator.polygon([...(rhombus as any)], { ...drawingOptions, seed: ROUGH_SEED })
+      roughElement = Rhombus.createRoughRhombus(tp, drawingOptions)
       break
 
     case 'arrow':
-      const arrow = Line.createLineWithArrow({ x1, y1, x2, y2 })
-      roughElement = roughGenerator.polygon([...(arrow as any)], { ...drawingOptions, seed: ROUGH_SEED })
+      roughElement = Line.createRoughArrow(tp, options)
       break
 
     case 'line':
-      roughElement = roughGenerator.line(x1, y1, x2, y2, { ...drawingOptions, seed: ROUGH_SEED })
+      roughElement = Line.createRoughLine(tp, options)
       break
 
     default:
       throw new Error(`Invalid tool: ${tool}`)
   }
 
-  return { tool, x1, y1, x2, y2, id, options: roughElement.options, sets: roughElement.sets, shape: roughElement.shape }
+  return {
+    tool,
+    x1: tp.x1,
+    y1: tp.y1,
+    x2: tp.x2,
+    y2: tp.y2,
+    id,
+    options: roughElement.options,
+    sets: roughElement.sets,
+    shape: roughElement.shape,
+  }
 }
 
 export const drawElement = async (roughCanvas: RoughCanvas, context: CanvasRenderingContext2D, element: any) => {
@@ -160,7 +163,7 @@ export const setSelectedElementBorder = (
   context: CanvasRenderingContext2D,
   tool: Tool,
   { x1, y1, x2, y2, x3, y3 }: ThreePoints,
-  points?: Point[]
+  penPoints?: Point[]
 ) => {
   const OFFSET = 10 // offset between element and border
   context.strokeStyle = '#bf94ff'
@@ -221,10 +224,10 @@ export const setSelectedElementBorder = (
     }
 
     case 'pen': {
-      if (!points) break
+      if (!penPoints) break
 
-      const pointsX = points.map((p) => p.x)
-      const pointsY = points.map((p) => p.y)
+      const pointsX = penPoints.map((p) => p.x)
+      const pointsY = penPoints.map((p) => p.y)
       const minX = Math.min(...pointsX)
       const maxX = Math.max(...pointsX)
       const minY = Math.min(...pointsY)

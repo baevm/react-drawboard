@@ -1,6 +1,6 @@
 import { MAX_CANVAS_SCALE, MIN_CANVAS_SCALE, ZOOM_SENSITIVITY } from '@/constants'
 import { Point } from '@/types'
-import { getCanvas } from '@/utils/getCanvas'
+import { getCanvas } from '@/helpers/canvas'
 import { create } from 'zustand'
 import { useMousePosition } from './useMousePosition'
 import { addPoints } from '@/helpers/points'

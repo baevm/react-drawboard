@@ -12,6 +12,8 @@
   position: absolute;
   bottom: 0.5rem;
   padding: 0.4rem 0.5rem;
+  z-index: 10;
+  position: absolute;
 }
 
 .ToggleGroup:first-of-type {

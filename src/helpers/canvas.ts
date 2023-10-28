@@ -26,3 +26,17 @@ export const createImage = async (drawings: Drawings) => {
 
   return canvas.toDataURL()
 }
+
+export const getCanvas = () => {
+  const canvas = document.getElementById('canvas') as HTMLCanvasElement
+  const context = canvas.getContext('2d')!
+
+  return { canvas, context }
+}
+
+export const getStaticCanvas = () => {
+  const staticCanvas = document.getElementById('canvas-static') as HTMLCanvasElement
+  const staticCtx = staticCanvas.getContext('2d')!
+
+  return { staticCanvas, staticCtx }
+}

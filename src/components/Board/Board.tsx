@@ -1,4 +1,5 @@
 import { DEVICE_PIXEL_RATIO } from '@/constants'
+import { getCanvas } from '@/helpers/canvas'
 import { setCursor, updateCurrentCursor } from '@/helpers/cursor'
 import {
   createElement,
@@ -19,13 +20,12 @@ import {
   scalePoints,
 } from '@/helpers/points'
 import { isAdjustableTool, isDrawableTool } from '@/helpers/tool'
+import { useBoardState } from '@/hooks/useBoardState'
 import { useDrawings, useDrawingsActions } from '@/hooks/useDrawings'
 import { useResizeObserver } from '@/hooks/useResizeObserver'
-import { useBoardState } from '@/hooks/useBoardState'
 import { ZOOM_TYPE, useZoom } from '@/hooks/useZoom'
-import { Action, DrawingOptions, DrawingWithOffset, Tool } from '@/types'
+import { Action, DrawingOptions, DrawingWithOffset, ThreePoints, Tool, TwoPoints } from '@/types'
 import { generateId } from '@/utils/generateId'
-import { getCanvas } from '@/utils/getCanvas'
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import rough from 'roughjs'
 import styles from './Board.module.css'
@@ -58,14 +58,7 @@ const Board = () => {
         return
       }
 
-      const { canvas, context } = getCanvas()
-
-      const storedTransform = context.getTransform()
-      context.canvas.width = context.canvas.width
-      context.setTransform(storedTransform)
-      context.save()
-
-      const roughCanvas = rough.canvas(canvas!)
+      const { roughCanvas, context } = getRoughCanvas()
 
       for (const element of drawings) {
         const isActive = selectedElement?.id === element.id
@@ -73,19 +66,16 @@ const Board = () => {
         const isDrawing = action === 'drawing'
 
         if (isActive && !isDrawing) {
-          setSelectedElementBorder(
-            context,
-            element.tool,
-            {
-              x1: element.x1!,
-              y1: element.y1!,
-              x2: element.x2!,
-              y2: element.y2!,
-              x3: element.x3,
-              y3: element.y3,
-            },
-            element.points
-          )
+          const points: ThreePoints = {
+            x1: element.x1!,
+            y1: element.y1!,
+            x2: element.x2!,
+            y2: element.y2!,
+            x3: element.x3,
+            y3: element.y3,
+          }
+
+          setSelectedElementBorder(context, element.tool, points, element.points)
         }
 
         if (isWritting) {
@@ -134,13 +124,26 @@ const Board = () => {
     }
   }
 
+  const getRoughCanvas = () => {
+    const { canvas, context } = getCanvas()
+
+    const storedTransform = context.getTransform()
+    context.canvas.width = context.canvas.width
+    context.setTransform(storedTransform)
+    context.save()
+
+    const roughCanvas = rough.canvas(canvas!)
+
+    return { roughCanvas, context }
+  }
+
   // update element when drawing
   const updateElement: UpdateElement = (x1, y1, x2, y2, tool, index, id, oldOptions, text) => {
     const drawingsCopy = [...drawings] as any
 
     switch (tool) {
       case 'pen': {
-        drawingsCopy[index].points = [...drawingsCopy[index].points, { x: x2, y: y2 }]
+        drawingsCopy[index].points = [...drawingsCopy[index].points, { x: Math.floor(x2), y: Math.floor(y2) }]
         break
       }
 
@@ -172,7 +175,13 @@ const Board = () => {
       }
 
       default: {
-        drawingsCopy[index] = createElement({ x1, y1, x2, y2, tool, id, options: oldOptions })
+        const tp: TwoPoints = {
+          x1,
+          y1,
+          x2,
+          y2,
+        }
+        drawingsCopy[index] = createElement({ tp, tool, id, options: oldOptions })
         break
       }
     }
@@ -242,11 +251,14 @@ const Board = () => {
 
     if (isDraw) {
       const elementId = generateId()
-      const newElement = createElement({
+      const tp: TwoPoints = {
         x1: clientX,
         y1: clientY,
         x2: clientX,
         y2: clientY,
+      }
+      const newElement = createElement({
+        tp,
         tool,
         id: elementId,
         options,
@@ -295,13 +307,13 @@ const Board = () => {
     const { clientX, clientY } = getScaledXY(e.clientX, e.clientY)
     const { style } = e.target as HTMLElement
 
+    updateCurrentCursor(tool, clientX, clientY, drawings, selectedElement, style)
+
     const isDrawing = action === 'drawing'
     const isMovingPen = action === 'moving' && selectedElement?.tool === 'pen'
     const isMovingPolygon = action === 'moving' && isAdjustableTool(selectedElement?.tool)
-    const isResizing = action === 'resizing' && selectedElement
+    const isResizingElement = action === 'resizing' && selectedElement
     const isPanning = action === 'panning'
-
-    updateCurrentCursor(tool, clientX, clientY, drawings, selectedElement, style)
 
     if (isDrawing) {
       // get index from last element
@@ -345,10 +357,10 @@ const Board = () => {
       return
     }
 
-    if (isResizing) {
+    if (isResizingElement) {
       const { id, tool, position, x1: oldX1, y1: oldY1, x2: oldX2, y2: oldY2, options } = selectedElement
 
-      const points = {
+      const points: TwoPoints = {
         x1: oldX1!,
         y1: oldY1!,
         x2: oldX2!,
@@ -402,6 +414,8 @@ const Board = () => {
         clientX - selectedElement.offsetX === selectedElement.x1 &&
         clientY - selectedElement.offsetY === selectedElement.y1
 
+      console.log(isTextEditMode)
+
       if (isTextEditMode) {
         setAction('writing')
         return
@@ -430,11 +444,15 @@ const Board = () => {
       return
     }
 
-    const { id, x1, y1, tool, options } = selectedElement as any
+    if (!selectedElement) {
+      return
+    }
+
+    const { id, x1, y1, tool, options } = selectedElement
     const text = e.target.value
 
     const index = getIndexOfElement(id, drawings)
-    updateElement(x1, y1, null as any, null as any, tool, index, id, options, text)
+    updateElement(x1!, y1!, null as any, null as any, tool, index, id, options!, text)
 
     setAction('none')
     setSelectedElement(null)
@@ -477,6 +495,8 @@ const Board = () => {
         style={{
           width,
           height,
+          // position: 'absolute', // this breaks text element
+          // zIndex: '2',
         }}
       />
 

@@ -1,4 +1,5 @@
 import { Point, TwoPoints } from '@/types'
+import { ROUGH_SEED, roughGenerator } from '../rough'
 
 export class Line {
   static isOnLine({ x1, y1, x2, y2 }: TwoPoints, x: number, y: number) {
@@ -49,5 +50,14 @@ export class Line {
 
   static distance(a: Point, b: Point) {
     return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2))
+  }
+
+  static createRoughArrow(tp: TwoPoints, options: any) {
+    const arrow = Line.createLineWithArrow(tp)
+    return roughGenerator.polygon([...(arrow as any)], { ...options, seed: ROUGH_SEED })
+  }
+
+  static createRoughLine(tp: TwoPoints, options: any) {
+    return roughGenerator.line(tp.x1, tp.y1, tp.x2, tp.y2, { ...options, seed: ROUGH_SEED })
   }
 }
