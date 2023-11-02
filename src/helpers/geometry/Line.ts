@@ -1,8 +1,9 @@
 import { Point, TwoPoints } from '@/types'
 import { ROUGH_SEED, roughGenerator } from '../rough'
+import { round } from '../math'
 
 export class Line {
-  static isOnLine({ x1, y1, x2, y2 }: TwoPoints, x: number, y: number) {
+  static isOnLine({ x, y }: Point, { x1, y1, x2, y2 }: TwoPoints) {
     const maxDistance = 1
     const a = { x: x1, y: y1 }
     const b = { x: x2, y: y2 }
@@ -15,7 +16,7 @@ export class Line {
     return points.some((point, index) => {
       const nextPoint = points[index + 1]
       if (!nextPoint) return false
-      return Line.isOnLine({ x1: point.x, y1: point.y, x2: nextPoint.x, y2: nextPoint.y }, x, y) != null
+      return Line.isOnLine({ x, y }, { x1: point.x, y1: point.y, x2: nextPoint.x, y2: nextPoint.y }) != null
     })
   }
 
@@ -46,10 +47,10 @@ export class Line {
     return arrow
   }
 
-  static createHandDrawnLine({ x1, y1, x2, y2 }: TwoPoints) {}
+  // static createHandDrawnLine({ x1, y1, x2, y2 }: TwoPoints) {}
 
   static distance(a: Point, b: Point) {
-    return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2))
+    return round(Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2)))
   }
 
   static createRoughArrow(tp: TwoPoints, options: any) {

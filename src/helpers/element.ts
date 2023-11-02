@@ -1,9 +1,10 @@
 import { DrawingOptions, Drawings, Point, ThreePoints, Tool, TwoPoints } from '@/types'
 import getStroke from 'perfect-freehand'
-import rough from 'roughjs'
 import { RoughCanvas } from 'roughjs/bin/canvas'
+import { Drawable } from 'roughjs/bin/core'
 import { Circle } from './geometry/Circle'
 import { Line } from './geometry/Line'
+import { Rectangle } from './geometry/Rectangle'
 import { Rhombus } from './geometry/Rhombus'
 import { Triangle } from './geometry/Triangle'
 import { getMemoizedHTMLImage } from './image'
@@ -15,11 +16,7 @@ import {
   createTriangleResizeHandles,
 } from './resize'
 import { getToolOptions } from './tool'
-import { Rectangle } from './geometry/Rectangle'
-import { Drawable } from 'roughjs/bin/core'
 
-const roughGenerator = rough.generator()
-const ROUGH_SEED = 100
 
 export const createElement = ({
   tp,
@@ -282,4 +279,4 @@ const getSvgPathFromStroke = (points: any, closed = true) => {
   return result
 }
 
-export const average = (a: number, b: number) => (a + b) / 2
+const average = (a: number, b: number) => (a + b) / 2

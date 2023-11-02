@@ -95,7 +95,7 @@ const posWithinDrawing = (clientX: number, clientY: number, element: Drawing) =>
   switch (tool) {
     case 'line':
     case 'arrow': {
-      const on = Line.isOnLine({ x1, y1, x2, y2 }, clientX, clientY)
+      const on = Line.isOnLine({ x: clientX, y: clientY }, { x1, y1, x2, y2 })
       const start = nearPoint(clientX, clientY, x1, y1, 'start')
       const end = nearPoint(clientX, clientY, x2, y2, 'end')
       return start || end || on
@@ -103,7 +103,7 @@ const posWithinDrawing = (clientX: number, clientY: number, element: Drawing) =>
 
     case 'triangle': {
       const { topLeft, topRight, bottomLeft, bottomRight } = getClickPosition({ clientX, clientY, x1, x2, y1, y2 })
-      const inside = Triangle.isInside(clientX, clientY, { x1, y1, x2, y2 }) ? 'inside' : null
+      const inside = Triangle.isInside({ x: clientX, y: clientY }, { x1, y1, x2, y2 }) ? 'inside' : null
       return topLeft || topRight || bottomLeft || bottomRight || inside
     }
 
@@ -111,13 +111,13 @@ const posWithinDrawing = (clientX: number, clientY: number, element: Drawing) =>
     case 'rectangle':
     case 'image': {
       const { topLeft, topRight, bottomLeft, bottomRight } = getClickPosition({ clientX, clientY, x1, x2, y1, y2 })
-      const inside = Rectangle.isInside(clientX, clientY, { x1, x2, y1, y2 }) ? 'inside' : null
+      const inside = Rectangle.isInside({ x: clientX, y: clientY }, { x1, x2, y1, y2 }) ? 'inside' : null
       return topLeft || topRight || bottomLeft || bottomRight || inside
     }
 
     case 'circle': {
       const { topLeft, topRight, bottomLeft, bottomRight } = getClickPosition({ clientX, clientY, x1, x2, y1, y2 })
-      const insideCircle = Circle.isInside(clientX, clientY, { x1, x2, y1, y2 }) ? 'inside' : null
+      const insideCircle = Circle.isInside({ x: clientX, y: clientY }, { x1, x2, y1, y2 }) ? 'inside' : null
       return topLeft || topRight || bottomLeft || bottomRight || insideCircle
     }
 
@@ -127,7 +127,7 @@ const posWithinDrawing = (clientX: number, clientY: number, element: Drawing) =>
     }
 
     case 'text': {
-      return Rectangle.isInside(clientX, clientY, { x1, x2, y1, y2 }) ? 'inside' : null
+      return Rectangle.isInside({ x: clientX, y: clientY }, { x1, x2, y1, y2 }) ? 'inside' : null
     }
 
     default:

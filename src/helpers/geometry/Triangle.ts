@@ -1,8 +1,8 @@
-import { TwoPoints } from '@/types'
+import { Point, TwoPoints } from '@/types'
 import { ROUGH_SEED, roughGenerator } from '../rough'
 
 export class Triangle {
-  static isInside(x: number, y: number, { x1, x2, y1, y2 }: TwoPoints) {
+  static isInside({ x, y }: Point, { x1, x2, y1, y2 }: TwoPoints) {
     const midpoint_x = (x1 + x2) / 2
     const midpoint_y = (y1 + y2) / 2
 

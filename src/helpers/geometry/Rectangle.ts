@@ -1,8 +1,8 @@
-import { TwoPoints } from '@/types'
+import { Point, TwoPoints } from '@/types'
 import { ROUGH_SEED, roughGenerator } from '../rough'
 
 export class Rectangle {
-  static isInside(x: number, y: number, { x1, y1, x2, y2 }: TwoPoints) {
+  static isInside({ x, y }: Point, { x1, y1, x2, y2 }: TwoPoints) {
     return x >= x1 && x <= x2 && y >= y1 && y <= y2
   }
 
