@@ -1,9 +1,9 @@
 # React drawboard
-**Live at**: [:globe_with_meridians: https://paint.dezzerlol.tech/](https://paint.dezzerlol.tech/)
+**Деплой**: [:globe_with_meridians: https://paint.dezzerlol.tech/](https://paint.dezzerlol.tech/)
 
 ![Drawboard screenshot](./assets/drwbrd.png)
 
-### Made with:
+### Библиотеки и технологии:
 - react
 - vite
 - typescript
@@ -12,16 +12,25 @@
 - zustand
 - @radix-ui
 
-### Features:
-  - [x] Pencil drawings
-  - [x] Different elements (circle, rectangle, triangle, rhombus, arrow, text, image)
-  - [x] Drawing settings (line color, line width, background fill style, etc.)
-  - [x] Adaptive design
-  - [x] Zoom and panning on the canvas
-  - [x] Export drawings as json
-  - [x] Undo/redo  
-  - [x] i18n (ru, en)
-  - [x] Export drawings as image
-  - [ ] Collaboration
-  - [ ] Tests
+### Функции:
+- [x] Рисунки карандашом
+- [x] Различные элементы (круг, прямоугольник, треугольник, ромб, стрелка, текст, изображение)
+- [x] Настройки рисования (цвет линии, ширина линии, стиль заливки фона и т. д.)
+- [x] Адаптивный дизайн
+- [x] Масштабирование на холсте
+- [x] Экспорт рисунков в формате JSON
+- [x] Отмена/повтор действий
+- [x] i18n (русский, английский)
+- [x] Экспорт рисунков в виде изображения
+- [ ] Совместная работа
+- [ ] Тесты
   
+
+# Локальный запуск:
+1. Запуск контейнера
+```
+docker compose -f ./deploy/docker-compose.yml up
+```
+
+2. Доступно на: `http://localhost:80`
+
