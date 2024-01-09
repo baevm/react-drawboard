@@ -170,7 +170,18 @@ const Board = () => {
         const width = x2 - x1
         const height = y2 - y1
 
-        drawingsCopy[index] = { ...drawingsCopy[index], x1, y1, x2, y2, width, height, tool, id, options: oldOptions }
+        drawingsCopy[index] = {
+          ...drawingsCopy[index],
+          x1,
+          y1,
+          x2,
+          y2,
+          width,
+          height,
+          tool,
+          id,
+          options: oldOptions,
+        }
         break
       }
 
@@ -414,8 +425,6 @@ const Board = () => {
         clientX - selectedElement.offsetX === selectedElement.x1 &&
         clientY - selectedElement.offsetY === selectedElement.y1
 
-      console.log(isTextEditMode)
-
       if (isTextEditMode) {
         setAction('writing')
         return
@@ -538,5 +547,5 @@ type UpdateElement = (
   index: number,
   id: string,
   oldOptions: DrawingOptions,
-  text?: any
+  text?: any,
 ) => any

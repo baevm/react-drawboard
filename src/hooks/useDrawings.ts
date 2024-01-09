@@ -1,10 +1,9 @@
-import { DEFAULT_BOARD_KEY, BOARDS_LS_KEY } from '@/constants'
-import { debouncedSaveToLS, getBoardsFromLS, saveBoardsToLS, saveBoardToLS } from '@/helpers/boards'
+import { DEFAULT_BOARD_KEY } from '@/constants'
+import { debouncedSaveToLS, getBoardsFromLS, saveBoardToLS, saveBoardsToLS } from '@/helpers/boards'
 import { resetImagesFromDb } from '@/helpers/image'
 import { BoardHistory, Boards, Drawings } from '@/types'
 import { useEffect } from 'react'
 import { create } from 'zustand'
-import { devtools } from 'zustand/middleware'
 import { shallow } from 'zustand/shallow'
 
 interface DrawingsStore {
@@ -27,7 +26,6 @@ interface DrawingsStore {
   redoDraw: (key: string) => void
 }
 
-// remove devtools later
 const drawingsStore = create<DrawingsStore>((set) => ({
   boards: {},
   historyDrawings: {},
@@ -44,6 +42,19 @@ const drawingsStore = create<DrawingsStore>((set) => ({
 
   setHistoryDrawings: (key, drawings) =>
     set((state) => {
+      // if history length is higher than current index, remove all items in history after current index
+      if (state.historyDrawings[key].length > state.boardsStateIndex[key]) {
+        state.historyDrawings[key] = state.historyDrawings[key].slice(0, state.boardsStateIndex[key])
+        state.boardsStateIndex[key] = state.historyDrawings[key].length - 1
+
+        console.log({ history: state.historyDrawings, index: state.boardsStateIndex[key] })
+
+        return {
+          historyDrawings: state.historyDrawings,
+          boardsStateIndex: state.boardsStateIndex,
+        }
+      }
+
       const history = state.historyDrawings[key]
 
       history.push(drawings)
@@ -70,7 +81,9 @@ const drawingsStore = create<DrawingsStore>((set) => ({
 
   setBoardsStateIndex: (key) =>
     set((state) => {
-      state.boardsStateIndex[key] -= 1
+      state.boardsStateIndex[key] += 1
+
+      console.log('new INDEX', { key, state: state.boardsStateIndex[key], history: state.historyDrawings })
 
       return {
         boardsStateIndex: state.boardsStateIndex,
@@ -158,6 +171,7 @@ const drawingsStore = create<DrawingsStore>((set) => ({
       const newIndex = oldIndex !== 0 ? oldIndex - 1 : oldIndex
 
       const currentDrawings = state.historyDrawings[key][newIndex]
+      console.log('UNDO', { history: state.historyDrawings, newIndex, oldIndex })
 
       saveBoardToLS(key, currentDrawings)
 
@@ -182,6 +196,8 @@ const drawingsStore = create<DrawingsStore>((set) => ({
 
       const currentDrawings = state.historyDrawings[key][newIndex]
 
+      console.log('REDO', { history: state.historyDrawings, newIndex, oldIndex })
+
       saveBoardToLS(key, currentDrawings)
 
       state.boardsStateIndex[key] = newIndex
@@ -204,7 +220,7 @@ export const useDrawings = (board: string) => {
       resetDrawingsStore: state.resetDrawings,
       historyDrawings: state.historyDrawings,
     }),
-    shallow
+    shallow,
   )
 
   function resetDrawings(board: string) {
@@ -251,7 +267,7 @@ export const useDrawingsActions = () => {
       updateBoardName: state.updateBoardName,
       deleteBoard: state.deleteBoard,
     }),
-    shallow
+    shallow,
   )
 
   const clearDrawings = (board: string) => {
@@ -262,8 +278,8 @@ export const useDrawingsActions = () => {
 
   const syncStorageDrawings = (board: string, drawings: Drawings) => {
     debouncedSaveToLS(board, drawings)
-    setHistoryDrawings(board, drawings)
     setBoardsStateIndex(board)
+    setHistoryDrawings(board, drawings)
   }
 
   return {

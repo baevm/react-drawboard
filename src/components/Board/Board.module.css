@@ -4,7 +4,7 @@
 }
 
 .board_canvas {
-  background-color: transparent;
+  background-color: var(--canvas-background-color);
   display: block;
   top: 0;
   left: 0;
