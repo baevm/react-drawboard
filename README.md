@@ -1,5 +1,5 @@
 # React drawboard
-**Деплой**: [:globe_with_meridians: https://paint.dezzerlol.tech/](https://paint.dezzerlol.tech/)
+**Деплой**: [https://react-drawboard.vercel.app/](https://react-drawboard.vercel.app/)
 
 ![Drawboard screenshot](./assets/drwbrd.png)
 
