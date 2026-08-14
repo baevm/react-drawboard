@@ -1,3 +1,5 @@
+
+
 # React drawboard
 **Деплой**: [https://react-drawboard.vercel.app/](https://react-drawboard.vercel.app/)
 
@@ -27,11 +29,21 @@
   
 
 # Локальный запуск:
-1. Запуск контейнера
+
+### Через Node.js
+1. Установка зависимостей
+```bash
+npm install
 ```
+2. Запуск сервера разработки
+```bash
+npm run dev
+```
+3. Доступно на: `http://localhost:5173`
+
+### Через Docker
+1. Запуск контейнера
+```bash
 docker compose -f ./deploy/docker-compose.yml up
 ```
-
 2. Доступно на: `http://localhost:80`
-
-
